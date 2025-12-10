@@ -1,0 +1,336 @@
+# 🏪 E-commerce-store
+
+Aplikacja e-commerce została stworzona w ramach kursu JavaScript Developer, moduł zaawansowany HTML i CSS. Projekt ma na celu odwzorowanie funkcjonalności popularnych sklepów internetowych, pozwalając użytkownikom na intuicyjne przeglądanie, wybieranie i zakup produktów.
+
+**Dostępna online:**  
+[https://e-commerce-store.netlify.app](https://e-commerce-store.netlify.app)
+
+---
+
+⚠️ **Informacje o API (Uwaga dla reviewerów) - :**
+Aplikacja korzysta z Fake Store API, które pełni rolę backendu demonstracyjnego.
+Dane są symulowane i nietrwałe – np. koszyk czy logowanie resetują się po odświeżeniu strony.
+
+Nie wszystkie endpointy API są wykorzystywane — integracja obejmuje te potrzebne do zakresu funkcjonalności (produkty, logowanie, koszyk).
+
+API służy wyłącznie celom edukacyjnym i testowym.
+
+---
+
+## 🚀 Najważniejsze funkcje
+
+- Integracja z Fake Store API do uwierzytelniania użytkownika oraz pobierania danych o produktach
+- Obsługa motywów: jasny i ciemny
+- System logowania użytkownika
+- Przeglądanie katalogu produktów z możliwością filtrowania i sortowania
+- Zarządzanie koszykiem użytkownika
+- Zarządzanie ulubionymi produktami
+- Finalizacja zakupów z wyborem metody płatności i dostawy
+- Pulpit użytkownika wraz z historią zamówień dostępny w sesji użytkownika
+
+---
+
+## 🛠️ Wykorzystywane technologie
+
+- React – do tworzenia skalowalnych i wielokrotnego użytku komponentów UI
+- React-Router – do zarządzania nawigacją między komponentami bez przeładowania strony
+- TanStack Query (React Query) – do zarządzania stanem danych z API, cache'owania i synchronizacji
+- Redux Toolkit – do globalnego zarządzania stanem aplikacji (sesja użytkownika, koszyk, historia zamówień, filtry, ulubione produkty)
+- React Hook Forms – do tworzenia formularzy
+- Zod - do walidacji formularzy
+- MUI (Material-UI) – do budowy spójnego, responsywnego i estetycznego interfejsu
+- Podejście Mobile-First
+- Narzędzia testowe:
+  - Vitest – testy jednostkowe
+  - React Testing Library – testy komponentów
+  - MSW – przechwytywanie żądań do Fake Store API i zwracanie przygotowanych odpowiedzi
+  - Playwright – testy end-to-end (E2E), zintegrowane z GitHub Actions (CI/CD)
+  - Fake Store API – do symulacji działania backendu dla produktów i transakcji
+- Docker – do konteneryzacji aplikacji w środowisku deweloperskim, testowym i produkcyjnym
+
+---
+
+## 📸 Zrzuty ekranu
+Desktop i mobile znajdują się w folderze src/screenshots/.
+
+<div style="display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; margin-bottom: 40px">
+  <img src="app/src/screenshots/desktop-view1.png" alt="Widok desktop" style="margin-right: 10px;">
+  <img src="app/src/screenshots/mobile-view1.png" alt="Widok mobilny">
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; margin-bottom: 40px">
+  <img src="app/src/screenshots/desktop-view2.png" alt="Widok desktop" style="margin-right: 10px;">
+  <img src="app/src/screenshots/mobile-view2.png" alt="Widok mobilny">
+</div>
+
+<div style="display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; margin-bottom: 40px">
+  <img src="app/src/screenshots/desktop-view3.png" alt="Widok desktop" style="margin-right: 10px;">
+  <img src="app/src/screenshots/mobile-view3.png" alt="Widok mobilny">
+</div>
+
+---
+
+## ⚙️ Szczegółowe funkcjonalności
+
+### ☀️🌙 1. Obsługa motywów
+
+Użytkownicy mogą płynnie przełączać się między jasnym a ciemnym motywem, zapewniając czytelność i dostępność UI.
+
+### 🔐 2. Uwierzytelnianie użytkowników
+
+Logowanie odbywa się poprzez endpoint Fake Store API - POST: `/auth/login`
+
+Dane logowania testowego:
+```bash
+username: "johnd"
+password: "m38rmF$"
+```
+API zwraca token JWT (symulowany) i jest zapisywany w lokalnej pamięci przeglądarki (localStorage).
+Token zawiera poprawny format JWT, ale nie ma walidacji bezpieczeństwa — jest generowany wyłącznie do celów demonstracyjnych.
+
+### 📦 3. Katalog produktów
+
+Wykorzystywane endpointy:
+
+```bash
+Pobranie listy produktów — GET `/products`
+Pobranie jednego produktu — GET `/products/:id`
+Pobranie kategorii — GET `/products/categories`
+Produkty w kategorii — GET `/products/category/:category`
+Sortowanie — GET `/products?sort=desc`
+```
+
+Ograniczenie API: maksymalnie 20 produktów.
+Produkty są prezentowane ze zdjęciami, opisami, cenami i kategoriami. Obsługuje filtrowanie, sortowanie i wyszukiwanie. Produkty ładowane są metodą lazy-loading. Maksymalna liczba produktów: 20 (ograniczenie API).
+
+### 🛒 4. Koszyk
+
+Koszyk działa po stronie aplikacji – dane nie są trwałe.
+Wysyłanie zamówienia zwraca jedynie ID zamówienia poprzez endpoint:
+
+POST: `/carts`
+
+### 5. Proces realizacji zakupów
+
+Ze względu na brak trwałości danych proces realizacji zakupów jest w całości lokalnie. Jedyne id zamówienia pochodzi z API po wysłaniu zamówienia POST na endpoint `/carts`. Użytkownik przechodzi przez wszystkie etapy: logowanie, podanie adresu wysyłki, wybór metody płatności i potwierdzenie zamówienia.
+
+### 📑 6. Pulpit użytkownika
+
+Historia zamówień zapisywana jest w sesji użytkownika dzięki redux-toolkit oraz localStorage.
+---
+
+## 🔧 Instalacja lokalna
+
+1. Utwórz folder `E-commerce-store`.
+
+2. Sklonuj repozytorium:
+
+```bash
+git clone https://github.com/Your-Account/E-commerce-store.git
+```
+
+3. Wejdź do katalogu:
+
+```bash
+   cd E-commerce-store
+```
+
+4. Zainstaluj zależności
+
+```bash
+   npm install
+```
+
+5. Uruchom środowisko developerskie:
+
+```bash
+   npm run dev
+```
+
+6. Buduj do produkcji (optional)**
+
+```bash
+   npm run build
+```
+
+### 🧪 Testy i Continuous Integration (CI)
+
+Aplikacja ma kilka rodzajów testów: jednostkowe, integracyjne oraz end-to-end (E2E). Możesz uruchomić je ręcznie albo korzystając z Husky przy pre-commit.
+Projekt korzysta również z automatycznych testów i skanów bezpieczeństwa, aby zapewnić jakość kodu oraz poprawne działanie aplikacji.
+
+1️⃣ GitHub Actions Workflow
+
+- Testy jednostkowe, integracyjne i E2E
+  - Uruchamiane przy pushu do branchy: main, develop, feature-fe
+  - Testy uruchamiane są na Node.js 24.x
+  - E2E testy Playwright wykonują się po zbudowaniu frontendu i uruchomieniu serwera developerskiego
+
+- Skan bezpieczeństwa (Trivy)
+  - Analizuje obraz Docker pod kątem podatności w systemie operacyjnym i bibliotekach używanych w projekcie
+  - Wykrywa krytyczne i wysokie podatności (CRITICAL, HIGH)
+  - Skanowanie nie ujawnia żadnych poufnych danych – używa jedynie tymczasowych tokenów GitHub do autoryzacji
+
+Aplikacja ma kilka rodzajów testów: jednostkowe, integracyjne oraz end-to-end (E2E). Możesz uruchomić je ręcznie albo korzystając z Husky przy pre-commit.
+
+1. Testy jednostkowe i integracyjne
+
+Uruchamiają się za pomocą Vitest:
+
+```bash
+npm test        # uruchamia wszystkie testy jednostkowe i integracyjne
+npm run coverage # uruchamia testy z raportem pokrycia
+```
+2. Testy end-to-end (E2E) z Playwright
+
+Do testów E2E możesz wykorzystać wersję z UI (Trace Viewer) lub CI:
+
+```bash
+npm run e2e         # wersja z interfejsem graficznym (Trace Viewer)
+npm run test:e2e-ci # uruchamia testy E2E w trybie CI (bez UI)
+```
+3. Uruchomienie frontendu do testów E2E
+
+Testy E2E wymagają uruchomionej aplikacji. Możesz to zrobić tak:
+
+```bash
+npm run start:e2e   # uruchamia statyczną wersję aplikacji na http://localhost:3000
+```
+
+Po uruchomieniu frontendu możesz odpalić testy E2E:
+
+npm run test:e2e-ci
+
+4. Automatyczne testy przy commicie (Husky)
+
+Lokalnie przed każdym commitem uruchamiane są:
+
+```bash
+npm run format   # automatycznie sformatuje wszystkie pliki zgodnie z Prettier
+npm run prettier   # sprawdzi, czy pliki są poprawnie sformatowane (bez zapisu zmian)
+npm run lint   # sprawdzi styl kodu zgodnie z ESLint
+npm run test   # uruchamia testy jednostkowe i integracyjne
+```
+
+Dzięki temu kod w repozytorium jest zawsze poprawny i zgodny ze standardami projektu.
+
+
+### 🐳 Uruchomiene i obraz Docker oraz środowisko developerskie
+
+Aplikacja jest przygotowana do uruchamiania w Dockerze. Cały proces jest zautomatyzowany: testy, instalacja zależności, build frontendu i serwowanie aplikacji przez Nginx. Dzięki temu użytkownik nie musi nic ręcznie budować — wystarczy uruchomić kontener.
+
+1️⃣ Co zawiera obraz Docker
+
+Obraz jest przygotowany w kilku etapach:
+
+1. Testy i instalacja zależności
+
+  - Kopiowanie całego kodu i instalacja wszystkich zależności (dependencies i devDependencies)
+  - Uruchomienie testów jednostkowych, integracyjnych i end-to-end (Playwright)
+
+2. Build frontendu
+
+  - Kompilacja aplikacji React (tworzenie katalogu dist)
+
+3. Serwowanie aplikacji przez Nginx
+  - Skopiowanie plików z dist do katalogu serwowanego przez Nginx
+  - Konfiguracja uprawnień, aby Nginx działał jako użytkownik nginx
+  - Domyślny port: 8080
+
+Dzięki temu obraz jest gotowy do użycia zarówno w środowisku developerskim, jak i produkcyjnym.
+
+2️⃣ Uruchamianie aplikacji
+Start środowiska developerskiego
+
+W katalogu głównym projektu:
+
+```bash
+./startdev.sh
+```
+
+Skrypt wykona:
+
+```bash
+docker compose up -d
+docker compose exec -it e-commerce-store bash
+```
+
+Teraz jesteś w terminalu kontenera i możesz uruchomić:
+
+```bash
+npm install     # opcjonalnie doinstalowanie paczek
+npm run dev     # start serwera developerskiego
+```
+
+Aplikacja dostępna będzie po uruchomieniu przez Nginx. 
+Frontend dostępny jest pod portem:
+
+W środowisku developerskim frontend dostępny jest na porcie:
+
+```bash
+http://localhost:3000
+```
+A w obrazie produkcyjnym Nginx na porcie:
+
+```bash
+http://localhost:8080
+```
+Zatrzymanie środowiska
+Po zakończeniu pracy wystarczy:
+
+```bash
+docker compose down
+```
+
+To zatrzymuje i usuwa kontener, pozostawiając kod lokalnie.
+
+3️⃣ Obraz Docker do CI/CD
+
+- W repozytorium jest skonfigurowany workflow GitHub Actions, który:
+ - Przeprowadza testy jednostkowe, integracyjne i E2E
+ - Buduje obraz Docker (build frontendu dist)
+ - Serwowanie przez Nginx (port 8080)
+ - Wysyła go do GitHub Container Registry (ghcr.io)
+ - Uruchamia skan bezpieczeństwa (Trivy) przy tagowaniu (CRITICAL/HIGH)
+
+Dzięki temu użytkownik końcowy może od razu użyć gotowego obrazu bez ręcznego buildowania.
+
+📂 Struktura repozytorium
+
+```bash
+E-commerce-store/
+├─ .github/workflows/           # Folder z workflow GitHub Actions
+│   ├─ cicd.yml                 # CI/CD: testy, build obrazu Docker, publikacja do GHCR
+│   └─ test-ci.yml              # Uruchamianie testów jednostkowych, integracyjnych i E2E
+├─ app/                         # Główny folder aplikacji frontendowej (Vite + React)
+│   ├─ .husky/                  # Konfiguracja Husky do pre-commit hooks (formatowanie, lint, testy)
+│   ├─ e2e/                     # Testy end-to-end (Playwright)
+│   ├─ public/                  # Pliki statyczne dostępne publicznie (obrazy, favicon, itp.)
+│   ├─ App.jsx                   # Główny komponent aplikacji React
+│   ├─ constants.js              # Stałe globalne używane w aplikacji
+│   ├─ GlobalAppStyles.jsx       # Globalne style aplikacji (MUI / CSS-in-JS)
+│   ├─ main.jsx                  # Punkt wejścia aplikacji (renderowanie React)
+│   └─ src/                      # Kod źródłowy aplikacji
+│       ├─ components/           # Komponenty React
+│       │   ├─ common/           # Wspólne komponenty (np. Button, Modal)
+│       │   └─ sections/         # Sekcje/fragmenty strony (np. Header, Footer)
+│       ├─ context/              # Konteksty React (np. motyw jasny/ciemny)
+│       ├─ hooks/                # Hooki własne aplikacji
+│       ├─ layout/               # Layouty stron
+│       ├─ pages/                # Widoki / strony aplikacji
+│       ├─ screenshots/          # Zrzuty ekranu (desktop i mobile)
+│       ├─ store/                # Redux Toolkit store
+│       ├─ __tests__/            # Testy jednostkowe i integracyjne
+│       └─ __mocks__/            # Mocki do testów (np. MSW)
+│       └─ package.json          # Zależności i skrypty projektu
+├─ README.md                     # Dokumentacja projektu
+├─ startdev.sh                   # Skrypt uruchamiający środowisko developerskie w Dockerze
+├─ .dockerignore                 # Plik ignorujący pliki przy buildzie obrazu Docker
+├─ docker-compose.yml            # Konfiguracja Docker Compose dla dev i prod
+├─ Dockerfile                    # Definicja obrazu Docker (build frontend + serwowanie przez Nginx)
+├─ nginx.conf                    # Konfiguracja serwera Nginx
+```
+
+✨ Status projektu
+
+Projekt realizowany edukacyjnie.
+Możliwe dalsze rozwijanie (backend własny, baza danych itd.).
