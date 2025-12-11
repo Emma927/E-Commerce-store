@@ -5,9 +5,7 @@ import { FAKE_API_URL } from '@/constants';
 const postOrder = async (orderData) => {
   const response = await fetch(`${FAKE_API_URL}/carts`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(orderData),
   });
 

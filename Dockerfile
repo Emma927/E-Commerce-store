@@ -29,7 +29,6 @@ FROM test_runner AS builder
 # Budowanie aplikacji (tworzenie katalogu 'dist')
 RUN npm run build
 
-#ALBO nginx:
 # --- STAGE 3: SERWOWANIE GOTOWEJ APLIKACJI PRZEZ NGINX ---
 # Używamy lekkiego, bezpiecznego obrazu Nginx Alpine
 FROM nginx:alpine AS production_nginx
@@ -45,13 +44,6 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Opcjonalnie: Kopiowanie niestandardowego pliku konfiguracyjnego Nginx (jeśli masz złożoną konfigurację)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# DODAJ TE DWIE LINIE: Zmień właściciela katalogów cache na użytkownika nginx
-# RUN chown -R nginx:nginx /var/cache/nginx
-# RUN chown -R nginx:nginx /var/run
-
-# Jawne przełączenie na ISTNIEJĄCEGO użytkownika 'nginx'
-# USER nginx
 
 # 3. Naprawiamy uprawnienia (to nadal konieczne, żeby Nginx mógł pisać swoje pliki jako non-root)
 RUN chown -R nginx:nginx /var/cache/nginx && \

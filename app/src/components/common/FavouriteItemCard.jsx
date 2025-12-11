@@ -22,7 +22,6 @@ export const FavouriteItemCard = ({ id, image, title, description, price }) => {
         borderRadius: 1,
         p: 2,
         position: 'relative',
-        // width: '100%',
       }}
     >
       {/* Gwiazdka toggle */}

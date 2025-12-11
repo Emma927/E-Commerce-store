@@ -64,27 +64,25 @@ const Home = () => {
         }}
       >
         <Box
-          // component="span"
+          component="span"
           sx={{
-            // display: 'inline-block',
-            //paddingLeft: '100%', // start poza ekranem
-            // animation: 'marquee 10s linear infinite',
+            display: 'inline-block',
+            paddingLeft: '100%', // start poza ekranem
+            animation: 'marquee 10s linear infinite',
             color: theme.palette.info,
-            display: 'flex',
-            justifyContent: 'center'
           }}
         >
-          Our top picks for you!
+          Our top picks for You!
         </Box>
 
-        {/* <style>
+        <style>
           {`
       @keyframes marquee {
         0% { transform: translateX(0%); }
         100% { transform: translateX(-100%); }
       }
     `}
-        </style> */}
+        </style>
       </Box>
       {categories.map((category, index) => {
         const products = productsQueries[index].data || [];

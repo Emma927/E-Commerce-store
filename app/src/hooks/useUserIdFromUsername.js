@@ -3,8 +3,8 @@ import { FAKE_API_URL } from '@/constants';
 import { useSelector } from 'react-redux';
 import { selectUsername } from '@/store/authSlice';
 
-export const fetchfetchUserIdByUsername = async (username) => {
-  //Funkcję możesz używać też poza hookiem (np. w testach albo w innych miejscach), więc sprawdzenie if (!username) zabezpiecza ją przed błędami.
+export const fetchUserIdByUsername = async (username) => {
+  // Funkcję można używać też poza hookiem (np. w testach albo w innych miejscach), więc sprawdzenie if (!username) zabezpiecza ją przed błędami.
   // Nawet jeśli w hooku mamy enabled: !!username, w innych miejscach ktoś może przypadkowo wywołać funkcję z pustym username.
   if (!username) return null;
 
@@ -18,9 +18,9 @@ export const useUserIdFromUsername = () => {
   const username = useSelector(selectUsername);
 
   return useQuery({
-    queryKey: ['userId', username],
-    queryFn: () => fetchfetchUserIdByUsername(username),
-    enabled: !!username,
-    initialData: null, // na początku brak danych → UI może pokazać spinner
+    queryKey: ['userId', username], // Unikalny klucz w cache React Query, zależny od username; pozwala odróżnić różne zapytania
+    queryFn: () => fetchUserIdByUsername(username), // Funkcja, która pobiera userId dla danego username z API
+    enabled: !!username, // Hook fetchuje dane tylko jeśli username istnieje (zapobiega błędom przy undefined/null)
+    initialData: null, // Wartość początkowa danych = null, dzięki czemu UI może np. pokazać Spinner zamiast błędu
   });
 };

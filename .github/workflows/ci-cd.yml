@@ -15,7 +15,7 @@ jobs:
   build_docker:
     runs-on: ubuntu-latest
     steps:
-      - name: Set lower casr Github repository name
+      - name: Set lower case Github repository name
         run: |
           echo "GH_REPO_LC=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
         env:
