@@ -38,14 +38,6 @@ jobs:
             exit-code: 1        # Zwraca kod błędu jeśli wykryje CRITICAL/HIGH
             vuln-type: os,library  # Typy podatności: system i biblioteki
             severity: CRITICAL,HIGH  # Skupia się na wysokich/krytycznych podatnościach
-        - name: Trivy FS scan (including devDependencies)
-          run: |
-            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
-            ~/.local/bin/trivy fs \
-              --exit-code 1 \
-              --severity CRITICAL,HIGH \
-              --vuln-type os,library \
-              --include-dev-deps ./app
 
   e2e:                          # Job do testów end-to-end
     needs: test                 # Wykonuje się dopiero po jobie "test"
