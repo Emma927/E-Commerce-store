@@ -32,13 +32,13 @@ import { ScrollToTopButton } from '@/components/common/ScrollToTopButton';
  * Komponent Products
  *
  * Optymalizacje zastosowane w tym komponencie:
- * 1️⃣ useMemo dla allProducts – spłaszcza wszystkie strony produktów tylko wtedy,
+ * 1. useMemo dla allProducts – spłaszcza wszystkie strony produktów tylko wtedy,
  *    gdy zmienia się wynik zapytania (data?.pages), zapobiegając niepotrzebnym obliczeniom przy każdym renderze.
- * 2️⃣ useMemo dla filteredProducts i sortedProducts – filtracja po wyszukiwarce i sortowanie odbywają się
+ * 2️. useMemo dla filteredProducts i sortedProducts – filtracja po wyszukiwarce i sortowanie odbywają się
  *    tylko wtedy, gdy zmieniają się dane, debouncedSearch lub sortOrder.
- * 3️⃣ useCallback dla handlerów filtrów – funkcje do zmiany kategorii, sortowania i wyszukiwania nie są
+ * 3️. useCallback dla handlerów filtrów – funkcje do zmiany kategorii, sortowania i wyszukiwania nie są
  *    tworzone od nowa przy każdym renderze, co zmniejsza liczbę niepotrzebnych renderów dzieci.
- * 4️⃣ Synchronizacja z URL – filtry są zapisane w URL i Redux, co pozwala na przywrócenie stanu po odświeżeniu strony.
+ * 4️. Synchronizacja z URL – filtry są zapisane w URL i Redux, co pozwala na przywrócenie stanu po odświeżeniu strony.
  *
  * Dzięki temu komponent jest bardziej wydajny, mniej renderuje i obsługuje dużą liczbę produktów płynnie.
  */
@@ -137,16 +137,14 @@ Po prawej stronie (argumenty useProductsInfinite({ category: selectedCategory, s
   }, [selectedCategory, sortOrder, debouncedSearch]);
 
   /**
-   ❓ Dlaczego to działa lepiej?
-
-🔹 Po reset URL zmienia się queryKey
-🔹 Po resetQueries kasuje stare strony (stary infinite scroll)
-🔹 Po invalidateQueries pobiera nowy start (pierwszą stronę)
-
+  * Dlaczego to działa lepiej?
+    * Po reset URL zmienia się queryKey
+    * Po resetQueries kasuje stare strony (stary infinite scroll)
+    * Po invalidateQueries pobiera nowy start (pierwszą stronę)
 Bez tych czynności mogłeś mieć taki problem:
 reset filtrów → lista zostaje pusta, bo React Query patrzy na stare strony
 infinite scroll zaczyna dopiero przy ładowaniu następnych danych
-👉 To właśnie rozwiązuje resetQueries + invalidateQueries.
+    *To właśnie rozwiązuje resetQueries + invalidateQueries.
    */
   // Reset filtrów + URL
   const handleReset = () => {
@@ -155,8 +153,8 @@ infinite scroll zaczyna dopiero przy ładowaniu następnych danych
     // 2. Reset URL
     setSearchParams({ category: 'all', sort: 'asc', search: '', rating: 0 }, { replace: true });
     // 3. Reset i refetch React Query
-    queryClient.resetQueries({ queryKey: ['products-infinite'], exact: false }); // Czyści
-    queryClient.invalidateQueries({ queryKey: ['products-infinite'], exact: false }); // fetch od nowa
+    queryClient.resetQueries({ queryKey: ['products-infinite'], exact: false }); // Czyści,  po resetQueries kasuje stare strony (stary infinite scroll)
+    queryClient.invalidateQueries({ queryKey: ['products-infinite'], exact: false }); // fetch od nowa, po invalidateQueries pobiera nowy start (pierwszą stronę)
     // 4. Scroll na górę
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };

@@ -5,7 +5,7 @@ import { selectIsAuthenticated } from '@/store/authSlice';
 const ProtectedRoute = ({ redirectPath = '/login' }) => {
   // Selektor zamiast bezpośredniego odczytu stanu.
   // Dzięki temu komponent nie zależy od struktury całego stanu Redux.
-  const isAuthenticated = useSelector(selectIsAuthenticated); // użycie selektora z slice
+  const isAuthenticated = useSelector(selectIsAuthenticated); // użycie selektora ze slice
   const location = useLocation(); // bieżąca lokalizacja użytkownika
 
   // Jeśli użytkownik zalogowany → renderuj Outlet (dzieci routingu)

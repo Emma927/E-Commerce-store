@@ -13,19 +13,41 @@ permissions:
 
 jobs:
   build_docker: # Job do budowania i publikowania obrazu Docker
-    runs-on: ubuntu-latest # Uruchamiany na Ubuntu
-    steps: # Kroki joba
-      - name: Set lower case Github repository name
-        run: |
-          echo "GH_REPO_LC=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}  # Tworzy zmienną środowiskową z nazwą repo w małych literach
-        env:
-          GITHUB_REPOSITORY: ${{ github.repository }} # Zmienna wejściowa z nazwą repo
-
+    runs-on: ubuntu-latest # Uruchamiany na maszynie Ubuntu
+    outputs: # Outputy joba, które mogą być użyte w innych jobach
+    # steps – odwołanie do kroków w tym jobie
+    # set_repo – id kroku, który produkuje output
+    # outputs.gh_repo_lc – nazwa outputu zdefiniowanego w kroku
+      GH_REPO_LC: ${{ steps.set_repo.outputs.gh_repo_lc }} # Nazwa repo w małych literach
+      TAG_NAME: ${{ steps.set_tag.outputs.tag_name }} # Nazwa tagu obrazu
+    steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # Pobiera kod repozytorium do runnera
+        uses: actions/checkout@v4 # Pobiera kod repozytorium na runnera
+
+      - name: Set lower case Github repository name
+        id: set_repo # ID kroku, wymagane, by ustawić output
+        run: |
+          # Tworzymy zmienną w małych literach z nazwy repozytorium
+          echo "gh_repo_lc=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+          # Zapis do output kroku, aby można było przekazać do innego joba
+          echo "gh_repo_lc=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }} # Nazwa repo
+
+      - name: Set proper tag name for Docker image
+        id: set_tag # ID kroku do outputu
+        run: |
+          # Zamiana liter na małe i '/' na '-', bo GHCR wymaga małych liter w tagach
+          TAG_NAME_LOWER=$(echo "${GITHUB_REF_NAME,,}" | sed 's|/|-|g')
+          # Zapis do $GITHUB_ENV dla użycia w tym jobie
+          echo "tag_name=$TAG_NAME_LOWER" >> $GITHUB_ENV
+          # Zapis do output kroku, aby przekazać do innego joba
+          echo "tag_name=$TAG_NAME_LOWER" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }} # Nazwa branch/tag wyzwalającego workflow
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3 # Konfiguruje Docker Buildx (multi-arch)
+        uses: docker/setup-buildx-action@v3 # Konfiguracja Buildx dla multi-architektury
 
       - name: Login to Github Container Registry
         uses: docker/login-action@v3 # Logowanie do GHCR
@@ -34,54 +56,32 @@ jobs:
           username: ${{ github.actor }} # Użytkownik GitHub
           password: ${{ secrets.GITHUB_TOKEN }} # Token do logowania
 
-      - name: Set proper tag name for Docker image
-        # Zamienia wszystkie litery na małe, bo GHCR wymaga małych liter w nazwach obrazów i tagach oraz zamienia wszystkie '/' na '-'
-        # | oznacza w YAML, że wszystko, co jest w kolejnych liniach, traktowane jest dosłownie jako wielolinijkowy tekst/komendy shell.
-        # echo ustawia zmienną TAG_NAME
-        run: |
-          TAG_NAME_LOWER=$(echo "${GITHUB_REF_NAME,,}" | sed 's|/|-|g') 
-          echo "TAG_NAME=$TAG_NAME_LOWER" >> $GITHUB_ENV
-        env:
-          GITHUB_REF_NAME: ${{ github.ref_name }} # Nazwa brancha/tagu wyzwalającego workflow
-
       - name: Build Docker image
         uses: docker/build-push-action@v3 # Buduje i wysyła obraz Docker
         with:
           context: . # Kontekst builda (root repo)
           file: ./Dockerfile # Plik Dockerfile
-          push: true # Wysyła obraz do rejestru
-          tags: ghcr.io/${{ env.GH_REPO_LC }}:${{ env.TAG_NAME }} # Tag obrazu w GHCR
+          push: true # Wysyła obraz do GHCR
+          # Użycie outputów kroków do utworzenia tagu obrazu
+          tags: ghcr.io/${{ steps.set_repo.outputs.gh_repo_lc }}:${{ steps.set_tag.outputs.tag_name }}
 
   secure_scan: # Job do skanowania obrazu Docker (Trivy)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # Uruchamiany na Ubuntu
     needs: build_docker # Wykonuje się dopiero po build_docker
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') # Tylko przy pushu tagów
     steps:
-      - name: Set lower case Github repository name
-        run: |
-          echo "GH_REPO_LC=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}  # Ustawia nazwę repo w małych literach
-        env:
-          GITHUB_REPOSITORY: ${{ github.repository }}
-
-      - name: Set proper tag name for Docker image
-        # Zamienia wszystkie litery na małe, bo GHCR wymaga małych liter w nazwach obrazów i tagach oraz zamienia wszystkie '/' na '-'
-        # | oznacza w YAML, że wszystko, co jest w kolejnych liniach, traktowane jest dosłownie jako wielolinijkowy tekst/komendy shell.
-        # echo ustawia zmienną TAG_NAME
-        run: |
-          TAG_NAME_LOWER=$(echo "${GITHUB_REF_NAME,,}" | sed 's|/|-|g')  
-          echo "TAG_NAME=$TAG_NAME_LOWER" >> $GITHUB_ENV
-        env:
-          GITHUB_REF_NAME: ${{ github.ref_name }}
-
       - name: Trivy Scan
         uses: aquasecurity/trivy-action@master # Skanowanie obrazu Trivy
         with:
-          image-ref: ghcr.io/${{ env.GH_REPO_LC }}:${{ env.TAG_NAME }} # Obraz do zeskanowania
-          format: "table" # Format raportu
-          exit-code: "1" # Exit code przy znalezieniu krytycznych/wysokich podatności
-          ignore-unfixed: true # Ignoruje niepoprawione podatności
-          vuln-type: os,library # Skanuje system i biblioteki
+          # Odwołanie do outputów joba build_docker
+          # needs.build_docker – job, który musi się zakończyć wcześniej
+          # outputs.GH_REPO_LC – output joba build_docker
+          image-ref: ghcr.io/${{ needs.build_docker.outputs.GH_REPO_LC }}:${{ needs.build_docker.outputs.TAG_NAME }}
+          format: "table" # Format tabeli
+          exit-code: "1" # Exit code przy krytycznych/wysokich podatnościach
+          ignore-unfixed: true # Ignoruje podatności, które nie mają poprawki
+          vuln-type: os,library # Skanuje OS i biblioteki
           severity: "CRITICAL,HIGH" # Skupia się na krytycznych i wysokich podatnościach
         env:
           TRIVY_USERNAME: ${{ github.actor }} # Tymczasowe dane logowania
-          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }} # Token do logowania

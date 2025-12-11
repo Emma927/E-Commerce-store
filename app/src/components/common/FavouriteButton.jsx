@@ -24,9 +24,14 @@ const FavouriteButtonComponent = ({ product }) => {
   const dispatch = useDispatch();
   const favourites = useSelector(selectFavouritesProducts);
 
-  // Bezpieczne sprawdzenie, czy product istnieje
-  // Selector factory – sprawdza, czy dany produkt jest w ulubionych
+  // Bezpieczne sprawdzenie, czy product istnieje w ulubionych
+  /**
+   favourites.some((p) => p.id === product.id) sprawdza, czy w tablicy ulubionych produktów (favourites) istnieje przynajmniej jeden element, którego id jest równe id wybranego produktu (product.id).
+    - Jeśli taki element istnieje → wynik .some() jest true.
+    - Jeśli nie istnieje → wynik .some() jest false.
+   */
   const isFavourite = useMemo(() => {
+    // To .some() decyduje, czy wynik faktycznie będzie true.
     return product ? favourites.some((p) => p.id === product.id) : false;
   }, [favourites, product]);
 

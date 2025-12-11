@@ -1,4 +1,14 @@
-import { Box, Typography, Divider, List, ListItem, ListItemText, ListItemAvatar, Avatar, Button } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
+  Avatar,
+  Button,
+} from '@mui/material';
 import { Link } from 'react-router-dom';
 import { memo, useCallback } from 'react';
 
@@ -6,22 +16,44 @@ import { memo, useCallback } from 'react';
 // Dzięki temu pojedyncze zamówienia nie renderują się ponownie przy zmianach stanu rodzica, które nie dotyczą ich propsów, np. otwarcie sidebaru na mobile, zmiana filtra czy motywu.
 export const OrderItemComponent = ({ order, onDelete }) => {
   // Stabilna referencja callback do usuwania zamówienia
-  const handleDelete = useCallback(() => onDelete(order.id), [onDelete, order.id]);
+  const handleDelete = useCallback(
+    () => onDelete(order.id),
+    [onDelete, order.id],
+  );
 
   return (
     <Box sx={{ mb: 3, p: 2, border: '1px solid #ccc', borderRadius: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <Box>
           <Typography variant="subtitle1">Order ID: {order.id} </Typography>
-          <Typography variant="subtitle2">Date: {new Date(order.serverDate).toLocaleString()}</Typography>
+          <Typography variant="subtitle2">
+            Date: {new Date(order.serverDate).toLocaleString()}
+          </Typography>
         </Box>
-        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: 2,
+          }}
+        >
           <Button
             variant="outlined"
             component={Link}
             key={order.id}
             to={`/dashboard/orders/${order.id}`}
-            sx={{ textDecoration: 'none', color: 'primary.main', display: 'flex', alignItems: 'center' }}
+            sx={{
+              textDecoration: 'none',
+              color: 'primary.main',
+              display: 'flex',
+              alignItems: 'center',
+            }}
           >
             Details
           </Button>
@@ -56,15 +88,25 @@ export const OrderItemComponent = ({ order, onDelete }) => {
           </ListItem>
         ))}
       </List>
-      <Typography sx={{ fontWeight: 'bold' }}>Total: ${order.total.toFixed(2)}</Typography>
+      <Typography sx={{ fontWeight: 'bold' }}>
+        Total: ${order.total.toFixed(2)}
+      </Typography>
     </Box>
   );
 };
 
 // Eksportowany memoizowany komponent z nazwą
-// ✅ Dzięki osobnej nazwie komponentu (OrderItemComponent) Fast Refresh nie narzeka na anonimowy komponent.
-// ✅ Memoizowany OrderItem działa poprawnie z onDelete przekazywanym z useCallback.
+// - Dzięki osobnej nazwie komponentu (OrderItemComponent) Fast Refresh nie narzeka na anonimowy komponent.
+// - Memoizowany OrderItem działa poprawnie z onDelete przekazywanym z useCallback.
 export const OrderItem = memo(OrderItemComponent);
 /**
- Fast Refresh to funkcja w React (i React Native), która pozwala na natychmiastowe odświeżenie komponentów w trakcie pracy nad aplikacją, zachowując stan komponentów tam, gdzie to możliwe. Dzięki temu nie musisz za każdym razem ręcznie odświeżać całej strony i tracić wprowadzonych danych w formularzach czy stanie komponentów.
+/**
+ * Fast Refresh aktualizuje komponenty automatycznie w przeglądarce, gdy zmienisz ich kod w edytorze, bez potrzeby ręcznego odświeżania strony.
+ * Fast Refresh to mechanizm w React, który pozwala na natychmiastowe
+ * odświeżenie komponentów w trakcie developmentu, zachowując stan komponentów tam, gdzie to możliwe.
+ * Dzięki temu nie trzeba ręcznie odświeżać całej strony ani tracić wprowadzonych danych w formularzach
+ * czy stanie komponentów.
+ *
+ * Dodatkowo, nadanie nazw komponentom (zamiast anonimowych funkcji) pomaga Fast Refresh poprawnie
+ * rozpoznać i odświeżyć konkretny komponent, unikając ostrzeżeń i utraty stanu.
  */

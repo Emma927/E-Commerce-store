@@ -12,10 +12,8 @@ import { selectUsername, selectIsAuthenticated } from '@/store/authSlice';
 import StoreIcon from '@mui/icons-material/Store';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import MenuIcon from '@mui/icons-material/Menu';
-// import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { Container } from '@mui/material';
 import { ThemeToggleButton } from '@/components/common/ThemeToggleButton';
-// import { useCategories } from '@/hooks/useCategories';
 import StarIcon from '@mui/icons-material/Star';
 import Badge from '@mui/material/Badge';
 import { useSelector } from 'react-redux';
@@ -24,6 +22,7 @@ import { selectCartTotalItems } from '@/store/cartSlice';
 import { selectFavouritesCount } from '@/store/favouritesSlice';
 import { NavigationDrawer } from '@/components/common/NavigationDrawer';
 
+// styled w MUI (Material-UI) to funkcja do tworzenia komponentów z własnymi stylami, która pozwala pisać CSS w JavaScript w bardzo wygodny sposób. W praktyce jest to wygodniejsza i mocniejsza alternatywa dla inline styles lub klasycznych CSS.
 const StyledNavLink = styled(NavLink)(({ theme }) => ({
   textDecoration: 'none',
   display: 'flex',
@@ -34,8 +33,6 @@ const StyledNavLink = styled(NavLink)(({ theme }) => ({
   '&:hover': {
     color: theme.palette.primary.main,
     backgroundColor: theme.palette.action.hover,
-    // color: theme.palette.primary.main,
-    // backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : theme.palette.action.hover,
   },
   '&.active': { color: theme.palette.primary.main, fontWeight: 'bold' },
 }));
@@ -50,8 +47,6 @@ const Navigation = () => {
 
   const favouritesCount = useSelector(selectFavouritesCount);
 
-  // const { data: categories, isPending } = useCategories();
-
   // Funkcja zamykająca Drawer i resetująca kategorie
   const handleNavigate = (path) => {
     // Drawer zostaje zamknięty (drawerOpen = false) i animacja kończy się naturalnie.
@@ -59,30 +54,14 @@ const Navigation = () => {
     setNextPath(path); // ustawiamy trasę do przejścia
   };
 
-  /**
-   To jest sposób na:
-
-✔️ nawigowanie dopiero, gdy Drawer zostanie zamknięty
-
-Dlaczego tak?
-
-Bo kliknięcie w link w Drawerze robi zwykle dwie rzeczy naraz:
-
-1️⃣ zamyka Drawer
-2️⃣ zmienia stronę (navigate())
-
-➡️ To powoduje brzydki efekt "skoku", animacja zamykania się urywa.
-   */
   // useEffect nasłuchuje na drawerOpen i wywołuje navigate() dopiero, gdy Drawer jest zamknięty, dzięki czemu wszystko działa płynnie.
   useEffect(() => {
     if (!drawerOpen && nextPath) {
       navigate(nextPath);
       // setNextPath(null) resetuje stan, żeby nie wywoływać navigate() ponownie przy kolejnym renderze.
-      setNextPath(null); // reset
+      setNextPath(null);
     }
   }, [drawerOpen, nextPath, navigate]);
-
-  // const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
   return (
     <>
@@ -147,6 +126,7 @@ Bo kliknięcie w link w Drawerze robi zwykle dwie rzeczy naraz:
                   color: 'inherit', // domyślny kolor
                 }}
               >
+                {/* Operator ?? w JavaScript to nullish coalescing operator – zwraca wartość po lewej stronie, chyba że jest null lub undefined, wtedy zwraca wartość po prawej stronie. */}
                 <Badge badgeContent={cartCount ?? undefined} color="primary">
                   <ShoppingCartIcon sx={{ fontSize: { md: '25px' } }} />
                 </Badge>
@@ -189,8 +169,7 @@ Bo kliknięcie w link w Drawerze robi zwykle dwie rzeczy naraz:
         </Container>
       </AppBar>
 
-      {/* Drawer Mobile */}
-
+      {/* NavigationDrawer na mobile */}
       <NavigationDrawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}

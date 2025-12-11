@@ -3,14 +3,6 @@ import { List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '@/store/authSlice';
-
-// Ikony Material UI
-// import HomeIcon from '@mui/icons-material/Home'; // <- ikona domu
-// import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-// import PaymentIcon from '@mui/icons-material/Payment';
-// import StarIcon from '@mui/icons-material/Star';
-// import HistoryIcon from '@mui/icons-material/History';
-// import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { LINKS } from '@/constants';
 
 const Sidebar = () => {
@@ -34,7 +26,7 @@ const Sidebar = () => {
               component={NavLink}
               to={to}
               end={to === '/' || to === '/dashboard'} // Home i Profile mają end
-              // Dla NavLink, jeśli end jest ustawione, link będzie aktywny tylko wtedy, gdy aktualna ścieżka dokładnie pasuje do to.
+              // Dla NavLink, jeśli "end" jest ustawione, link będzie aktywny tylko wtedy, gdy aktualna ścieżka dokładnie pasuje do atrybutu "to".
               sx={{
                 gap: 1,
                 justifyContent: { xs: 'center' },
