@@ -192,10 +192,10 @@ Projekt korzysta również z automatycznych testów i skanów bezpieczeństwa, a
   - Testy uruchamiane są na Node.js 24.x
   - E2E testy Playwright wykonują się po zbudowaniu frontendu i uruchomieniu serwera developerskiego
 
-- Skan bezpieczeństwa (Trivy)
-  - Analizuje obraz Docker pod kątem podatności w systemie operacyjnym i bibliotekach używanych w projekcie
-  - Wykrywa krytyczne i wysokie podatności (CRITICAL, HIGH)
-  - Skanowanie nie ujawnia żadnych poufnych danych – używa jedynie tymczasowych tokenów GitHub do autoryzacji
+- Skan bezpieczeństwa source code (Trivy FS scan)
+  - Analizuje folder ./app oraz zależności (node_modules)
+  - Wykrywa podatności w bibliotekach i pakietach (CRITICAL/HIGH)
+  - Nie skanuje logiki biznesowej ani tajnych danych
 
 1. Testy jednostkowe i integracyjne
 
