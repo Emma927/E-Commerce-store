@@ -41,7 +41,11 @@ jobs:
         - name: Trivy FS scan (including devDependencies)
           run: |
             curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
-            ./trivy fs --exit-code 1 --severity CRITICAL,HIGH --vuln-type os,library --include-dev-deps ./app
+            ~/.local/bin/trivy fs \
+              --exit-code 1 \
+              --severity CRITICAL,HIGH \
+              --vuln-type os,library \
+              --include-dev-deps ./app
 
   e2e:                          # Job do testów end-to-end
     needs: test                 # Wykonuje się dopiero po jobie "test"
