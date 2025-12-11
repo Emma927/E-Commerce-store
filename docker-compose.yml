@@ -8,6 +8,7 @@ services:
     user: "${USER_ID}:${GROUP_ID}"
     tty: true
     ports:
-      - "3000:3000"
+        - "3000:3000"  # dev server
+        - "8080:8080"  # produkcja Nginx
     env_file:
       - .env
