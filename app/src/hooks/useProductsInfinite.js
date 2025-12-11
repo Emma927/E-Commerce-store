@@ -13,7 +13,7 @@ import { FAKE_API_URL } from '@/constants';
  */
 export const fetchProductsInfinite = async ({ category, sort = 'asc' } = {}) => {
   // = {} na końcu ma inną rolę: gwarantuje, że jeśli funkcja zostanie wywołana bez argumentu w ogóle, np. fetchProductsInfinite(), to destrukturyzacja nie wyrzuci błędu.
-  // Nie do końca – wartość domyślna sort = 'asc' działa tylko jeśli argument sort w ogóle nie istnieje w przekazanym obiekcie.
+  // Wartość domyślna sort = 'asc' działa tylko jeśli argument sort w ogóle nie istnieje w przekazanym obiekcie.
   const url = category
     ? `${FAKE_API_URL}/products/category/${encodeURIComponent(category)}`
     : `${FAKE_API_URL}/products`;
@@ -40,7 +40,7 @@ export const useProductsInfinite = ({ category, pageSize = 6, sort, search = '',
     queryKey: ['products-infinite', { category, sort, search, rating }],
     // pageParam = 0 w hooku to startowy indeks w tablicy produktów, od którego zaczyna się wycinek (slice) dla pierwszej „strony” infinite scroll.
     queryFn: async ({ pageParam = 0 }) => {
-      // 🔹 jeśli category === 'all', traktujemy jak pusty string
+      // Jeśli category === 'all', traktujemy jak pusty string
       // Nie ma kategorii "all". Jeśli w URL wpiszesz /products/category/all, API zwróci 404 albo pustą tablicę. Dlatego w hooku, gdy użytkownik wybiera All, trzeba przekazać pusty string, żeby triggerować GET /products zamiast /products/category/all.
       // '' (pusty string) oznacza fetch wszystkich produktów: /products zamiast /products/category/all.
       const cat = category === 'all' ? '' : category; // W skrócie: "all" w UI to → '' w kodzie, czyli → /products w API bez kategorii

@@ -4,15 +4,6 @@ import { FAKE_API_URL } from '@/constants';
 // Jeśli spróbujesz zrobić categories.map(c => useProducts({ category: c })) → błąd hooków, bo hooki nie mogą być wywoływane w pętli.
 // useProducts jest zaprojektowany do jednej kategorii na raz — jego queryKey i queryFn odnoszą się do konkretnej kategorii. Nie możesz go użyć w pętli dla wielu kategorii, bo hooki nie mogą być wywoływane dynamicznie w mapie (to złamanie zasad hooków Reacta).
 export const fetchProducts = async ({ category, limit, sort } = {}) => {
-  /**
-   Jeśli category jest podane, URL zmienia się na /products/category/:category.
-
-Ten endpoint zwraca tylko produkty w tej kategorii.
-
-Przykład: /products/category/electronics → wszystkie produkty elektroniczne.
-
-Jeśli category nie jest podane (undefined), URL pozostaje /products -> zwraca wszystkie produkty, niezależnie od kategorii.
-   */
 
   /**
    * Pobiera produkty z Fake Store API.
@@ -32,15 +23,15 @@ Jeśli category nie jest podane (undefined), URL pozostaje /products -> zwraca w
   let url = category ? `${FAKE_API_URL}/products/category/${encodeURIComponent(category)}` : `${FAKE_API_URL}/products`;
 
   /**
-   * URLSearchParams jest klasą, więc musisz najpierw utworzyć jej instancję, żeby używać append().
+   * URLSearchParams jest klasą, więc trzeba najpierw utworzyć jej instancję, żeby używać append().
 URLSearchParams().toString() to po prostu wygodny sposób na zamianę danych z obiektu JavaScript na poprawny, sformatowany ciąg znaków, który przeglądarki i serwery potrafią odczytać jako listę parametrów URL.
    */
   const params = new URLSearchParams();
   if (limit) params.append('limit', limit);
   if (sort) params.append('sort', sort);
 
-  // limit=5&sort=desc
-  // ✅ Znak & dodaje JS sam, nie musisz tego robić ręcznie.
+  // limit=3&sort=desc
+  // ✅ Znak & dodaje JS sam, nie trzeba tego robić ręcznie.
   if ([...params].length) {
     url += `?${params.toString()}`;
   }
@@ -52,10 +43,8 @@ URLSearchParams().toString() to po prostu wygodny sposób na zamianę danych z o
   return data;
 };
 
-/**Chroni przed błędem, gdy ktoś wywoła useProducts() bez żadnych parametrów.
-
-Wtedy category, limit i sort będą undefined, a funkcja nadal zadziała. */
-// Funkcja strzałkowa bez klamer i return:
+/** Domyślnie przekazany pusty obiekt = {} chroni przed błędem, gdy ktoś wywoła useProducts() bez żadnych parametrów / argumentów.
+Wtedy category, limit i sort będą undefined, a funkcja nadal zadziała. bez tego ={} byłby błąd typu „Cannot destructure property of undefined” */
 export const useProducts = ({ category, limit, sort } = {}) =>
   useQuery({
     queryKey: ['products', { category, limit, sort }], // queryKey pełni rolę tablicy zależności
