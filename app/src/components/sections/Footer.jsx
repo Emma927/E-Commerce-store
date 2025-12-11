@@ -1,5 +1,5 @@
 import { Box, Container, Typography, IconButton } from '@mui/material';
-import { SOCIAL_MEDIA_SITES } from '@/constants'; // Twoja tablica ikon
+import { SOCIAL_MEDIA_SITES } from '@/constants';
 import { useLocation } from 'react-router-dom';
 
 const Footer = () => {
@@ -13,11 +13,7 @@ const Footer = () => {
       sx={{
         borderTop: 1,
         borderColor: 'divider',
-        // position: 'fixed',
-        // bottom: 0,
-        // left: 0,
         backgroundColor: 'background.default',
-        // zIndex: 20,
         width: '100%',
         height: '90px',
         mb: {

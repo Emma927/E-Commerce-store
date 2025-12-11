@@ -11,7 +11,7 @@ const ordersSlice = createSlice({
   initialState,
   reducers: {
     addOrder: (state, action) => {
-      state.orders.push(action.payload); // W Redux Toolkit (createSlice) nie ma potrzeby tworzenia nowej tablicy w tym przypadku, bo RTK używa Immer, który pozwala na bezpośrednią mutację stanu.
+      state.orders.push(action.payload); // W Redux Toolkit (createSlice) nie ma potrzeby tworzenia nowej tablicy w tym przypadku, bo RTK używa Immer, który pozwala na bezpośrednią mutację stanu. Immer tworzy niemutowalną kopię stanu za nas.
       localStorage.setItem('orders', JSON.stringify(state.orders));
     },
     deleteOrder: (state, action) => {
