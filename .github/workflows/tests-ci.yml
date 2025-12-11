@@ -1,81 +1,74 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
-
-name: CI - Code Tests and Scans 
+name: CI - Code Tests and Scans  # Nazwa całego workflow
 
 on:
-  push:
-    branches: ['main', 'develop', 'feature-fe']
-  pull_request:
-    branches: ['main', 'develop']
+  push:                         # Wyzwala workflow przy pushu
+    branches: ['main', 'develop', 'feature-fe']  # Tylko dla tych branchy
+  pull_request:                 # Wyzwala workflow przy PR
+    branches: ['main', 'develop']  # Tylko dla tych branchy
 
 jobs:
-  test:
-
-    runs-on: ubuntu-latest
+  test:                         # Job o nazwie "test"
+    runs-on: ubuntu-latest      # Uruchamia się na maszynie Ubuntu
 
     strategy:
       matrix:
-        node-version: [24.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        node-version: [24.x]    # Testy uruchamiane dla Node.js 24.x
 
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
+    steps:                      # Kroki w jobie "test"
+      - uses: actions/checkout@v4  # Pobiera kod repozytorium
+      - name: Use Node.js ${{ matrix.node-version }}  # Ustawienie Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-      - run: npm i
-      - run: npm test
+          node-version: ${{ matrix.node-version }}  # Wersja Node.js z matrix
+          cache: 'npm'  # Włącza cache dla zależności npm
+      - run: npm i             # Instalacja zależności npm
+      - run: npm test          # Uruchamia testy jednostkowe i integracyjne
 
-  source_scan:
-      # Ten job działa niezależnie i szybko
-      runs-on: ubuntu-latest
-      steps:
+  source_scan:                  # Job do skanowania kodu źródłowego
+      runs-on: ubuntu-latest    # Uruchamiany na Ubuntu
+      steps:                    # Kroki w jobie "source_scan"
         - name: Checkout code
-          uses: actions/checkout@v4
+          uses: actions/checkout@v4  # Pobiera repozytorium do runnera
         - name: Trivy scan source code
-          uses: aquasecurity/trivy-action@master
+          uses: aquasecurity/trivy-action@master  # Używa Trivy do skanowania
           with:
-            scan-type: fs # <-- MUSI być 'fs', aby użyć parametru 'path'
-            path: ./app   # <-- Ten parametr jest prawidłowy tylko dla scan-type - Podkreślenie to tylko problem lintowania GitHub Actions workflow, a nie błędu runtime.
-            format: table
-            exit-code: 1
-            vuln-type: code,secret,os,library # Skanuj wszystko
-            severity: CRITICAL,HIGH
+            scan-type: fs       # Typ skanu: File System (pliki w folderze)
+            input: ./app        # Folder aplikacji do zeskanowania
+            format: table       # Format raportu: tabela
+            exit-code: 1        # Zwraca kod błędu jeśli wykryje CRITICAL/HIGH
+            vuln-type: os,library  # Typy podatności: system i biblioteki
+            severity: CRITICAL,HIGH  # Skupia się na wysokich/krytycznych podatnościach
 
-  e2e:
-    needs: test
-
-    runs-on: ubuntu-latest
+  e2e:                          # Job do testów end-to-end
+    needs: test                 # Wykonuje się dopiero po jobie "test"
+    runs-on: ubuntu-latest      # Uruchamiany na Ubuntu
     strategy:
       matrix:
-        node-version: [24.x]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+        node-version: [24.x]    # Testy uruchamiane dla Node.js 24.x
+    steps:                      # Kroki w jobie "e2e"
+      - uses: actions/checkout@v4  # Pobiera repozytorium
+      - uses: actions/setup-node@v4  # Ustawia Node.js
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: ${{ matrix.node-version }}  # Wersja Node.js
       - name: Install dependencies
-        run: npm ci
+        run: npm ci              # Instalacja zależności według lockfile
 
-      # DODAJ TEN KROK TUTAJ:
       - name: Build application
-        run: npm run build
+        run: npm run build       # Buduje frontend (dist)
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-    #   - name: Start backend & frontend - backend nie będzie mi potrzebny
+        run: npx playwright install --with-deps  # Instaluje przeglądarki do E2E
+
       - name: frontend
-        run: npm run start:e2e &
+        run: npm run start:e2e &  # Uruchamia frontend w tle dla testów
       - name: Wait for frontend
-        run: npx wait-on http://localhost:3000
+        run: npx wait-on http://localhost:3000  # Czeka aż frontend będzie dostępny
       - name: Run Playwright tests
-        run: npx playwright test
-      - uses: actions/upload-artifact@v4
-        if: always()
+        run: npx playwright test  # Uruchamia testy end-to-end
+      - uses: actions/upload-artifact@v4  # Upload raportu testów
+        # Nawet jeśli testy się nie powiodą ( always() )
+        if: always()            
         with:
-          name: playwright-report-${{ matrix.node-version }}
-          path: playwright-report/
-          retention-days: 30
+          name: playwright-report-${{ matrix.node-version }}  # Nazwa artefaktu
+          path: playwright-report/  # Folder z raportami
+          retention-days: 30        # Przechowuje artefakt przez 30 dni
