@@ -184,10 +184,9 @@ git clone https://github.com/Your-Account/E-Commerce-store.git
 Aplikacja ma kilka rodzajów testów: jednostkowe, integracyjne oraz end-to-end (E2E). Możesz uruchomić je ręcznie albo korzystając z Husky przy pre-commit.
 Projekt korzysta również z automatycznych testów i skanów bezpieczeństwa, aby zapewnić jakość kodu oraz poprawne działanie aplikacji.
 
-1️⃣ GitHub Actions Workflow
+1️⃣ GitHub Actions Workflow – Testy i Skan kodu źródłowego
 
 - Testy jednostkowe, integracyjne i E2E
-
   - Uruchamiane przy pushu do branchy: main, develop, feature-fe
   - Testy uruchamiane są na Node.js 24.x
   - E2E testy Playwright wykonują się po zbudowaniu frontendu i uruchomieniu serwera developerskiego
@@ -315,7 +314,10 @@ To zatrzymuje i usuwa kontener, pozostawiając kod lokalnie.
 - Buduje obraz Docker (build frontendu dist)
 - Serwowanie przez Nginx (port 8080)
 - Wysyła go do GitHub Container Registry (ghcr.io)
-- Uruchamia skan bezpieczeństwa (Trivy) przy tagowaniu (CRITICAL/HIGH)
+- Uruchamia skan bezpieczeństwa (Trivy) przy tagowaniu (CRITICAL/HIGH):
+  - Skanuje gotowy obraz Docker
+  - Wykrywa podatności CRITICAL/HIGH w systemie operacyjnym oraz bibliotekach w obrazie
+  - Wykonuje się przy tagowaniu obrazu (push tagów do GHCR)
 
 Dzięki temu użytkownik końcowy może od razu użyć gotowego obrazu bez ręcznego buildowania.
 
