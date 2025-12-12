@@ -90,5 +90,5 @@ jobs:
         if: always()            
         with:
           name: playwright-report-${{ matrix.node-version }}  # Nazwa artefaktu
-          path: playwright-report/  # Folder z raportami
+          path: app/playwright-report/  # Folder z raportami
           retention-days: 30        # Przechowuje artefakt przez 30 dni
