@@ -20,10 +20,10 @@ export default defineConfig({
     include: ['**/*.{spec,test}.{js,jsx}'],
     exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**'],
     //setupFiles w konfiguracji Vitest (vitest.config.js) służy do inicjalizacji środowiska testowego przed każdym testem. Dzięki temu nie musisz powtarzać importu w każdym pliku testowym.
-    setupFiles: ['./src/setupTests.js'], // <- inicjalizacja jest-dom
+    setupFiles: ['./src/setupTests.js'], // inicjalizacja jest-dom
     //Jeśli chcesz uruchomić więcej niż jeden plik setup:
     // setupFiles: ["./vitest.setup.js", "./anotherSetup.js"]
-    passWithNoTests: true, // <- pozwala zakończyć testy sukcesem jeśli brak plików
+    passWithNoTests: true, // pozwala zakończyć testy sukcesem jeśli brak plików
   },
   plugins: [react()],
   resolve: {
@@ -32,6 +32,6 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: ['@playwright/test', 'playwright-core'],
+    exclude: ['@playwright/test', 'playwright-core'], // Wykluczenie niektórych zależności z optymalizacji Vite
   },
 });

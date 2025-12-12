@@ -110,7 +110,7 @@ Sortowanie produktów po cenie — GET `/products?sort=desc`
 ```
 
 Ograniczenie API: maksymalnie 20 produktów.
-Produkty są prezentowane ze zdjęciami, opisami, cenami, ocenami i kategoriami. Aplikacja obsługuje filtrowanie, sortowanie i wyszukiwanie. Produkty ładowane są metodą lazy-loading. Maksymalna liczba produktów: 20 (ograniczenie API).
+Produkty są prezentowane ze zdjęciami, opisami, cenami, ocenami i kategoriami. Aplikacja obsługuje filtrowanie, sortowanie i wyszukiwanie. Produkty ładowane są metodą lazy-loading.
 
 ### 🛒 4. Koszyk
 
@@ -310,14 +310,14 @@ To zatrzymuje i usuwa kontener, pozostawiając kod lokalnie.
 3️⃣ Obraz Docker do CI/CD
 
 - W repozytorium jest skonfigurowany workflow GitHub Actions, który:
-- Przeprowadza testy jednostkowe, integracyjne i E2E (tryb headlessowy)
-- Buduje obraz Docker (build frontendu dist)
-- Serwowanie przez Nginx (port 8080)
-- Wysyła go do GitHub Container Registry (ghcr.io)
-- Uruchamia skan bezpieczeństwa (Trivy) przy tagowaniu (CRITICAL/HIGH):
-  - Skanuje gotowy obraz Docker
-  - Wykrywa podatności CRITICAL/HIGH w systemie operacyjnym oraz bibliotekach w obrazie
-  - Wykonuje się przy tagowaniu obrazu (push tagów do GHCR)
+ - Przeprowadza testy jednostkowe, integracyjne i E2E (tryb headlessowy)
+ - Buduje obraz Docker (build frontendu dist)
+ - Serwuje aplikację przez Nginx (port 8080)
+ - Publikuje obraz do GitHub Container Registry (ghcr.io)
+ - Wykonuje skan bezpieczeństwa Trivy przy push’u tagów:
+   - Analizuje gotowy obraz Docker
+   - Wykrywa podatności CRITICAL/HIGH w systemie operacyjnym oraz bibliotekach w obrazie
+   - Uruchamia się tylko przy tagowaniu obrazu (push tagów do GHCR)
 
 Dzięki temu użytkownik końcowy może od razu użyć gotowego obrazu bez ręcznego buildowania.
 
@@ -354,8 +354,8 @@ E-Commerce-store/
 ├─ .dockerignore                 # Ignorowane pliki przy buildzie obrazu Docker
 ├─ .env                          # USER_ID=1000, GROUP_ID=1000
 ├─ .gitignore                    # Ignorowane pliki w repozytorium git
-├─ docker-compose.yml            # Konfiguracja Docker Compose (dev + prod)
-├─ Dockerfile                    # Definicja obrazu Docker (build + Nginx)
+├─ docker-compose.yml            # Konfiguracja Docker Compose (dev)
+├─ Dockerfile                    # Definicja obrazu Docker (testy + build + Nginx)
 ├─ nginx.conf                    # Konfiguracja Nginx
 ```
 

@@ -6,9 +6,9 @@ services:
       - ./app:/app
     working_dir: /app
     user: "${USER_ID}:${GROUP_ID}"
-    tty: true
+    tty: true   # Wirtualny terminal. Utrzymuje kontener aktywnym(bez niego kontener od razu może się zakońćzyć), ułatwia debug i kolorowy output.
+    stdin_open: true  # pozwala na otwarcie stdin, czyli interakcję z kontenerem, bez stdin nie można robić interaktywnych rzeczy typu podłączenie się do kontenera i pisanie w konsoli.
     ports:
         - "3000:3000"  # dev server
-        - "8080:8080"  # produkcja Nginx
     env_file:
       - .env
