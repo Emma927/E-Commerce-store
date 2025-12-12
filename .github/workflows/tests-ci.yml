@@ -22,7 +22,9 @@ jobs:
           node-version: ${{ matrix.node-version }}  # Wersja Node.js z matrix
           cache: 'npm'  # Włącza cache dla zależności npm
       - run: npm i             # Instalacja zależności npm
+        working-directory: ./app
       - run: npm test          # Uruchamia testy jednostkowe i integracyjne
+        working-directory: ./app
 
   source_scan:                  # Job do skanowania kodu źródłowego
       runs-on: ubuntu-latest    # Uruchamiany na Ubuntu
@@ -52,19 +54,27 @@ jobs:
           node-version: ${{ matrix.node-version }}  # Wersja Node.js
       - name: Install dependencies
         run: npm ci              # Instalacja zależności według lockfile
+        working-directory: ./app # testy do e2e są w katalogu app
 
       - name: Build application
         run: npm run build       # Buduje frontend (dist)
+        working-directory: ./app # testy do e2e są w katalogu app
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps  # Instaluje przeglądarki do E2E
+        working-directory: ./app # testy do e2e są w katalogu app
 
       - name: frontend
         run: npm run start:e2e &  # Uruchamia frontend w tle dla testów
+        working-directory: ./app # testy do e2e są w katalogu app
+
       - name: Wait for frontend
         run: npx wait-on http://localhost:3000  # Czeka aż frontend będzie dostępny
+        working-directory: ./app # testy do e2e są w katalogu app
+
       - name: Run Playwright tests
         run: npx playwright test  # Uruchamia testy end-to-end
+
       - uses: actions/upload-artifact@v4  # Upload raportu testów
         # Nawet jeśli testy się nie powiodą ( always() )
         if: always()            
