@@ -6,9 +6,25 @@ services:
       - ./app:/app
     working_dir: /app
     user: "${USER_ID}:${GROUP_ID}"
-    tty: true
+    tty: true   # Wirtualny terminal. Utrzymuje kontener aktywnym(bez niego kontener od razu może się zakońćzyć), ułatwia debug i kolorowy output.
+    stdin_open: true  # pozwala na otwarcie stdin, czyli interakcję z kontenerem, bez stdin nie można robić interaktywnych rzeczy typu podłączenie się do kontenera i pisanie w konsoli.
     ports:
         - "3000:3000"  # dev server
-        - "8080:8080"  # produkcja Nginx
     env_file:
       - .env
+    command: ["npm", "run", "dev"]  # uruchamia frontend w trybie deweloperskim
+
+  e2e-tests:
+    image: mcr.microsoft.com/playwright:v1.57.0-noble
+    container_name: e2e-tests
+    working_dir: /app
+    volumes:
+      - ./app:/app
+    depends_on:
+      - e-commerce-store
+    env_file:
+      - .env
+    user: "0:0"   # uruchamia kontener jako root tylko do testów e2e
+    command: ["sh", "-c", "npx wait-on $PLAYWRIGHT_BASE_URL && npx playwright test ./e2e || tail -f /dev/null"]
+
+    # Testy E2E (Playwright) zostały usunięte z Dockerfile – słusznie, bo E2E najlepiej uruchamiać po uruchomieniu kontenera frontendowego, np. w docker-compose jako osobny serwis. Dzięki temu nie blokują builda i nie wymagają uruchamiania frontendu w tle w czasie builda.

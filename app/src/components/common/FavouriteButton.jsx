@@ -6,13 +6,14 @@ import { addToFavourites, removeFromFavourites, selectFavouritesProducts } from 
 import { useMemo, memo } from 'react';
 
 const FavoriteIconButton = styled(IconButton, {
-  shouldForwardProp: (prop) => prop !== 'active', // aby 'active' nie trafiło do DOM
+  shouldForwardProp: (prop) => prop !== 'active', //shouldForwardProp filtruje propsy, które są używane tylko do stylowania,
+// aby nie trafiały do DOM i nie generowały ostrzeżeń Reacta.
 })(({ theme, active }) => ({
   position: 'absolute',
   margin: theme.spacing(0.5),
   top: 5,
   right: 5,
-  color: active ? theme.palette.primary.main : '#fff', // <-- kolor zmienia się jeśli active
+  color: active ? theme.palette.primary.main : '#fff',
   backdropFilter: 'blur(20px)',
   backgroundColor: 'rgba(108, 107, 107, 0.30)',
   '&:hover': {

@@ -1,8 +1,20 @@
-import { Box, Grid, Typography, Button, TextField, IconButton } from '@mui/material';
+import {
+  Box,
+  Grid,
+  Typography,
+  Button,
+  TextField,
+  IconButton,
+} from '@mui/material';
 import { CartItemCard } from '@/components/common/CartItemCard';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectUsername, selectIsAuthenticated } from '@/store/authSlice';
-import { removeFromCart, updateQuantity, selectCartProducts, selectCartTotalPrice } from '@/store/cartSlice';
+import {
+  removeFromCart,
+  updateQuantity,
+  selectCartProducts,
+  selectCartTotalPrice,
+} from '@/store/cartSlice';
 import { useNavigate } from 'react-router-dom';
 import RemoveIcon from '@mui/icons-material/Remove';
 import AddIcon from '@mui/icons-material/Add';
@@ -20,7 +32,7 @@ const Cart = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
 
   const handleCheckout = () => {
-    navigate('/checkout'); 
+    navigate('/checkout');
   };
 
   // useCallback: Główna rola: zapamiętanie funkcji między renderami, aby nie tworzyć ich od nowa i nie powodować niepotrzebnych renderów dzieci. useCallback nie jest tuaj potrzbeny , ponieważ funckja nie jest przekazywana do memoizowanego komponentu, więc nie ma potrzeby używania useCallback.
@@ -45,22 +57,55 @@ const Cart = () => {
         Your cart
       </Typography>
       <Grid container spacing={2}>
-        <Grid item xs={12} md={8} sx={{ mb: { xs: '185px', md: 0, height: 'fit-content' /* ważne dla sticky*/ } }}>
+        <Grid
+          item
+          xs={12}
+          md={8}
+          sx={{
+            mb: {
+              xs: '185px',
+              md: 0,
+              height: 'fit-content' /* ważne dla sticky*/,
+            },
+          }}
+        >
           {cartProducts.map((p, index) => (
             <Box
               key={`${p.id}-${index}`}
-              sx={{ border: (theme) => `1px solid ${theme.palette.primary.main}`, p: 2, borderRadius: 1, mb: 2 }}
+              sx={{
+                border: (theme) => `1px solid ${theme.palette.primary.main}`,
+                p: 2,
+                borderRadius: 1,
+                mb: 2,
+              }}
             >
               <CartItemCard {...p} />
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 1, gap: 1 }}>
-                <IconButton size="small" onClick={() => handleChangeQty(p.id, (p.quantity || 1) - 1)}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  mt: 1,
+                  gap: 1,
+                }}
+              >
+                <IconButton
+                  data-testid={`decrement-button-${p.id}`}
+                  size="small"
+                  onClick={() => handleChangeQty(p.id, (p.quantity || 1) - 1)}
+                >
                   <RemoveIcon />
                 </IconButton>
                 <TextField
                   type="number"
                   variant="outlined"
                   size="small"
-                  inputProps={{ min: 1, style: { textAlign: 'center' } }}
+                  data-testid={`quantity-input-${p.id}`} // ← to jest kluczowe
+                  inputProps={{
+                    'aria-label': `quantity-input-${p.id}`,
+                    min: 1,
+                    style: { textAlign: 'center' },
+                  }}
                   value={p.quantity || 1}
                   onChange={(e) => {
                     const qty = parseInt(e.target.value, 10) || 1;
@@ -69,16 +114,30 @@ const Cart = () => {
                   sx={{
                     width: 60,
                     // usuwa strzałki w Chrome/Safari/Edge
-                    '& input::-webkit-outer-spin-button': { WebkitAppearance: 'none', margin: 0 },
-                    '& input::-webkit-inner-spin-button': { WebkitAppearance: 'none', margin: 0 },
+                    '& input::-webkit-outer-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
+                    '& input::-webkit-inner-spin-button': {
+                      WebkitAppearance: 'none',
+                      margin: 0,
+                    },
                     // usuwa strzałki w Firefox
                     '& input[type=number]': { MozAppearance: 'textfield' },
                   }}
                 />
-                <IconButton size="small" onClick={() => handleChangeQty(p.id, (p.quantity || 1) + 1)}>
+                <IconButton
+                  data-testid={`increment-button-${p.id}`}
+                  size="small"
+                  onClick={() => handleChangeQty(p.id, (p.quantity || 1) + 1)}
+                >
                   <AddIcon />
                 </IconButton>
-                <Button variant="outlined" color="error" onClick={() => dispatch(removeFromCart(p.id))}>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={() => dispatch(removeFromCart(p.id))}
+                >
                   Remove
                 </Button>
               </Box>
@@ -113,7 +172,11 @@ const Cart = () => {
               </Typography>
 
               {/* Wyświetlenie username jeśli zalogowany */}
-              {isAuthenticated && <Typography sx={{ mb: 1, color: 'primary.main' }}>Welcome, {username}</Typography>}
+              {isAuthenticated && (
+                <Typography sx={{ mb: 1, color: 'primary.main' }}>
+                  Welcome, {username}
+                </Typography>
+              )}
               <Typography>Products price: ${totalPrice.toFixed(2)}</Typography>
               {cartProducts.length > 0 && (
                 <Button
@@ -129,7 +192,7 @@ const Cart = () => {
           </Box>
         </Grid>
       </Grid>
-      <ScrollToTopButton/>
+      <ScrollToTopButton />
     </Box>
   );
 };

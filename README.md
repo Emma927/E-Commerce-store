@@ -110,7 +110,7 @@ Sortowanie produktów po cenie — GET `/products?sort=desc`
 ```
 
 Ograniczenie API: maksymalnie 20 produktów.
-Produkty są prezentowane ze zdjęciami, opisami, cenami, ocenami i kategoriami. Aplikacja obsługuje filtrowanie, sortowanie i wyszukiwanie. Produkty ładowane są metodą lazy-loading. Maksymalna liczba produktów: 20 (ograniczenie API).
+Produkty są prezentowane ze zdjęciami, opisami, cenami, ocenami i kategoriami. Aplikacja obsługuje filtrowanie, sortowanie i wyszukiwanie. Produkty ładowane są metodą lazy-loading.
 
 ### 🛒 4. Koszyk
 
@@ -209,10 +209,49 @@ npm run coverage # uruchamia testy z raportem pokrycia
 
 Do testów E2E możesz wykorzystać wersję z UI (Trace Viewer) lub CI:
 
+🔍 Lokalnie (z UI Trace Viewer)
+
+Uruchamia graficzny interfejs Playwrighta, przydatny do debugowania:
+
 ```bash
-npm run e2e         # wersja z interfejsem graficznym (Trace Viewer)
-npm run test:e2e-ci # uruchamia testy E2E w trybie CI (bez UI)
+npm run e2e # wersja z interfejsem graficznym (Trace Viewer) - lokalne bez konener
 ```
+Działa tylko lokalnie — poza Dockerem.
+
+🐳 W kontenerze Docker (zalecane)
+ 
+1. Uruchom środowisko developerskie:
+
+```bash
+./startdev.sh
+```
+2. Wejdź do kontenera testowego jako użytkownik root:
+
+```bash
+docker compose exec --user root e2e-tests sh # Wejście do kontenera jako user-root
+```
+3. Uruchom testy E2E w trybie CI (bez UI):
+
+```bash
+npm run test:e2e-ci # uruchamia testy E2E w trybie CI (bez UI) - w kontenerze jako root
+```
+>⚠️ Uwaga dotycząca uprawnień w kontenerze:
+Dlaczego testy E2E muszą być uruchamiane jako użytkownik root?
+
+Playwright w kontenerze korzysta z przeglądarek (Chromium, Firefox, WebKit), które:
+- tworzą cache przeglądarek i dane runtime w katalogach:
+  - /root/.cache/
+  - /root/.config/
+  - /tmp/playwright*
+- zapisują trace’y(nagrania przebiegu całego testu e2e), screenshoty i raporty w katalogu projektu:
+  - /app/test-results/
+- Użytkownik node (UID 1000) — standardowy user w kontenerach Node — nie ma pełnych praw zapisu do tych lokalizacji, co powodowałoby błędy typu:
+- EACCES: permission denied
+
+Dlatego:
+➡️ Testy E2E są uruchamiane tylko w izolowanym kontenerze i tylko jako root.
+➡️ Jest to normalne i zgodne z zaleceniami Playwrighta dla środowisk Dockerowych.
+➡️ Nie ma to żadnego wpływu na bezpieczeństwo środowiska produkcyjnego — dotyczy wyłącznie środowiska testowego.
 
 3. Uruchomienie frontendu do testów E2E
 
@@ -275,8 +314,9 @@ Start środowiska developerskiego w katalogu głównym projektu:
 Skrypt wykona:
 
 ```bash
-docker compose up -d
-docker compose exec -it e-commerce-store bash
+docker compose up -d # Uruchomienie kontenerów
+docker compose exec -it e-commerce-store bash # Wejście do kontenera jako standradowy użytkownik node
+docker compose run e2e-tests  # Uruchomienie osobnego kontenera do testów E2E (Playwright)
 ```
 
 Teraz jesteś w terminalu kontenera i możesz uruchomić:
@@ -310,14 +350,14 @@ To zatrzymuje i usuwa kontener, pozostawiając kod lokalnie.
 3️⃣ Obraz Docker do CI/CD
 
 - W repozytorium jest skonfigurowany workflow GitHub Actions, który:
-- Przeprowadza testy jednostkowe, integracyjne i E2E (tryb headlessowy)
-- Buduje obraz Docker (build frontendu dist)
-- Serwowanie przez Nginx (port 8080)
-- Wysyła go do GitHub Container Registry (ghcr.io)
-- Uruchamia skan bezpieczeństwa (Trivy) przy tagowaniu (CRITICAL/HIGH):
-  - Skanuje gotowy obraz Docker
-  - Wykrywa podatności CRITICAL/HIGH w systemie operacyjnym oraz bibliotekach w obrazie
-  - Wykonuje się przy tagowaniu obrazu (push tagów do GHCR)
+ - Przeprowadza testy jednostkowe, integracyjne i E2E (tryb headlessowy)
+ - Buduje obraz Docker (build frontendu dist)
+ - Serwuje aplikację przez Nginx (port 8080)
+ - Publikuje obraz do GitHub Container Registry (ghcr.io)
+ - Wykonuje skan bezpieczeństwa Trivy przy push’u tagów:
+   - Analizuje gotowy obraz Docker
+   - Wykrywa podatności CRITICAL/HIGH w systemie operacyjnym oraz bibliotekach w obrazie
+   - Uruchamia się tylko przy tagowaniu obrazu (push tagów do GHCR)
 
 Dzięki temu użytkownik końcowy może od razu użyć gotowego obrazu bez ręcznego buildowania.
 
@@ -354,8 +394,8 @@ E-Commerce-store/
 ├─ .dockerignore                 # Ignorowane pliki przy buildzie obrazu Docker
 ├─ .env                          # USER_ID=1000, GROUP_ID=1000
 ├─ .gitignore                    # Ignorowane pliki w repozytorium git
-├─ docker-compose.yml            # Konfiguracja Docker Compose (dev + prod)
-├─ Dockerfile                    # Definicja obrazu Docker (build + Nginx)
+├─ docker-compose.yml            # Konfiguracja Docker Compose (dev)
+├─ Dockerfile                    # Definicja obrazu Docker (testy + build + Nginx)
 ├─ nginx.conf                    # Konfiguracja Nginx
 ```
 

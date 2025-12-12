@@ -16,13 +16,28 @@ COPY ./app .
 # Jeśli testy zakończą się błędem, budowanie obrazu zatrzyma się.
 RUN npm test
 
-# Instalacja zależności systemowych i przeglądarki Chromium, Firefox, Webkit dla Playwright
-# Musi być wykonane przez roota.
-RUN npx playwright install --with-deps
+# Instalacja zależności systemowych wymaganych przez Playwright
+# RUN apt-get update && apt-get install -y \
+#     libnss3 libnspr4 libx11-xcb1 libxrandr2 libxcomposite1 libxcursor1 \
+#     libxdamage1 libxfixes3 libxi6 libgtk-3-0 libgdk-3-0 libatk1.0-0 \
+#     libasound2 libdbus-1-3 libgbm1 libxss1 libxkbcommon0 libcurl4 \
+#     libatspi2.0-0 libcups2 libwayland-client0 libwayland-server0 \
+#     libepoxy0 libwoff2-1 libvpx7 libopus0 gstreamer1.0-plugins-base \
+#     gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-libav \
+#     -y
 
-# Uruchomienie testów E2E (Playwright, używając nowego skryptu 'test:e2e-ci')
-# Testy end-to-end, tryb headlessowy; przerwie build przy błędzie
-RUN npm run test:e2e-ci
+# # Instalacja zależności systemowych i przeglądarki Chromium, Firefox, Webkit dla Playwright
+# # Musi być wykonane przez roota.
+# RUN npx playwright install --with-deps
+# 
+# # Ustaw zmienną środowiskową
+# ENV PLAYWRIGHT_BASE_URL=http://e-commerce-store:3000
+# 
+# # Uruchomienie testów E2E (Playwright, używając nowego skryptu 'test:e2e-ci')
+# # Testy end-to-end, tryb headlessowy; przerwie build przy błędzie
+# RUN npm run start:e2e & \
+#     npx wait-on $PLAYWRIGHT_BASE_URL && \
+#     npx playwright test ./e2e
 
 # --- STAGE 2: BUDOWANIE APLIKACJI (Kompilacja frontendu) ---
 # Używamy etapu development/test_runner jako bazy, bo ma już zainstalowane wszystkie zależności (vite, babel itp.)
@@ -86,3 +101,25 @@ CMD ["nginx", "-g", "daemon off;"]
 # 5. chown -R nginx:nginx /var/run/nginx.pid
 # - Nadaje uprawnienia użytkownikowi nginx do pliku PID.
 # - Cel: Nginx jako nie-root może zapisać swój PID i poprawnie działać.
+
+# 1️⃣ Build obrazu
+# 
+# Dockerfile ma na celu zbudowanie finalnego obrazu (w tym wypadku frontendu w /dist i przygotowanie Nginx).
+# 
+# Podczas budowania obrazu:
+# 
+# Nie ma jeszcze działającego serwera frontendu (bo kontener jeszcze się nie uruchomił).
+# 
+# Próba uruchomienia npm run start:e2e & w RUN zawiesza build, bo serwer działa ciągle i RUN nigdy się nie kończy.
+# 
+# Dlatego testy E2E w RUN nie działają i blokują build.
+# 
+# 2️⃣ Testy E2E
+# 
+# Playwright musi mieć działający serwer – czyli kontener z frontem musi być uruchomiony.
+# 
+# Dlatego testy E2E:
+# 
+# uruchamiasz dopiero w runtime, np. przez docker-compose w osobnym kontenerze.
+# 
+# Możesz je wykonywać lokalnie przed deployem, lub w CI/CD pipeline.

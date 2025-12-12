@@ -15,14 +15,26 @@ jobs:
         node-version: [24.x]    # Testy uruchamiane dla Node.js 24.x
 
     steps:                      # Kroki w jobie "test"
-      - uses: actions/checkout@v4  # Pobiera kod repozytorium
+      - uses: actions/checkout@v4   # Pobiera kod źródłowy repozytorium do środowiska runnera
       - name: Use Node.js ${{ matrix.node-version }}  # Ustawienie Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4   # Ustawia określoną wersję Node.js do użycia w workflow
         with:
           node-version: ${{ matrix.node-version }}  # Wersja Node.js z matrix
-          cache: 'npm'  # Włącza cache dla zależności npm
+          #cache: 'npm'  # Włącza cache dla zależności npm - tutaj nie będzie, ponieważ on działa tylko dla package-lock.json w katalogu root repo, a mój lockfile jest w app/. Ta opcja działa tylko, jeśli package-lock.json jest w root repozytorium.
+
+      #Określa katalog, który ma być zapisany w cache.
+       # Cache node_modules dla folderu app
+      - uses: actions/cache@v3 # Używa akcji cache do przechowywania zależności między uruchomieniami workflow
+        with:
+          path: ./app/node_modules  # Ścieżka do katalogu, który ma być zapisany w cache
+          key: ${{ runner.os }}-node-${{ hashFiles('app/package-lock.json') }} # Unikalny klucz cache oparty na systemie operacyjnym i hashu pliku package-lock.json
+          restore-keys: | # Klucz używany do przywrócenia cache, jeśli dokładny klucz nie istnieje (częściowe dopasowanie)
+            ${{ runner.os }}-node- 
+
       - run: npm i             # Instalacja zależności npm
+        working-directory: ./app
       - run: npm test          # Uruchamia testy jednostkowe i integracyjne
+        working-directory: ./app
 
   source_scan:                  # Job do skanowania kodu źródłowego
       runs-on: ubuntu-latest    # Uruchamiany na Ubuntu
@@ -52,23 +64,32 @@ jobs:
           node-version: ${{ matrix.node-version }}  # Wersja Node.js
       - name: Install dependencies
         run: npm ci              # Instalacja zależności według lockfile
+        working-directory: ./app # testy do e2e są w katalogu app
 
       - name: Build application
         run: npm run build       # Buduje frontend (dist)
+        working-directory: ./app # testy do e2e są w katalogu app
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps  # Instaluje przeglądarki do E2E
+        working-directory: ./app # testy do e2e są w katalogu app
 
       - name: frontend
         run: npm run start:e2e &  # Uruchamia frontend w tle dla testów
+        working-directory: ./app # testy do e2e są w katalogu app
+
       - name: Wait for frontend
         run: npx wait-on http://localhost:3000  # Czeka aż frontend będzie dostępny
+        working-directory: ./app # testy do e2e są w katalogu app
+
       - name: Run Playwright tests
         run: npx playwright test  # Uruchamia testy end-to-end
+        working-directory: ./app 
+
       - uses: actions/upload-artifact@v4  # Upload raportu testów
         # Nawet jeśli testy się nie powiodą ( always() )
         if: always()            
         with:
           name: playwright-report-${{ matrix.node-version }}  # Nazwa artefaktu
-          path: playwright-report/  # Folder z raportami
+          path: app/playwright-report/  # Folder z raportami
           retention-days: 30        # Przechowuje artefakt przez 30 dni

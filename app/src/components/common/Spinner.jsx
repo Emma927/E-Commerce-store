@@ -3,6 +3,7 @@ import { Box, CircularProgress } from '@mui/material';
 export const Spinner = () => {
   return (
     <Box
+      data-testid="spinner" // identyfikator do testów
       sx={{
         position: 'fixed',
         top: 0,
