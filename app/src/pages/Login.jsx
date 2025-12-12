@@ -85,7 +85,7 @@ Wszystkie etapy przepływu danych i kontroli, od interakcji użytkownika, przez 
         onSettled: () => {
           () => console.log('Mutatin end');
         },
-      }
+      },
     );
   };
 
@@ -110,34 +110,58 @@ Wszystkie etapy przepływu danych i kontroli, od interakcji użytkownika, przez 
           {/* noValidate  - Wyłącza domyślną walidację HTML5 z przeglądarki i nie będzie pokazywać własnych komunikatów błędów (te małe dymki z przeglądarki). Formularz będzie korzystał tylko z walidacji React Hook Form. Warto przy pracy z własnym systemem błędów i komunikatami (helperText). */}
           {/* handleSubmit sam przechwytuje submit i blokuje domyślne odświeżenie strony, które normalnie wywołuje HTML-owy <form>.
 Jeśli dodamy onSubmit={(e) => { e.preventDefault(); ... }}, to nic złego się nie stanie, ale jest to zbędne, bo RHF już to robi za nas. */}
-          <Box component="form" noValidate sx={{ mt: 1 }} onSubmit={methods.handleSubmit(onSubmit)}>
+          <Box
+            component="form"
+            noValidate
+            sx={{ mt: 1 }}
+            onSubmit={methods.handleSubmit(onSubmit)}
+          >
             {/* autoFocus to atrybut HTML/prop dla komponentów input, w tym dla MUI <TextField>, który automatycznie ustawia fokus na tym polu po załadowaniu strony lub renderze komponentu. */}
-            <TextFieldComponent label="Username" name="username" type="text" autoFocus />
-            <TextFieldComponent label="Password" type="password" name="password" />
+            <TextFieldComponent
+              label="Username"
+              name="username"
+              type="text"
+              autoFocus
+            />
+            <TextFieldComponent
+              label="Password"
+              type="password"
+              name="password"
+            />
             <Controller
               name="remember"
               control={methods.control}
               render={({ field }) => (
                 <FormControlLabel
-                  control={<Checkbox {...field} color="primary" checked={field.value} />}
+                  control={
+                    <Checkbox
+                      {...field}
+                      color="primary"
+                      checked={field.value}
+                    />
+                  }
                   label="Remember me"
                 />
               )}
             />
-            {methods.formState.errors.remember && <p>{methods.formState.errors.remember.message}</p>}
-            <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }} disabled={isPending}>
-              {isPending ? (
-                <>
-                  <Spinner />
-                  Logging in...
-                </>
-              ) : (
-                'Login'
-              )}
+            {methods.formState.errors.remember && (
+              <p>{methods.formState.errors.remember.message}</p>
+            )}
+
+            {isPending && <Spinner />}   {/* <=== SPINNER JEST TU */}
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+              disabled={isPending}
+              data-testid={isPending ? 'login-button-loading' : 'login-button'}
+            >
+                {isPending ? 'Logging in...' : 'Login'}
             </Button>
             {/* Komunikat błędu */}
             {isError && (
-              <Typography color="error" align="center">
+              <Typography data-testid="login-error" color="error" align="center">
                 {error?.message || 'Error occured'}
               </Typography>
             )}

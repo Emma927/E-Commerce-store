@@ -14,7 +14,7 @@
     "test": "vitest run --",
     "coverage": "vitest run -- --coverage",
     "e2e": "npx playwright test --ui",
-    "test:e2e-ci": "npx playwright test ./e2e",
+    "test:e2e-ci": "npx wait-on $PLAYWRIGHT_BASE_URL && npx playwright test ./e2e",
     "testing-tool": "set TESTING_TOOL=true& playwright test --ui",
     "start:e2e": "serve -s dist -l 3000"
   },
@@ -51,6 +51,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
     "autoprefixer": "^10.4.22",
+    "cross-env": "^10.1.0",
     "cssnano": "^7.1.2",
     "eslint": "^9.39.1",
     "eslint-plugin-import": "^2.32.0",

@@ -16,6 +16,16 @@ COPY ./app .
 # Jeśli testy zakończą się błędem, budowanie obrazu zatrzyma się.
 RUN npm test
 
+# Instalacja zależności systemowych wymaganych przez Playwright
+# RUN apt-get update && apt-get install -y \
+#     libnss3 libnspr4 libx11-xcb1 libxrandr2 libxcomposite1 libxcursor1 \
+#     libxdamage1 libxfixes3 libxi6 libgtk-3-0 libgdk-3-0 libatk1.0-0 \
+#     libasound2 libdbus-1-3 libgbm1 libxss1 libxkbcommon0 libcurl4 \
+#     libatspi2.0-0 libcups2 libwayland-client0 libwayland-server0 \
+#     libepoxy0 libwoff2-1 libvpx7 libopus0 gstreamer1.0-plugins-base \
+#     gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-libav \
+#     -y
+
 # Instalacja zależności systemowych i przeglądarki Chromium, Firefox, Webkit dla Playwright
 # Musi być wykonane przez roota.
 RUN npx playwright install --with-deps

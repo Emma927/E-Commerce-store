@@ -12,3 +12,17 @@ services:
         - "3000:3000"  # dev server
     env_file:
       - .env
+    command: ["npm", "run", "dev"]  # uruchamia frontend w trybie deweloperskim
+
+  e2e-tests:
+    image: mcr.microsoft.com/playwright:v1.57.0-noble
+    container_name: e2e-tests
+    working_dir: /app
+    volumes:
+      - ./app:/app
+    depends_on:
+      - e-commerce-store
+    env_file:
+      - .env
+    user: "0:0"   # uruchamia kontener jako root tylko do testów e2e
+    command: ["sh", "-c", "npx wait-on $PLAYWRIGHT_BASE_URL && npx playwright test ./e2e || tail -f /dev/null"]

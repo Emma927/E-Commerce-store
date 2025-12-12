@@ -20,8 +20,9 @@ jobs:
         uses: actions/setup-node@v4   # Ustawia określoną wersję Node.js do użycia w workflow
         with:
           node-version: ${{ matrix.node-version }}  # Wersja Node.js z matrix
-          #cache: 'npm'  # Włącza cache dla zależności npm - tutaj nie będzie, ponieważ on dizała tylko dla package-lock.json w katalogu root repo, a mój lockfile jest w app/
+          #cache: 'npm'  # Włącza cache dla zależności npm - tutaj nie będzie, ponieważ on działa tylko dla package-lock.json w katalogu root repo, a mój lockfile jest w app/. Ta opcja działa tylko, jeśli package-lock.json jest w root repozytorium.
 
+      #Określa katalog, który ma być zapisany w cache.
        # Cache node_modules dla folderu app
       - uses: actions/cache@v3 # Używa akcji cache do przechowywania zależności między uruchomieniami workflow
         with:

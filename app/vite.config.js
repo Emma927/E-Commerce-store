@@ -8,6 +8,10 @@ export default defineConfig({
     host: true,
     port: 3000,
     open: false,
+    allowedHosts: [
+      'localhost', // dla lokalnego dev
+      'e-commerce-store', // dla kontenera e2e-tests
+    ],
   },
   test: {
     coverage: {

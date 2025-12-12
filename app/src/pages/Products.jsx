@@ -222,8 +222,9 @@ infinite scroll zaczyna dopiero przy ładowaniu następnych danych
           }}
         >
           <FormControl>
-            <InputLabel>Category</InputLabel>
+            <InputLabel id="category-label">Category</InputLabel>
             <Select
+              labelId="category-label"
               value={selectedCategory}
               onChange={(e) => handleCategoryChange(e.target.value)}
               label="Category"

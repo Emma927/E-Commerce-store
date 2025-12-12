@@ -209,10 +209,50 @@ npm run coverage # uruchamia testy z raportem pokrycia
 
 Do testów E2E możesz wykorzystać wersję z UI (Trace Viewer) lub CI:
 
+🔍 Lokalnie (z UI Trace Viewer)
+
+Uruchamia graficzny interfejs Playwrighta, przydatny do debugowania:
+
 ```bash
-npm run e2e         # wersja z interfejsem graficznym (Trace Viewer)
-npm run test:e2e-ci # uruchamia testy E2E w trybie CI (bez UI)
+npm run e2e # wersja z interfejsem graficznym (Trace Viewer) - lokalne bez konener
 ```
+Działa tylko lokalnie — poza Dockerem.
+
+🐳 W kontenerze Docker (zalecane)
+ 
+1. Uruchom środowisko developerskie:
+
+```bash
+./startdev.sh
+```
+2. Wejdź do kontenera testowego jako użytkownik root:
+
+```bash
+docker compose exec --user root e2e-tests sh # Wejście do kontenera jako user-root
+```
+3. Uruchom testy E2E w trybie CI (bez UI):
+
+```bash
+npm run test:e2e-ci # uruchamia testy E2E w trybie CI (bez UI) - w kontenerze jako root
+```
+>⚠️ Uwaga dotycząca uprawnień w kontenerze:
+Dlaczego testy E2E muszą być uruchamiane jako użytkownik root?
+
+Playwright w kontenerze korzysta z przeglądarek (Chromium, Firefox, WebKit), które:
+
+- tworzą cache przeglądarek i dane runtime w katalogach:
+  - /root/.cache/
+  - /root/.config/
+  - /tmp/playwright*
+- zapisują trace’y(nagrania przebiegu całego testu e2e), screenshoty i raporty w katalogu projektu:
+  - /app/test-results/
+- Użytkownik node (UID 1000) — standardowy user w kontenerach Node — nie ma pełnych praw zapisu do tych lokalizacji, co powodowałoby błędy typu:
+- EACCES: permission denied
+
+Dlatego:
+➡️ Testy E2E są uruchamiane tylko w izolowanym kontenerze i tylko jako root.
+➡️ Jest to normalne i zgodne z zaleceniami Playwrighta dla środowisk Dockerowych.
+➡️ Nie ma to żadnego wpływu na bezpieczeństwo środowiska produkcyjnego — dotyczy wyłącznie środowiska testowego.
 
 3. Uruchomienie frontendu do testów E2E
 
@@ -275,8 +315,9 @@ Start środowiska developerskiego w katalogu głównym projektu:
 Skrypt wykona:
 
 ```bash
-docker compose up -d
-docker compose exec -it e-commerce-store bash
+docker compose up -d # Uruchomienie kontenerów
+docker compose exec -it e-commerce-store bash # Wejście do kontenera jako standradowy użytkownik node
+docker compose run e2e-tests  # Uruchomienie osobnego kontenera do testów E2E (Playwright)
 ```
 
 Teraz jesteś w terminalu kontenera i możesz uruchomić:

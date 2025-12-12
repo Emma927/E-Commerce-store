@@ -52,7 +52,7 @@ const Home = () => {
 
   return (
     <Box>
-      <Hero data-testid="hero" />
+      <Hero data-testid="hero" /> {/* identyfikator do testów */}
       <FeatureBar />
       <Box
         sx={{
