@@ -30,9 +30,13 @@ RUN npm test
 # Musi być wykonane przez roota.
 RUN npx playwright install --with-deps
 
+# Ustaw zmienną środowiskową
+ENV PLAYWRIGHT_BASE_URL=http://e-commerce-store:3000
+
 # Uruchomienie testów E2E (Playwright, używając nowego skryptu 'test:e2e-ci')
 # Testy end-to-end, tryb headlessowy; przerwie build przy błędzie
-RUN npm run test:e2e-ci
+RUN npm run start:e2e & \
+    npm run test:e2e-ci
 
 # --- STAGE 2: BUDOWANIE APLIKACJI (Kompilacja frontendu) ---
 # Używamy etapu development/test_runner jako bazy, bo ma już zainstalowane wszystkie zależności (vite, babel itp.)
