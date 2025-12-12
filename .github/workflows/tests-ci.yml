@@ -15,12 +15,21 @@ jobs:
         node-version: [24.x]    # Testy uruchamiane dla Node.js 24.x
 
     steps:                      # Kroki w jobie "test"
-      - uses: actions/checkout@v4  # Pobiera kod repozytorium
+      - uses: actions/checkout@v4   # Pobiera kod źródłowy repozytorium do środowiska runnera
       - name: Use Node.js ${{ matrix.node-version }}  # Ustawienie Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4   # Ustawia określoną wersję Node.js do użycia w workflow
         with:
           node-version: ${{ matrix.node-version }}  # Wersja Node.js z matrix
-          cache: 'npm'  # Włącza cache dla zależności npm
+          #cache: 'npm'  # Włącza cache dla zależności npm - tutaj nie będzie, ponieważ on dizała tylko dla package-lock.json w katalogu root repo, a mój lockfile jest w app/
+
+       # Cache node_modules dla folderu app
+      - uses: actions/cache@v3 # Używa akcji cache do przechowywania zależności między uruchomieniami workflow
+        with:
+          path: ./app/node_modules  # Ścieżka do katalogu, który ma być zapisany w cache
+          key: ${{ runner.os }}-node-${{ hashFiles('app/package-lock.json') }} # Unikalny klucz cache oparty na systemie operacyjnym i hashu pliku package-lock.json
+          restore-keys: | # Klucz używany do przywrócenia cache, jeśli dokładny klucz nie istnieje (częściowe dopasowanie)
+            ${{ runner.os }}-node- 
+
       - run: npm i             # Instalacja zależności npm
         working-directory: ./app
       - run: npm test          # Uruchamia testy jednostkowe i integracyjne
