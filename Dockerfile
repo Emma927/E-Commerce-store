@@ -36,7 +36,8 @@ ENV PLAYWRIGHT_BASE_URL=http://e-commerce-store:3000
 # Uruchomienie testów E2E (Playwright, używając nowego skryptu 'test:e2e-ci')
 # Testy end-to-end, tryb headlessowy; przerwie build przy błędzie
 RUN npm run start:e2e & \
-    npm run test:e2e-ci
+    npx wait-on $PLAYWRIGHT_BASE_URL && \
+    npx playwright test ./e2e
 
 # --- STAGE 2: BUDOWANIE APLIKACJI (Kompilacja frontendu) ---
 # Używamy etapu development/test_runner jako bazy, bo ma już zainstalowane wszystkie zależności (vite, babel itp.)
