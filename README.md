@@ -239,7 +239,6 @@ npm run test:e2e-ci # uruchamia testy E2E w trybie CI (bez UI) - w kontenerze ja
 Dlaczego testy E2E muszą być uruchamiane jako użytkownik root?
 
 Playwright w kontenerze korzysta z przeglądarek (Chromium, Firefox, WebKit), które:
-
 - tworzą cache przeglądarek i dane runtime w katalogach:
   - /root/.cache/
   - /root/.config/
