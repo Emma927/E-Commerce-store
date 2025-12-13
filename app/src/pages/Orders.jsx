@@ -7,6 +7,10 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { ScrollToTopButton } from '@/components/common/ScrollToTopButton';
 import { OrderItem } from '@/components/common/OrderItem';
 
+// React.memo → optymalizacja komponentu dziecka, renderuje się tylko jeśli propsy się zmieniły
+// useCallback → zapewnia, że funkcje przekazywane w propsach nie zmieniają referencji między renderami
+// debouncedValue zmieni się dopiero 300 ms po ostatnim wpisaniu znaku
+
 /**
  * Optymalizacja Orders:
  *

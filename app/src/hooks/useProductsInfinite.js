@@ -52,9 +52,11 @@ export const useProductsInfinite = ({ category, pageSize = 6, sort, search = '',
     // React Query używa getNextPageParam, żeby wiedzieć, od którego indeksu pobrać kolejną stronę:
     getNextPageParam: (lastPage, allPages) => {
       if (!lastPage || lastPage.length < pageSize) return undefined;
-      return allPages.flat().length;
+      return allPages.flat().length; // allPages.flat().length → daje liczbę produktów pobranych do tej pory, czyli indeks startowy dla następnej strony.
     },
-    staleTime: 1000 * 60 * 5,
-    cacheTime: 1000 * 60 * 10,
-    retry: 1,
+    staleTime: 1000 * 60 * 5, // 5 minut (ms) → przez ten czas React Query uważa dane za "świeże" i **nie będzie ponownie fetchować** przy remount lub ponownym użyciu queryKey
+    cacheTime: 1000 * 60 * 10, // 10 minut (ms) → ile czasu dane pozostają w pamięci cache **po tym jak query przestanie być używane**. 
+// Po tym czasie React Query usunie je z cache.
+    retry: 1, // Liczba prób ponowienia zapytania w przypadku błędu fetcha. 
+// Tutaj: jeśli fetch się nie powiedzie, React Query spróbuje jeszcze 1 raz przed ustawieniem isError = true
   });

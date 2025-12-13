@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 
 /**
- useDebounde służy do tego, aby nie wykonywać akcji przy każdej zmianie wpisywanych liter, tylko wykonać ją dopiero po tym, jak użytkownik przestanie pisać. Przeznaczone jest na wyszukiwanie 300ms
+ * useDebounce służy do tego, aby nie wykonywać akcji przy każdej zmianie wpisywanych liter,
+ * tylko wykonać ją dopiero po tym, jak użytkownik przestanie pisać.
+ * Domyślnie opóźnienie wynosi 300 ms, co jest typowe np. dla wyszukiwania.
+ * Jeśli użytkownik przestanie pisać na co najmniej 300 ms, to debouncedValue zostanie zaktualizowane.
  */
 export const useDebounce = (value, delay = 300) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
