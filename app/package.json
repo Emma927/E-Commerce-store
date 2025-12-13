@@ -10,7 +10,7 @@
     "prettier": "prettier . --check",
     "format": "prettier . --write",
     "preview": "vite preview",
-    "prepare": "husky install ../.husky",
+    "prepare": "husky",
     "test": "vitest run --",
     "coverage": "vitest run -- --coverage",
     "e2e": "npx playwright test --ui",
