@@ -1,5 +1,6 @@
 import { Spinner } from '@/components/common/Spinner';
-import { Box, Typography, Button, useTheme, Rating } from '@mui/material';
+import { Box, Typography, Button, Rating } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { FavouriteButton } from '@/components/common/FavouriteButton';
 import { useParams } from 'react-router-dom';
 import { useProduct } from '@/hooks/useProduct';

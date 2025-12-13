@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { Box, Grid, Typography, MenuItem, Select, FormControl, InputLabel, useTheme, Button } from '@mui/material';
+import { Box, Grid, Typography, MenuItem, Select, FormControl, InputLabel, Button } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { useIntersection } from '@mantine/hooks';
 import { useProductsInfinite } from '@/hooks/useProductsInfinite';
 import { ProductCard } from '@/components/common/ProductCard';

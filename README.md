@@ -3,7 +3,7 @@
 Aplikacja e-commerce została stworzona w ramach kursu JavaScript Developer, moduł specjalistyczny. Projekt ma na celu odwzorowanie funkcjonalności popularnych sklepów internetowych, pozwalając użytkownikom na intuicyjne przeglądanie, wybieranie i zakup produktów.
 
 **Dostępna online:**  
-[https://e-commerce-store.netlify.app](https://e-commerce-store.netlify.app)
+[https://e-commerce-store-project-app.netlify.app/](https://e-commerce-store-project-app.netlify.app/)
 
 ---
 

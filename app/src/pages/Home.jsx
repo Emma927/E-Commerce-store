@@ -1,6 +1,7 @@
 import Hero from '@/components/sections/Hero';
 import { ProductCard } from '@/components/common/ProductCard';
-import { Box, Grid, Typography, useTheme } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { Spinner } from '@/components/common/Spinner';
 import { useCategories } from '@/hooks/useCategories';
 import { fetchProducts } from '@/hooks/useProducts';
