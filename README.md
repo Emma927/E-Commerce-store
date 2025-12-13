@@ -225,34 +225,29 @@ Działa tylko lokalnie — poza Dockerem.
 1. Uruchom środowisko developerskie:
 
 ```bash
-./startdev.sh
+./startdev-e2e.sh
 ```
+- Skrypt uruchamia kontener e2e-tests.
+  - Dzięki depends_on, jeśli kontener frontendowy (e-commerce-store) nie działa, zostanie również uruchomiony.
+  - Kontener frontendowy pozostaje aktywny dzięki tty: true, więc nie zakończy się samoczynnie.
+  - Kontener E2E jest uruchamiany jako root (user: "0:0"), co jest wymagane dla Playwrighta (pełne prawa zapisu do cache i trace’ów).
 
-2. Wejdź do kontenera testowego jako użytkownik root:
+Skrypt wykona:
 
 ```bash
-docker compose exec --user root e2e-tests sh # Wejście do kontenera jako user-root
+docker compose up -d e2e-tests # Uruchomienie kontenera dla testów E2E
+docker compose exec -it e2e-tests bash # Wejście do kontenera jako standradowy użytkownik node
 ```
 
-3. Uruchom testy E2E w trybie CI (bez UI):
+Teraz jesteś w terminalu kontenera i możesz uruchomić:
 
 ```bash
 npm run test:e2e-ci # uruchamia testy E2E w trybie CI (bez UI) - w kontenerze jako root
 ```
 
 > ⚠️ Uwaga dotycząca uprawnień w kontenerze:
-> Dlaczego testy E2E muszą być uruchamiane jako użytkownik root?
-
-Playwright w kontenerze korzysta z przeglądarek (Chromium, Firefox, WebKit), które:
-
-- tworzą cache przeglądarek i dane runtime w katalogach:
-  - /root/.cache/
-  - /root/.config/
-  - /tmp/playwright\*
-- zapisują trace’y(nagrania przebiegu całego testu e2e), screenshoty i raporty w katalogu projektu:
-  - /app/test-results/
-- Użytkownik node (UID 1000) — standardowy user w kontenerach Node — nie ma pełnych praw zapisu do tych lokalizacji, co powodowałoby błędy typu:
-- EACCES: permission denied
+> Dlaczego testy E2E muszą być uruchamiane jako root?
+Playwright w kontenerze tworzy cache i zapisuje trace’y w katalogach /root/.cache/, /root/.config/, /tmp/playwright* oraz /app/test-results/. Standardowy użytkownik node (UID 1000) nie ma pełnych praw zapisu, co powodowałoby błędy typu EACCES: permission denied.
 
 Dlatego:
 ➡️ Testy E2E są uruchamiane tylko w izolowanym kontenerze i tylko jako root.
@@ -328,9 +323,8 @@ Start środowiska developerskiego w katalogu głównym projektu:
 Skrypt wykona:
 
 ```bash
-docker compose up -d # Uruchomienie kontenerów
+docker compose up -d e-commerce-store # Uruchomienie kontenera frontendowego
 docker compose exec -it e-commerce-store bash # Wejście do kontenera jako standradowy użytkownik node
-docker compose run e2e-tests  # Uruchomienie osobnego kontenera do testów E2E (Playwright)
 ```
 
 Teraz jesteś w terminalu kontenera i możesz uruchomić:
