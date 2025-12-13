@@ -1,7 +1,1 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
-cd app || exit 1
-npm run prettier
-npm run lint
-npm run test
+npm run prettier && npm run lint && npm run test
