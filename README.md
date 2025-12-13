@@ -187,6 +187,7 @@ Projekt korzysta również z automatycznych testów i skanów bezpieczeństwa, a
 1️⃣ GitHub Actions Workflow – Testy i Skan kodu źródłowego
 
 - Testy jednostkowe, integracyjne i E2E
+
   - Uruchamiane przy pushu do branchy: main, develop, feature-fe
   - Testy uruchamiane są na Node.js 24.x
   - E2E testy Playwright wykonują się po zbudowaniu frontendu i uruchomieniu serwera developerskiego
@@ -216,33 +217,38 @@ Uruchamia graficzny interfejs Playwrighta, przydatny do debugowania:
 ```bash
 npm run e2e # wersja z interfejsem graficznym (Trace Viewer) - lokalne bez konener
 ```
+
 Działa tylko lokalnie — poza Dockerem.
 
 🐳 W kontenerze Docker (zalecane)
- 
+
 1. Uruchom środowisko developerskie:
 
 ```bash
 ./startdev.sh
 ```
+
 2. Wejdź do kontenera testowego jako użytkownik root:
 
 ```bash
 docker compose exec --user root e2e-tests sh # Wejście do kontenera jako user-root
 ```
+
 3. Uruchom testy E2E w trybie CI (bez UI):
 
 ```bash
 npm run test:e2e-ci # uruchamia testy E2E w trybie CI (bez UI) - w kontenerze jako root
 ```
->⚠️ Uwaga dotycząca uprawnień w kontenerze:
-Dlaczego testy E2E muszą być uruchamiane jako użytkownik root?
+
+> ⚠️ Uwaga dotycząca uprawnień w kontenerze:
+> Dlaczego testy E2E muszą być uruchamiane jako użytkownik root?
 
 Playwright w kontenerze korzysta z przeglądarek (Chromium, Firefox, WebKit), które:
+
 - tworzą cache przeglądarek i dane runtime w katalogach:
   - /root/.cache/
   - /root/.config/
-  - /tmp/playwright*
+  - /tmp/playwright\*
 - zapisują trace’y(nagrania przebiegu całego testu e2e), screenshoty i raporty w katalogu projektu:
   - /app/test-results/
 - Użytkownik node (UID 1000) — standardowy user w kontenerach Node — nie ma pełnych praw zapisu do tych lokalizacji, co powodowałoby błędy typu:
@@ -289,7 +295,15 @@ Obraz jest przygotowany w kilku etapach:
 1. Testy i instalacja zależności
 
 - Kopiowanie całego kodu i instalacja wszystkich zależności (dependencies i devDependencies)
-- Uruchomienie testów jednostkowych, integracyjnych i end-to-end (Playwright)
+- Uruchomienie testów jednostkowych, integracyjnych
+
+### ⚠️ Uwagi dotyczące testów E2E w Dockerze
+
+> Testy E2E nie są uruchamiane w obrazie Docker podczas jego budowy, ponieważ:
+
+>- Wymagają działającego backendu/frontendu w sieci, co w trakcie budowania obrazu jest trudne do zapewnienia.
+>- Uruchamianie ich blokowałoby proces budowania (start serwera w tle pozostawałby w nieskończoność...).
+>- Zamiast tego testy E2E są uruchamiane w osobnym kontenerze (`e2e-tests`) jako użytkownik root lub przez workflow `tests-ci.yml`.
 
 2. Build frontendu
 
@@ -350,14 +364,15 @@ To zatrzymuje i usuwa kontener, pozostawiając kod lokalnie.
 3️⃣ Obraz Docker do CI/CD
 
 - W repozytorium jest skonfigurowany workflow GitHub Actions, który:
- - Przeprowadza testy jednostkowe, integracyjne i E2E (tryb headlessowy)
- - Buduje obraz Docker (build frontendu dist)
- - Serwuje aplikację przez Nginx (port 8080)
- - Publikuje obraz do GitHub Container Registry (ghcr.io)
- - Wykonuje skan bezpieczeństwa Trivy przy push’u tagów:
-   - Analizuje gotowy obraz Docker
-   - Wykrywa podatności CRITICAL/HIGH w systemie operacyjnym oraz bibliotekach w obrazie
-   - Uruchamia się tylko przy tagowaniu obrazu (push tagów do GHCR)
+- Przeprowadza testy jednostkowe, integracyjne
+- Uruchamia testy E2E (Playwright, tryb headlessowy) w osobnym workflow GitHub Actions (`test-ci.yml`), niezależnie od procesu budowy obrazu Docker
+- Buduje obraz Docker (build frontendu dist)
+- Serwuje aplikację przez Nginx (port 8080)
+- Publikuje obraz do GitHub Container Registry (ghcr.io)
+- Wykonuje skan bezpieczeństwa Trivy przy push’u tagów:
+  - Analizuje gotowy obraz Docker
+  - Wykrywa podatności CRITICAL/HIGH w systemie operacyjnym oraz bibliotekach w obrazie
+  - Uruchamia się tylko przy tagowaniu obrazu (push tagów do GHCR)
 
 Dzięki temu użytkownik końcowy może od razu użyć gotowego obrazu bez ręcznego buildowania.
 
