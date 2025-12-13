@@ -1,7 +1,7 @@
 import { createSlice, createSelector } from '@reduxjs/toolkit';
 
 // Wczytanie ulubionych produktów z localStorage przy starcie
-const savedFavourites = JSON.parse(localStorage.getItem('favourites')) || [];
+const savedFavourites = JSON.parse(localStorage.getItem('favourites')) || []; // Pusta tablica = bezpieczny stan początkowy, który pozwala operować na ulubionych produktach bez dodatkowych warunków.
 
 const initialState = {
   favouritesProducts: savedFavourites,
@@ -12,8 +12,8 @@ const favouritesSlice = createSlice({
   initialState,
   reducers: {
     addToFavourites: (state, action) => {
-      const exists = state.favouritesProducts.find((p) => p.id === action.payload.id);
-      if (!exists) {
+      const exists = state.favouritesProducts.find((p) => p.id === action.payload.id); // Jeśli id produktu z tablicy ulubionych produktów jest równe wybranemu przez użytkownika, to znaczy, że produkt w ulubionych już istnieje
+      if (!exists) { // Jeśli produktu w tablicy ulubionych jeszcze nie ma, to dodajemy go tam i zapisujemy w localStorage
         state.favouritesProducts.push(action.payload);
         localStorage.setItem('favourites', JSON.stringify(state.favouritesProducts));
       }
@@ -29,32 +29,19 @@ const favouritesSlice = createSlice({
   },
 });
 
-// 🔹 Podstawowy selector
-// export const selectFavouritesProducts = (state) => state.favourites.favouritesProducts;
-// 🔹 Selektor zwracający ulubione produkty w odwrotnej kolejności (od najnowszego)
-/**
- createSelector memoizuje wynik:
-
-jeśli wejściowa tablica (favouritesProducts) nie zmieniła się, zwraca tę samą referencję,
-
-więc React-Redux nie wywołuje rerenderu i nie ma ostrzeżeń.
- /*
-W aplikacji wejściowa tablica nie zmienia się referencyjnie przy każdym renderze/redux update.
-
-createSelector widzi tę samą referencję → memoizacja działa → .reverse() zwraca nową tablicę tylko wtedy, gdy faktycznie zmieniła się zawartość.
-
-Stąd brak ostrzeżeń.
-*/
+// Selektor jest do odczytu stanu favourites w kolejności od najnowszego do najstarszego, z memoizacją dla wydajności.
 export const selectFavouritesProducts = createSelector(
-  [(state) => state.favourites.favouritesProducts], 
+  [(state) => state.favourites.favouritesProducts], // ← tablica funkcji wejściowych
   (products) => [...products].reverse()
 );
 
-// 🔹 Memoizowany selector do liczenia produktów w favourites
-export const selectFavouritesCount = createSelector([selectFavouritesProducts], (products) => products.length);
+// Memoizowany selector do liczenia produktów w favourites
+export const selectFavouritesCount = createSelector(
+  [selectFavouritesProducts], // ← tablica funkcji wejściowych
+  (products) => products.length); // ← funkcja obliczająca wynik
 
-// 🔹 Eksport akcji
+// Eksport akcji
 export const { addToFavourites, removeFromFavourites, clearFavourites } = favouritesSlice.actions;
 
-// 🔹 Eksport reducer
+// Eksport reducer
 export default favouritesSlice.reducer;

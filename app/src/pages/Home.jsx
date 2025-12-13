@@ -16,20 +16,24 @@ const Home = () => {
   // Wywołujemy hooki dla produktów wszystkich kategorii na raz
   // Można dalej korzystać z useProducts tylko wtedy, gdy fetchujemy produkty dla jednej, stałej kategorii.
   const productsQueries = useQueries({
-  // queries nie jest tablicą sama w sobie, tylko kluczem w obiekcie przekazywanym do useQueries, który musi zawierać tablicę obiektów query.
+    // queries nie jest tablicą sama w sobie, tylko kluczem w obiekcie przekazywanym do useQueries, który musi zawierać tablicę obiektów query.
     queries: categories.map((category) => ({
       queryKey: ['products', category],
-      queryFn: () => fetchProducts({ category, limit: 3 }),
+      queryFn: () => fetchProducts({ category, limit: 20 }),
       staleTime: 1000 * 60 * 5, // 5 minut – dane są uważane za „świeże”, dopóki nie minie ten czas, brak refetch przy mountowaniu
       cacheTime: 1000 * 60 * 10, // 10 minut – dane pozostają w pamięci po odmontowaniu komponentu, potem zostaną usunięte
       retry: 1, // maksymalnie 1 ponowna próba fetch w przypadku błędu (łącznie 2 próby)
     })),
   });
 
+  // Jeśli cokolwiek jest w trakcie pobierania danych, pokaż animację ładowania.
+  //isPending odnosi się tylko do hooka useCategories(), czyli mówi: „czy kategorie wciąż się ładują?”.
+  // productsQueries.some(q => q.isPending) dotyczy fetchy produktów dla każdej kategorii. Mogą one wciąż się ładować, nawet jeśli isPending już jest false.
   if (isPending || productsQueries.some((q) => q.isPending)) {
     return <Spinner />;
   }
 
+  // Jeśli coś się nie udało pobrać, pokaż komunikat błędu użytkownikowi.
   if (isError || productsQueries.some((q) => q.isError)) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
@@ -48,7 +52,7 @@ const Home = () => {
 
   return (
     <Box>
-      <Hero data-testid="hero" />
+      <Hero data-testid="hero" /> {/* identyfikator do testów */}
       <FeatureBar />
       <Box
         sx={{
@@ -85,8 +89,12 @@ const Home = () => {
         </style>
       </Box>
       {categories.map((category, index) => {
-        const products = productsQueries[index].data || [];
-        // const products = (productsQueries[index].data || []).slice(0, 4);
+        const products = productsQueries[index].data || []; // productsQueries[index] – wybieramy wynik dla konkretnej kategorii (indeks z categories.map).
+
+        // --- Top 3 po ratingu ---
+        const topProducts = products
+          .sort((a, b) => b.rating.rate - a.rating.rate)
+          .slice(0, 3);
 
         return (
           <Box
@@ -102,14 +110,23 @@ const Home = () => {
               {CAPITALIZE_WORDS(category)}
             </Typography>
             <Grid container spacing={2} marginBottom={3}>
-              {products.length ? (
-                products.map((product) => (
-                  <Grid item key={product.id} xs={12} md={6} lg={4} data-testid={`product-${product.id}`}>
+              {topProducts.length ? (
+                topProducts.map((product) => (
+                  <Grid
+                    item
+                    key={product.id}
+                    xs={12}
+                    md={6}
+                    lg={4}
+                    data-testid={`product-${product.id}`}
+                  >
                     <ProductCard {...product} />
                   </Grid>
                 ))
               ) : (
-                <Typography sx={{ m: 2 }}>No products in this category.</Typography>
+                <Typography sx={{ m: 2 }}>
+                  No products in this category.
+                </Typography>
               )}
             </Grid>
             <ScrollToTopButton />

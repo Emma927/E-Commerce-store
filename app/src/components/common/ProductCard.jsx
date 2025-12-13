@@ -32,9 +32,9 @@ Z memo funkcja w ogóle się nie wykona → oszczędzasz zasoby.
 
 /** 
  React.memo opakowuje komponent, aby: 
- 1️⃣ Zapobiec rerenderowaniu ProductCard, jeśli propsy (id, title, price, image) się nie zmieniły.
- 2️⃣ Wydajniej obsługiwać listy produktów – dzięki temu, gdy rodzic rerenderuje się, z powodu np. otwarcia drawer’a, zmiany filtra czy motywu, funkcja dziecka nie jest wywoływana ponownie.
- 3️⃣ Zmniejszyć obciążenie CPU (Central Processing Unit, czyli procesor w komputerze lub urządzeniu) przy renderowaniu wielu kart, mimo że DOM i tak się nie zmieni.
+ 1️. Zapobiec rerenderowaniu ProductCard, jeśli propsy (id, title, price, image) się nie zmieniły.
+ 2️. Wydajniej obsługiwać listy produktów – dzięki temu, gdy rodzic rerenderuje się, z powodu np. otwarcia drawer’a, zmiany filtra czy motywu, funkcja dziecka nie jest wywoływana ponownie.
+ 3️. Zmniejszyć obciążenie CPU (Central Processing Unit, czyli procesor w komputerze lub urządzeniu) przy renderowaniu wielu kart, mimo że DOM i tak się nie zmieni.
  */
 const ProductCardComponent = ({ id, image, title, description, price, rating }) => {
   const dispatch = useDispatch();
@@ -50,13 +50,10 @@ const ProductCardComponent = ({ id, image, title, description, price, rating }) 
         position: 'relative',
         border: `3px solid ${theme.palette.primary.light}`,
         minHeight: { xs: '400px', xsm: '430px', md: '490px', lg: '530px' },
-        display: 'flex', // <--- musimy użyć flex
-        flexDirection: 'column', // <--- kolumnowo
+        display: 'flex',
+        flexDirection: 'column',
       })}
     >
-      {/* To nie jest pełny URL API (https://fakestoreapi.com/...).
-To tylko ścieżka front-endowa, której używasz do nawigacji w aplikacji SPA. */}
-      {/* ✅ Efekt: obrazki ładowane dopiero, gdy wchodzą do viewportu, co znacząco zmniejsza początkowe użycie pamięci i przyspiesza renderowanie strony. */}
       <CardActionArea
         sx={{
           display: 'flex',
@@ -69,14 +66,13 @@ To tylko ścieżka front-endowa, której używasz do nawigacji w aplikacji SPA. 
           cursor: 'default',
         }}
       >
-        {/* Kontener na obrazek z overflow hidden */}
         <Box sx={{ m: 3, maxHeight: { xs: '240px', md: '300px' } }}>
           <CardMedia
             component="img"
             image={image}
             alt={title}
-            loading="lazy" // <- tu dodajemy lazy loading
-            className="card-media-hover" // klasa dla efektu hover
+            loading="lazy"
+            className="card-media-hover"
             sx={{
               maxHeight: { xs: '140px', xsm: '180px' },
               width: 'auto',
@@ -102,15 +98,13 @@ To tylko ścieżka front-endowa, której używasz do nawigacji w aplikacji SPA. 
           {/* Rating produktu */}
           {rating && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {/* Atrybut readOnly w komponencie MUI <Rating> oznacza, że użytkownik nie może zmieniać wartości gwiazdek — komponent jest wyłącznie do wyświetlania. */}
               <Rating value={rating.rate} precision={0.1} readOnly size="small" />
               <Typography variant="body2" color="text.secondary">
                 ({rating.count})
               </Typography>
             </Box>
           )}
-          {/* <Typography variant="body2" color="text.secondary">
-            {description}
-          </Typography> */}
           <Typography variant="subtitle1" sx={{ fontSize: { xs: '18px', sm: '20px', md: '22px' }, fontWeight: 'bold' }}>
             ${Number(price).toFixed(2)}
           </Typography>
@@ -144,9 +138,3 @@ To tylko ścieżka front-endowa, której używasz do nawigacji w aplikacji SPA. 
 };
 
 export const ProductCard = memo(ProductCardComponent);
-
-/**
- Scenariusz	Rerender rodzica	Rerender dzieci (ProductCard)
-Bez memo	✅ tak	✅ tak — funkcja każdego dziecka się wykonuje, choć propsy prymitywne są takie same
-Z memo	✅ tak	❌ nie — funkcja dziecka nie wykonuje się, jeśli propsy się nie zmieniły
- */

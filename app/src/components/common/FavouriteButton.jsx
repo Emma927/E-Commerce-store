@@ -6,13 +6,14 @@ import { addToFavourites, removeFromFavourites, selectFavouritesProducts } from 
 import { useMemo, memo } from 'react';
 
 const FavoriteIconButton = styled(IconButton, {
-  shouldForwardProp: (prop) => prop !== 'active', // aby 'active' nie trafiło do DOM
+  shouldForwardProp: (prop) => prop !== 'active', //shouldForwardProp filtruje propsy, które są używane tylko do stylowania,
+// aby nie trafiały do DOM i nie generowały ostrzeżeń Reacta.
 })(({ theme, active }) => ({
   position: 'absolute',
   margin: theme.spacing(0.5),
   top: 5,
   right: 5,
-  color: active ? theme.palette.primary.main : '#fff', // <-- kolor zmienia się jeśli active
+  color: active ? theme.palette.primary.main : '#fff',
   backdropFilter: 'blur(20px)',
   backgroundColor: 'rgba(108, 107, 107, 0.30)',
   '&:hover': {
@@ -24,9 +25,14 @@ const FavouriteButtonComponent = ({ product }) => {
   const dispatch = useDispatch();
   const favourites = useSelector(selectFavouritesProducts);
 
-  // Bezpieczne sprawdzenie, czy product istnieje
-  // Selector factory – sprawdza, czy dany produkt jest w ulubionych
+  // Bezpieczne sprawdzenie, czy product istnieje w ulubionych
+  /**
+   favourites.some((p) => p.id === product.id) sprawdza, czy w tablicy ulubionych produktów (favourites) istnieje przynajmniej jeden element, którego id jest równe id wybranego produktu (product.id).
+    - Jeśli taki element istnieje → wynik .some() jest true.
+    - Jeśli nie istnieje → wynik .some() jest false.
+   */
   const isFavourite = useMemo(() => {
+    // To .some() decyduje, czy wynik faktycznie będzie true.
     return product ? favourites.some((p) => p.id === product.id) : false;
   }, [favourites, product]);
 

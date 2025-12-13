@@ -23,12 +23,13 @@ dist-ssr
 .env.production.local
 
 # Playwright / tests / coverage
-/test-results/
-playwright-report/
-blob-report/
-playwright/.cache/
-playwright/.auth/
-coverage/
+app/test-results/
+app/playwright-report/
+app/blob-report/
+app/playwright/.cache/
+app/playwright/.auth/
+app/coverage/
+
 
 # Docker / system
 docker-compose.override.yml
