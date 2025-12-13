@@ -1,1 +1,5 @@
-npm run format && npm run prettier && npm run lint && npm run test
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Uruchomienie komend w kontenerze e-commerce-store
+docker compose exec -T e-commerce-store sh -c "cd /app && npm run format && npm run prettier && npm run lint && npm run test"
