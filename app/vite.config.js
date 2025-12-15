@@ -10,13 +10,17 @@ export default defineConfig({
     open: false,
     allowedHosts: [
       'localhost', // dla lokalnego dev
-      'e-commerce-store', // dla kontenera e2e-tests w sieci kontenerowejmam
+      'e-commerce-store', // dla kontenera e2e-tests w sieci kontenerowej
     ],
   },
   test: {
     coverage: {
-      reporter: ['html'],
+      provider: 'c8', // c8 to narzędzie do mierzenia coverage
+      reporter: ['text', 'html'],
       reportsDirectory: './test-results/coverage', // trafia do katalogu z wynikami testów
+      all: true, // <- obejmuje wszystkie pliki, nie tylko te testowane
+      include: ['src/**/*.{js,jsx}'], // <- folder z kodem źródłowym
+      exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**'],
     },
     environment: 'jsdom', // <- potrzebne dla RTL, to React Testing Library:
 
