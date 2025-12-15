@@ -1,4 +1,4 @@
-# --- STAGE 1: TESTY E2E (Zawiera wszystko, by uruchomić testy) ---
+# --- STAGE 1: TESTY (Zawiera wszystko, by uruchomić testy jednostkowe i integracyjne) ---
 # Bazowy obraz Node.js 24, alias 'test_runner'
 FROM node:24 AS test_runner 
 # Ustawienie katalogu roboczego w kontenerze

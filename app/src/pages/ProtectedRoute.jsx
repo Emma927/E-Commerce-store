@@ -10,7 +10,11 @@ const ProtectedRoute = ({ redirectPath = '/login' }) => {
 
   // Jeśli użytkownik zalogowany → renderuj Outlet (dzieci routingu)
   // Jeśli nie → przekieruj do login z informacją o stronie, z której przyszedł
-  return isAuthenticated ? <Outlet /> : <Navigate to={redirectPath} state={{ from: location }} replace />; // Parametr replace w <Navigate> działa tak, że zamienia bieżącą pozycję w historii przeglądarki, zamiast dodawać nowy wpis. Usuwa chronioną stronę z historii przeglądarki, aby kliknięcie „wstecz” nie wracało do niej.
+  return isAuthenticated ? (
+    <Outlet />
+  ) : (
+    <Navigate to={redirectPath} state={{ from: location }} replace />
+  ); // Parametr replace w <Navigate> działa tak, że zamienia bieżącą pozycję w historii przeglądarki, zamiast dodawać nowy wpis. Usuwa chronioną stronę z historii przeglądarki, aby kliknięcie „wstecz” nie wracało do niej.
 };
 
 export default ProtectedRoute;

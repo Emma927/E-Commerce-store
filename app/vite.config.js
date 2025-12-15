@@ -6,16 +6,17 @@ import path from 'path';
 export default defineConfig({
   server: {
     host: true,
-    port: 3000,
+    port: 3000, // jeśli nie podano PORT, domyślnie 3000
     open: false,
     allowedHosts: [
       'localhost', // dla lokalnego dev
-      'e-commerce-store', // dla kontenera e2e-tests
+      'e-commerce-store', // dla kontenera e2e-tests w sieci kontenerowejmam
     ],
   },
   test: {
     coverage: {
       reporter: ['html'],
+      reportsDirectory: './test-results/coverage', // trafia do katalogu z wynikami testów
     },
     environment: 'jsdom', // <- potrzebne dla RTL, to React Testing Library:
 

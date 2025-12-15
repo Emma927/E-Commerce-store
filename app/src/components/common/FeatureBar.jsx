@@ -16,7 +16,7 @@ export const FeatureBar = () => {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 1
+              gap: 1,
             }}
           >
             <Icon fontSize="large" />

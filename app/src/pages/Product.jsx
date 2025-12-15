@@ -30,7 +30,7 @@ const Product = () => {
         description: product.description,
         price: product.price,
         quantity: 1,
-      })
+      }),
     );
   };
 
@@ -102,14 +102,23 @@ const Product = () => {
           <Typography
             variant="h4"
             gutterBottom
-            sx={{ fontSize: { xs: '18px', md: '23px' }, color: theme.palette.primary.main, fontWeight: 'bold' }}
+            sx={{
+              fontSize: { xs: '18px', md: '23px' },
+              color: theme.palette.primary.main,
+              fontWeight: 'bold',
+            }}
           >
             {product.title}
           </Typography>
           {/* Rating produktu */}
           {product.rating && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <Rating value={product.rating.rate} precision={0.1} readOnly size="small" />
+              <Rating
+                value={product.rating.rate}
+                precision={0.1}
+                readOnly
+                size="small"
+              />
               <Typography variant="body2" color="text.secondary">
                 ({product.rating.count})
               </Typography>
@@ -118,7 +127,14 @@ const Product = () => {
           <Typography variant="body1" paragraph>
             {FORMAT_COMMAS(product.description)}
           </Typography>
-          <Typography variant="h5" sx={{ mb: 2, color: theme.palette.primary.main, fontWeight: 'bold' }}>
+          <Typography
+            variant="h5"
+            sx={{
+              mb: 2,
+              color: theme.palette.primary.main,
+              fontWeight: 'bold',
+            }}
+          >
             ${Number(product.price).toFixed(2)}
           </Typography>
           <Button variant="contained" onClick={handleAddToCart}>

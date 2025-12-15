@@ -4,7 +4,7 @@ import Sidebar from '@/components/sections/Sidebar';
 
 const Dashboard = () => {
   return (
-    <Grid container direction={{ xs: 'column', md: 'row' }} >
+    <Grid container direction={{ xs: 'column', md: 'row' }}>
       {/* Sidebar */}
       <Grid
         item
@@ -23,7 +23,7 @@ const Dashboard = () => {
           backgroundColor: 'background.default', // żeby nie było przezroczyste,
           display: 'flex',
           flexDirection: 'column', // ułożenie dzieci w kolumnie
-         justifyContent: 'center', // pionowe wyśrodkowanie
+          justifyContent: 'center', // pionowe wyśrodkowanie
         }}
       >
         <Sidebar />

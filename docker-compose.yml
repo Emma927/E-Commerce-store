@@ -6,13 +6,25 @@ services:
       - ./app:/app
     working_dir: /app
     user: "${USER_ID}:${GROUP_ID}"
-    tty: true   # Wirtualny terminal. Utrzymuje kontener aktywnym(bez niego kontener od razu może się zakońćzyć), ułatwia debug i kolorowy output.
+    tty: true # Wirtualny terminal. Utrzymuje kontener aktywnym(bez niego kontener od razu może się zakońćzyć), ułatwia debug i kolorowy output.
     # stdin_open: true  # pozwala na otwarcie stdin, czyli interakcję z kontenerem, bez stdin nie można robić interaktywnych rzeczy typu podłączenie się do kontenera i pisanie w konsoli. - nie potrzbene bo wchodze przez -it
     ports:
-        - "3000:3000"  # dev server
+      - "3000:3000" # dev server
     env_file:
       - .env
-    command: ["npm", "run", "dev"]  # uruchamia frontend w trybie deweloperskim
+    command: ["npm", "run", "dev"] # uruchamia frontend w trybie deweloperskim, potrzbene aby testy e2e dla user root sie odpalily. Ale nie dizała przez to npm run devna localhost 3000
+    # 1️⃣ Bez command: ["npm", "run", "dev"] w docker-compose
+    # Kontener e-commerce-store nie uruchamia dev servera automatycznie.
+    # Port 3000 w kontenerze jest wolny, bo nic tam nie nasłuchuje.
+    # Jeśli wejdziesz do kontenera i zrobisz ręcznie:
+    # npm run dev
+    # Next.js lub Vite widzi, że port 3000 jest dostępny → startuje na nim.
+    # W konsoli widzisz http://localhost:3000.
+  # 2️⃣ Gdy odkomentujesz command: ["npm", "run", "dev"]
+  # Kontener startuje automatycznie dev server na tym samym porcie 3000.
+  # Port 3000 wewnątrz kontenera jest już zajęty → ręczne uruchomienie npm run dev w tym samym kontenerze wykryje konflikt:
+  # Vite → spróbuje kolejnego wolnego portu (3001, 3002…)
+  # Next.js → może wywalić błąd EADDRINUSE albo spróbuje dalej 3000 → konflikt
 
   e2e-tests:
     image: mcr.microsoft.com/playwright:v1.57.0-noble
@@ -24,8 +36,8 @@ services:
       - e-commerce-store
     env_file:
       - .env
-    user: "0:0"   # uruchamia kontener jako root tylko do testów e2e
-    tty: true   # Wirtualny terminal. Utrzymuje kontener aktywnym(bez niego kontener od razu może się zakońćzyć), ułatwia debug i kolorowy output.
+    user: "0:0" # uruchamia kontener jako root tylko do testów e2e
+    tty: true # Wirtualny terminal. Utrzymuje kontener aktywnym(bez niego kontener od razu może się zakońćzyć), ułatwia debug i kolorowy output.
     # stdin_open: true  # pozwala na otwarcie stdin, czyli interakcję z kontenerem, bez stdin nie można robić interaktywnych rzeczy typu podłączenie się do kontenera i pisanie w konsoli. - nie potrzbene bo wchodze przez it
     # TRYB AUTOMATYCZNY: odkomentuj linię poniżej
     # command: ["sh", "-c", "npx wait-on $PLAYWRIGHT_BASE_URL && npx playwright test ./e2e; tail -f /dev/null"]

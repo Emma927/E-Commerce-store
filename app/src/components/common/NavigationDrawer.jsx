@@ -1,4 +1,11 @@
-import { Drawer, List, ListItem, ListItemText, ListItemButton, Badge } from '@mui/material';
+import {
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemButton,
+  Badge,
+} from '@mui/material';
 import { styled } from '@mui/material/styles';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import StarIcon from '@mui/icons-material/Star';
@@ -62,7 +69,9 @@ export const NavigationDrawer = ({
             sx={{ color: 'text.primary' }}
           >
             <Badge badgeContent={favouritesCount ?? undefined} color="primary">
-              <StarIcon color={currentPath === '/favourites' ? 'primary' : 'inherit'} />
+              <StarIcon
+                color={currentPath === '/favourites' ? 'primary' : 'inherit'}
+              />
             </Badge>
           </DrawerNavButton>
         </ListItem>

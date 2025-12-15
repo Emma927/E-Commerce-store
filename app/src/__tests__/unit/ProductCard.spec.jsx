@@ -59,7 +59,9 @@ describe('ProductCard unit tests', () => {
     expect(screen.getByText(product.title)).toBeInTheDocument();
 
     // Sprawdzamy, czy cena produktu jest w DOM
-    expect(screen.getByText(`$${product.price.toFixed(2)}`)).toBeInTheDocument();
+    expect(
+      screen.getByText(`$${product.price.toFixed(2)}`),
+    ).toBeInTheDocument();
 
     // Rating zakomentowany, bo nie dodajemy go do payload koszyka
     // expect(screen.getByText(`(${product.rating.count})`)).toBeInTheDocument();
@@ -83,7 +85,7 @@ describe('ProductCard unit tests', () => {
       expect.objectContaining({
         type: addToCart.type,
         payload: { ...product, quantity: 1 },
-      })
+      }),
     );
   });
 

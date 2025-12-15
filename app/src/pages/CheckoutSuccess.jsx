@@ -1,7 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/hooks/useUser';
-import { Box, Typography, Button, Divider, List, ListItem, ListItemText } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Button,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+} from '@mui/material';
 import { Spinner } from '@/components/common/Spinner';
 import { CAPITALIZE_WORDS } from '@/constants';
 
@@ -50,7 +58,11 @@ Usuwanie po kluczu (removeItem)	Tak, tylko ten klucz	Tak, tylko ten klucz */
           No order found.
         </Typography>
 
-        <Button variant="contained" color="primary" onClick={() => navigate(user ? '/dashboard/orders' : '/')}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate(user ? '/dashboard/orders' : '/')}
+        >
           {user ? 'Go to Orders' : 'Back to Home'}
         </Button>
       </Box>
@@ -129,14 +141,18 @@ Usuwanie po kluczu (removeItem)	Tak, tylko ten klucz	Tak, tylko ten klucz */
           <strong>Total:</strong> ${lastOrder.total.toFixed(2)}
         </Typography>
         <Typography variant="body2" mt={1}>
-          <strong>Delivery Method:</strong> {CAPITALIZE_WORDS(lastOrder.deliveryMethod)}
+          <strong>Delivery Method:</strong>{' '}
+          {CAPITALIZE_WORDS(lastOrder.deliveryMethod)}
         </Typography>
         <Typography variant="body2">
-          <strong>Payment Method:</strong> {CAPITALIZE_WORDS(lastOrder.paymentMethod)}
+          <strong>Payment Method:</strong>{' '}
+          {CAPITALIZE_WORDS(lastOrder.paymentMethod)}
         </Typography>
         <Typography variant="body2" mt={1}>
-          <strong>Shipping Address:</strong> {lastOrder.deliveryAddress.address}, {lastOrder.deliveryAddress.city},{' '}
-          {lastOrder.deliveryAddress.postalCode}, {lastOrder.deliveryAddress.country}
+          <strong>Shipping Address:</strong> {lastOrder.deliveryAddress.address}
+          , {lastOrder.deliveryAddress.city},{' '}
+          {lastOrder.deliveryAddress.postalCode},{' '}
+          {lastOrder.deliveryAddress.country}
         </Typography>
 
         <Button

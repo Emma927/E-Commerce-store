@@ -13,19 +13,26 @@ const cartSlice = createSlice({
   reducers: {
     // W koszyku możesz mieć wiele sztuk tego samego produktu, np. 3 razy ten sam kubek → wtedy liczy się quantity, a nie blokujesz dodawania.
     addToCart: (state, action) => {
-      const existingProduct = state.cartProducts.find((p) => p.id === action.payload.id);
+      const existingProduct = state.cartProducts.find(
+        (p) => p.id === action.payload.id,
+      );
       // if (existingProduct) – produkt jest już w koszyku → zwiększamy jego quantity o 1.
       if (existingProduct) {
         existingProduct.quantity += action.payload.quantity || 1;
-      // else – produkt nie ma w koszyku → tworzymy nowy wpis z quantity = 1 i dodajemy do tablicy.
+        // else – produkt nie ma w koszyku → tworzymy nowy wpis z quantity = 1 i dodajemy do tablicy.
       } else {
-        state.cartProducts.push({ ...action.payload, quantity: action.payload.quantity || 1 });
+        state.cartProducts.push({
+          ...action.payload,
+          quantity: action.payload.quantity || 1,
+        });
       }
 
       localStorage.setItem('cart', JSON.stringify(state.cartProducts));
     },
     removeFromCart: (state, action) => {
-      state.cartProducts = state.cartProducts.filter((p) => p.id !== action.payload);
+      state.cartProducts = state.cartProducts.filter(
+        (p) => p.id !== action.payload,
+      );
       localStorage.setItem('cart', JSON.stringify(state.cartProducts));
     },
     // Szukasz w tablicy cartProducts produktu o tym samym id.0
@@ -56,18 +63,22 @@ Dzięki temu wszędzie w aplikacji, gdzie używasz selectCartProducts, produkty 
 // Selektor jest do odczytu stanu cart w kolejności od najnowszego do najstarszego, z memoizacją dla wydajności.
 export const selectCartProducts = createSelector(
   [(state) => state.cart.cartProducts], // ← tablica funkcji wejściowych
-  (products) => [...products].reverse() // ← funkcja obliczająca wynik
+  (products) => [...products].reverse(), // ← funkcja obliczająca wynik
 );
 
-export const selectCartTotalPrice = createSelector([selectCartProducts], // ← tablica funkcji wejściowych
-  (products) =>  products.reduce((acc, p) => acc + p.price * (p.quantity || 1), 0) // ← funkcja obliczająca wynik. Jeśli quantity nie istnieje, traktujemy produkt jakby miał 1 sztukę (dla sumowania ilości).
+export const selectCartTotalPrice = createSelector(
+  [selectCartProducts], // ← tablica funkcji wejściowych
+  (products) =>
+    products.reduce((acc, p) => acc + p.price * (p.quantity || 1), 0), // ← funkcja obliczająca wynik. Jeśli quantity nie istnieje, traktujemy produkt jakby miał 1 sztukę (dla sumowania ilości).
 );
 
-export const selectCartTotalItems = createSelector([selectCartProducts], (products) =>
-  products.reduce((acc, p) => acc + (p.quantity || 1), 0) // p.quantity || 1 gwarantuje, że nawet jeśli quantity nie istnieje, produkt zostanie policzony jako 1 sztuka.
+export const selectCartTotalItems = createSelector(
+  [selectCartProducts],
+  (products) => products.reduce((acc, p) => acc + (p.quantity || 1), 0), // p.quantity || 1 gwarantuje, że nawet jeśli quantity nie istnieje, produkt zostanie policzony jako 1 sztuka.
 );
 
-export const { addToCart, removeFromCart, updateQuantity, clearCart } = cartSlice.actions;
+export const { addToCart, removeFromCart, updateQuantity, clearCart } =
+  cartSlice.actions;
 export default cartSlice.reducer;
 
 /**

@@ -20,14 +20,20 @@ const filtersSlice = createSlice({
     setSearchQuery: (state, action) => {
       state.searchQuery = action.payload;
     },
-     setRatingQuery: (state, action) => {
+    setRatingQuery: (state, action) => {
       state.ratingQuery = action.payload;
     },
     resetFilters: () => initialState,
   },
 });
 
-export const { setCategory, setSortOrder, setSearchQuery, setRatingQuery, resetFilters } = filtersSlice.actions;
+export const {
+  setCategory,
+  setSortOrder,
+  setSearchQuery,
+  setRatingQuery,
+  resetFilters,
+} = filtersSlice.actions;
 
 export const selectCategory = (state) => state.filters.category;
 export const selectSortOrder = (state) => state.filters.sortOrder;

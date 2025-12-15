@@ -28,8 +28,16 @@ const ThemeToggleButtonComponent = () => {
   const { mode, toggleColorMode } = useColorMode();
 
   return (
-    <IconButton color="inherit" onClick={toggleColorMode} sx={{ py: '0', px: '0' }}>
-      {mode === 'dark' ? <Brightness7Icon sx={{ fontSize: { md: '25px' } }} /> : <Brightness4Icon sx={{ fontSize: { md: '25px' } }} />}
+    <IconButton
+      color="inherit"
+      onClick={toggleColorMode}
+      sx={{ py: '0', px: '0' }}
+    >
+      {mode === 'dark' ? (
+        <Brightness7Icon sx={{ fontSize: { md: '25px' } }} />
+      ) : (
+        <Brightness4Icon sx={{ fontSize: { md: '25px' } }} />
+      )}
     </IconButton>
   );
 };

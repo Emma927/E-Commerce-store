@@ -13,7 +13,11 @@ import {
 } from '@mui/material';
 import { useForm, FormProvider, Controller } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
-import { clearCart, selectCartProducts, selectCartTotalPrice } from '@/store/cartSlice';
+import {
+  clearCart,
+  selectCartProducts,
+  selectCartTotalPrice,
+} from '@/store/cartSlice';
 import { addOrder } from '@/store/ordersSlice';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/hooks/useUser';
@@ -131,7 +135,10 @@ const Checkout = () => {
     // --- LOGI TUTAJ ---
     console.log('DEBUG CHECKOUT: Saving order to sessionStorage:', fullOrder);
     // sessionStorage.setItem('lastOrder', JSON.stringify(order)); // dla CheckoutSuccess
-    console.log('DEBUG CHECKOUT: Checking sessionStorage right after save:', sessionStorage.getItem('lastOrder'));
+    console.log(
+      'DEBUG CHECKOUT: Checking sessionStorage right after save:',
+      sessionStorage.getItem('lastOrder'),
+    );
     // ----------------------------
   };
 
@@ -140,7 +147,7 @@ const Checkout = () => {
 
   if (isPendingUser) return <Spinner />;
 
-// true, jeśli brak usera i fetch użytkownika nie trwa (użytkownik jest gościem)
+  // true, jeśli brak usera i fetch użytkownika nie trwa (użytkownik jest gościem)
   const isGuest = !user && !isPendingUser;
 
   return (
@@ -151,11 +158,16 @@ const Checkout = () => {
 
       {user && (
         <Typography sx={{ mb: 1, color: 'primary.main' }}>
-          Welcome, {CAPITALIZE_WORDS(user.name.firstname)} {CAPITALIZE_WORDS(user.name.lastname)}
+          Welcome, {CAPITALIZE_WORDS(user.name.firstname)}{' '}
+          {CAPITALIZE_WORDS(user.name.lastname)}
         </Typography>
       )}
 
-      {isGuest && <Typography sx={{ mb: 1, color: 'secondary.main' }}>Ordering as a guest</Typography>}
+      {isGuest && (
+        <Typography sx={{ mb: 1, color: 'secondary.main' }}>
+          Ordering as a guest
+        </Typography>
+      )}
 
       {isPendingOrder && (
         <Box sx={{ mt: 2 }}>
@@ -189,9 +201,21 @@ const Checkout = () => {
                   control={methods.control}
                   render={({ field }) => (
                     <RadioGroup {...field}>
-                      <FormControlLabel value="cash" control={<Radio />} label="Cash on Delivery" />
-                      <FormControlLabel value="transfer" control={<Radio />} label="Bank Transfer" />
-                      <FormControlLabel value="card" control={<Radio />} label="Credit/Debit Card" />
+                      <FormControlLabel
+                        value="cash"
+                        control={<Radio />}
+                        label="Cash on Delivery"
+                      />
+                      <FormControlLabel
+                        value="transfer"
+                        control={<Radio />}
+                        label="Bank Transfer"
+                      />
+                      <FormControlLabel
+                        value="card"
+                        control={<Radio />}
+                        label="Credit/Debit Card"
+                      />
                     </RadioGroup>
                   )}
                 />
@@ -207,7 +231,9 @@ const Checkout = () => {
                       {...field}
                       onChange={(e) => {
                         field.onChange(e); // aktualizuje RHF
-                        const selected = DELIVERY_OPTIONS.find((opt) => opt.value === e.target.value);
+                        const selected = DELIVERY_OPTIONS.find(
+                          (opt) => opt.value === e.target.value,
+                        );
                         setDeliveryPrice(selected?.price || 0);
                       }}
                     >
@@ -234,18 +260,26 @@ const Checkout = () => {
               Order Summary
             </Typography>
             {cartProducts.map((p) => (
-              <Box key={p.id} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <Box
+                key={p.id}
+                sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}
+              >
                 {/* Miniaturka produktu */}
                 <Box>
                   <Box
                     component="img"
                     src={p.image}
                     alt={p.title}
-                    sx={{ width: { xs: 70, md: 80 }, height: { xs: 70, md: 80 }, objectFit: 'contain' }}
+                    sx={{
+                      width: { xs: 70, md: 80 },
+                      height: { xs: 70, md: 80 },
+                      objectFit: 'contain',
+                    }}
                   />
                 </Box>
                 <Typography key={p.id}>
-                  {p.title} x {p.quantity || 1}: ${((p.price || 0) * (p.quantity || 1)).toFixed(2)}
+                  {p.title} x {p.quantity || 1}: $
+                  {((p.price || 0) * (p.quantity || 1)).toFixed(2)}
                 </Typography>
               </Box>
             ))}

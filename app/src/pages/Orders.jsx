@@ -67,7 +67,9 @@ const Orders = () => {
   */
   const sortedOrders = useMemo(() => {
     if (!orders) return [];
-    return [...orders].sort((a, b) => new Date(b.serverDate) - new Date(a.serverDate));
+    return [...orders].sort(
+      (a, b) => new Date(b.serverDate) - new Date(a.serverDate),
+    );
   }, [orders]);
 
   if (!orders.length) {
@@ -99,14 +101,24 @@ const Orders = () => {
       <Button
         variant="outlined"
         color="error"
-        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2, ml: 'auto' }}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          mb: 2,
+          ml: 'auto',
+        }}
         onClick={handleClearOrders}
       >
         Clear Orders
       </Button>
       <Box>
         {sortedOrders.map((order) => (
-          <OrderItem key={order.id} order={order} onDelete={handleDeleteOrder} />
+          <OrderItem
+            key={order.id}
+            order={order}
+            onDelete={handleDeleteOrder}
+          />
         ))}
       </Box>
 

@@ -1,5 +1,11 @@
 import { NavLink } from 'react-router-dom';
-import { List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import {
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+} from '@mui/material';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '@/store/authSlice';
@@ -66,7 +72,11 @@ const Sidebar = () => {
             </ListItemButton>
           ) : (
             <ListItemButton
-              sx={{ gap: 1, justifyContent: { xs: 'center' }, flexDirection: { xs: 'column', md: 'row' } }}
+              sx={{
+                gap: 1,
+                justifyContent: { xs: 'center' },
+                flexDirection: { xs: 'column', md: 'row' },
+              }}
               onClick={() => handleClick(action)}
             >
               {Icon && (

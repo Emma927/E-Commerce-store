@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from 'react-router-dom';
 import Layout from '@/layout/Layout';
 import { Spinner } from '@/components/common/Spinner';
 import { Suspense, lazy } from 'react';
@@ -46,8 +51,8 @@ const App = () => {
             {/* Chronione routy */}
             <Route element={<ProtectedRoute />}>
               <Route path="dashboard" element={<Dashboard />}>
-              {/* Atrybut replace używa się tylko przy przekierowaniach (Navigate), gdy chcemy uniknąć tworzenia nowego wpisu w historii.*/}
-              {/* Aby URL był dokładnie /dashboard/profile, a nie /dashboard potrzebuja Navigate z replace. */}
+                {/* Atrybut replace używa się tylko przy przekierowaniach (Navigate), gdy chcemy uniknąć tworzenia nowego wpisu w historii.*/}
+                {/* Aby URL był dokładnie /dashboard/profile, a nie /dashboard potrzebuja Navigate z replace. */}
                 <Route index element={<Navigate to="profile" replace />} />
                 <Route path="profile" element={<Profile />} />
                 {/* Historia zamówień */}

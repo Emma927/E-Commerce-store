@@ -36,7 +36,14 @@ Z memo funkcja w ogóle się nie wykona → oszczędzasz zasoby.
  2️. Wydajniej obsługiwać listy produktów – dzięki temu, gdy rodzic rerenderuje się, z powodu np. otwarcia drawer’a, zmiany filtra czy motywu, funkcja dziecka nie jest wywoływana ponownie.
  3️. Zmniejszyć obciążenie CPU (Central Processing Unit, czyli procesor w komputerze lub urządzeniu) przy renderowaniu wielu kart, mimo że DOM i tak się nie zmieni.
  */
-const ProductCardComponent = ({ id, image, title, description, price, rating }) => {
+const ProductCardComponent = ({
+  id,
+  image,
+  title,
+  description,
+  price,
+  rating,
+}) => {
   const dispatch = useDispatch();
   const theme = useTheme();
 
@@ -82,7 +89,14 @@ const ProductCardComponent = ({ id, image, title, description, price, rating }) 
             }}
           />
         </Box>
-        <CardContent sx={{ minHeight: { xs: '110px', md: '160px' }, objectFit: 'contain', width: '100%', mt: 1 }}>
+        <CardContent
+          sx={{
+            minHeight: { xs: '110px', md: '160px' },
+            objectFit: 'contain',
+            width: '100%',
+            mt: 1,
+          }}
+        >
           <Typography
             gutterBottom
             variant="h5"
@@ -99,20 +113,41 @@ const ProductCardComponent = ({ id, image, title, description, price, rating }) 
           {rating && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {/* Atrybut readOnly w komponencie MUI <Rating> oznacza, że użytkownik nie może zmieniać wartości gwiazdek — komponent jest wyłącznie do wyświetlania. */}
-              <Rating value={rating.rate} precision={0.1} readOnly size="small" />
+              <Rating
+                value={rating.rate}
+                precision={0.1}
+                readOnly
+                size="small"
+              />
               <Typography variant="body2" color="text.secondary">
                 ({rating.count})
               </Typography>
             </Box>
           )}
-          <Typography variant="subtitle1" sx={{ fontSize: { xs: '18px', sm: '20px', md: '22px' }, fontWeight: 'bold' }}>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontSize: { xs: '18px', sm: '20px', md: '22px' },
+              fontWeight: 'bold',
+            }}
+          >
             ${Number(price).toFixed(2)}
           </Typography>
         </CardContent>
       </CardActionArea>
       <Box sx={{ flexGrow: 1 }} />
-      <CardActions disableSpacing sx={{ justifyContent: 'space-between', p: 2, pb: 3, mt: 'auto' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, width: '100%'}}>
+      <CardActions
+        disableSpacing
+        sx={{ justifyContent: 'space-between', p: 2, pb: 3, mt: 'auto' }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 2,
+            width: '100%',
+          }}
+        >
           <FavouriteButton product={{ id, image, title, description, price }} />
           <Button
             size="small"

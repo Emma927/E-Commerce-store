@@ -29,10 +29,18 @@ const Hero = ({ 'data-testid': dataTestId }) => {
         <Grid item xs={12} md={5}>
           <Grid container spacing={2} direction="column">
             <Grid item>
-              <HeroImage src="ecommerce1.webp" alt="E-Commerce Hero 1" loading="lazy" />
+              <HeroImage
+                src="ecommerce1.webp"
+                alt="E-Commerce Hero 1"
+                loading="lazy"
+              />
             </Grid>
             <Grid item>
-              <HeroImage src="ecommerce2.webp" alt="E-Commerce Hero 2" loading="lazy" />
+              <HeroImage
+                src="ecommerce2.webp"
+                alt="E-Commerce Hero 2"
+                loading="lazy"
+              />
             </Grid>
           </Grid>
         </Grid>
@@ -70,10 +78,18 @@ const Hero = ({ 'data-testid': dataTestId }) => {
         <Grid item xs={12} md={5}>
           <Grid container spacing={2} direction="column">
             <Grid item>
-              <HeroImage src="ecommerce3.webp" alt="E-Commerce Hero 3" loading="lazy" />
+              <HeroImage
+                src="ecommerce3.webp"
+                alt="E-Commerce Hero 3"
+                loading="lazy"
+              />
             </Grid>
             <Grid item>
-              <HeroImage src="ecommerce4.webp" alt="E-Commerce Hero 4" loading="lazy" />
+              <HeroImage
+                src="ecommerce4.webp"
+                alt="E-Commerce Hero 4"
+                loading="lazy"
+              />
             </Grid>
           </Grid>
         </Grid>

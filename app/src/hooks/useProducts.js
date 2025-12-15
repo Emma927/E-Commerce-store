@@ -4,7 +4,6 @@ import { FAKE_API_URL } from '@/constants';
 // Jeśli spróbujesz zrobić categories.map(c => useProducts({ category: c })) → błąd hooków, bo hooki nie mogą być wywoływane w pętli.
 // useProducts jest zaprojektowany do jednej kategorii na raz — jego queryKey i queryFn odnoszą się do konkretnej kategorii. Nie możesz go użyć w pętli dla wielu kategorii, bo hooki nie mogą być wywoływane dynamicznie w mapie (to złamanie zasad hooków Reacta).
 export const fetchProducts = async ({ category, limit, sort } = {}) => {
-
   /**
    * Pobiera produkty z Fake Store API.
    *
@@ -20,7 +19,9 @@ export const fetchProducts = async ({ category, limit, sort } = {}) => {
 
   // URL zmienia się w zależności od tego, czy podana jest kategoria.
   // A FakeStoreAPI nie przyjmie "men's clothing" bez kodowania.
-  let url = category ? `${FAKE_API_URL}/products/category/${encodeURIComponent(category)}` : `${FAKE_API_URL}/products`;
+  let url = category
+    ? `${FAKE_API_URL}/products/category/${encodeURIComponent(category)}`
+    : `${FAKE_API_URL}/products`;
 
   /**
    * URLSearchParams jest klasą, więc trzeba najpierw utworzyć jej instancję, żeby używać append().

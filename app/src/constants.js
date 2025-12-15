@@ -29,7 +29,7 @@ export const CAPITALIZE_WORDS = (str) =>
         w.charAt(0).toUpperCase() +
         // Dokleja resztę słowa bez zmian
         // "ohn" -> "ohn"
-        w.slice(1)
+        w.slice(1),
     )
     // Łączy z powrotem wszystkie słowa w jeden string, rozdzielając spacją
     // ["John", "Doe"] -> "John Doe"
@@ -70,8 +70,16 @@ export const SOCIAL_MEDIA_SITES = [
 ];
 
 export const FEATURES = [
-  { icon: ShoppingCartIcon, title: 'E-Commerce store', subtitle: 'Online shopping' },
-  { icon: LocalShippingIcon, title: 'Fast delivery', subtitle: 'Start from $10' },
+  {
+    icon: ShoppingCartIcon,
+    title: 'E-Commerce store',
+    subtitle: 'Online shopping',
+  },
+  {
+    icon: LocalShippingIcon,
+    title: 'Fast delivery',
+    subtitle: 'Start from $10',
+  },
   { icon: PaymentIcon, title: 'Payment', subtitle: 'Secure system' },
 ];
 

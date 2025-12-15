@@ -1,12 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import {
-  AppBar,
-  Toolbar,
-  IconButton,
-  Box,
-  Button,
-} from '@mui/material';
+import { AppBar, Toolbar, IconButton, Box, Button } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { selectUsername, selectIsAuthenticated } from '@/store/authSlice';
 import StoreIcon from '@mui/icons-material/Store';
@@ -70,7 +64,13 @@ const Navigation = () => {
         position="fixed"
         color="default"
         elevation={1}
-        sx={{ top: 0, left: 0, height: '90px', display: 'flex', justifyContent: 'center' }}
+        sx={{
+          top: 0,
+          left: 0,
+          height: '90px',
+          display: 'flex',
+          justifyContent: 'center',
+        }}
       >
         <Container maxWidth="lg" sx={{ height: '100%' }}>
           <Toolbar
@@ -110,8 +110,19 @@ const Navigation = () => {
             </Box>
 
             {/* Desktop menu */}
-            <Box sx={{ display: { xs: 'none', md: 'flex', height: '100%' }, alignItems: 'center', gap: 2.5 }}>
-              <Button color="inherit" component={StyledNavLink} to="/products" sx={{ fontSize: { md: '16px' } }}>
+            <Box
+              sx={{
+                display: { xs: 'none', md: 'flex', height: '100%' },
+                alignItems: 'center',
+                gap: 2.5,
+              }}
+            >
+              <Button
+                color="inherit"
+                component={StyledNavLink}
+                to="/products"
+                sx={{ fontSize: { md: '16px' } }}
+              >
                 Products
               </Button>
               {/* Stałe linki */}
@@ -141,7 +152,10 @@ const Navigation = () => {
                   alignItems: 'center',
                 }}
               >
-                <Badge badgeContent={favouritesCount ?? undefined} color="primary">
+                <Badge
+                  badgeContent={favouritesCount ?? undefined}
+                  color="primary"
+                >
                   <StarIcon sx={{ fontSize: { md: '25px' } }} />
                 </Badge>
               </Button>
@@ -152,7 +166,12 @@ const Navigation = () => {
                 </Button>
               ) : (
                 // kiedy zalogowany → pokazujemy username
-                <Button color="inherit" component={StyledNavLink} to="/dashboard" sx={{ fontSize: { md: '16px' } }}>
+                <Button
+                  color="inherit"
+                  component={StyledNavLink}
+                  to="/dashboard"
+                  sx={{ fontSize: { md: '16px' } }}
+                >
                   {username}
                 </Button>
               )}
@@ -160,7 +179,9 @@ const Navigation = () => {
             </Box>
 
             {/* Mobile hamburger */}
-            <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center' }}>
+            <Box
+              sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center' }}
+            >
               <IconButton color="inherit" onClick={() => setDrawerOpen(true)}>
                 <MenuIcon sx={{ fontSize: { xs: '22px', xsm: '30px' } }} />
               </IconButton>
