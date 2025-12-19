@@ -30,6 +30,7 @@ const App = () => {
       {/* Dzięki React.lazy + Suspense, początkowy bundle jest mniejszy → strona startowa ładuje się szybciej. */}
       {/* Bez React.lazy wszystkie komponenty stron są importowane statycznie, czyli podczas startu aplikacji cały kod trafia do głównego bundle’a. Niezależnie od tego, czy użytkownik odwiedzi daną stronę, czy nie – kod jest już w przeglądarce. */}
       {/* React.lazy + Suspense rozwiązuje ten problem, bo komponenty są ładowane dynamicznie (tzw. code splitting). Kod strony nie znajduje się w głównym bundle’u, tylko zostaje umieszczony w osobnym, dynamicznie ładowanym pliku JavaScript. Jest pobrany dopiero w momencie, gdy komponent zostanie wyrenderowany (np. użytkownik odwiedzi daną stronę). Kod nie jest w bundle głównym, tylko w osobnym pliku, który pobiera się dopiero „na żądanie”.*/}
+      {/* Suspense w React to komponent, który pozwala „zawiesić” renderowanie części drzewa komponentów, dopóki dane lub moduły nie są gotowe. */}
       <Suspense fallback={<Spinner />}>
         <Routes>
           <Route path="/" element={<Layout />}>
@@ -53,6 +54,10 @@ const App = () => {
               <Route path="dashboard" element={<Dashboard />}>
                 {/* Atrybut replace używa się tylko przy przekierowaniach (Navigate), gdy chcemy uniknąć tworzenia nowego wpisu w historii.*/}
                 {/* Aby URL był dokładnie /dashboard/profile, a nie /dashboard potrzebuja Navigate z replace. */}
+                {/* Podsumowanie działania w historii przeglądarki
+Użytkownik wpisuje /dashboard → od razu jest przekierowany do /dashboard/profile.
+W historii przeglądarki nie pojawia się wpis /dashboard, tylko bezpośrednio /dashboard/profile.
+Jeśli kliknie „wstecz” w przeglądarce, nie wróci do /dashboard, tylko do poprzedniej strony sprzed /dashboard. */}
                 <Route index element={<Navigate to="profile" replace />} />
                 <Route path="profile" element={<Profile />} />
                 {/* Historia zamówień */}

@@ -167,11 +167,13 @@ git clone https://github.com/Your-Account/E-Commerce-store.git
    npm install
 ```
 
-5. Uruchom środowisko developerskie:
+5. Uruchom środowi
 
+# Uruchomienie serwera developerskiego (Vite)
 ```bash
    npm run dev
 ```
+# → działa tylko lokalnie na hoście pod http://localhost:3000
 
 6. Buduj do produkcji (opcjonalnie)\*\*
 
@@ -346,8 +348,13 @@ Start środowiska developerskiego w katalogu głównym projektu:
  chmod +x startdev.sh  # nadaj uprawnienia (tylko za pierwszym razem)
 ./startdev.sh
 ```
-
-Skrypt wykona:
+⚠️ Uwagi:
+Polecenie npm run dev działa tylko lokalnie na hoście, nie w kontenerze, ponieważ port 3000 w kontenerze jest już zajęty.
+Frontend w kontenerze (e-commerce-store) uruchamia się automatycznie i jest dostępny w przeglądarce pod adresem:
+```bash
+http://localhost:3000
+```
+Testy E2E w kontenerze wymagają działającego kontenera frontendowego, dlatego port 3000 musi być dostępny dla przeglądarki i kontenerów testowych.
 
 ```bash
 docker compose up -d e-commerce-store # Uruchomienie kontenera frontendowego
@@ -404,7 +411,7 @@ Dzięki temu użytkownik końcowy może od razu użyć gotowego, zweryfikowanego
 ```bash
 E-Commerce-store/
 ├─ .github/workflows/           # Folder z workflow GitHub Actions
-│   ├─ cicd.yml                 # CI/CD: testy, build obrazu Docker, publikacja do GHCR
+│   ├─ ci-cd.yml                 # CI/CD: testy, build obrazu Docker, publikacja do GHCR
 │   └─ test-ci.yml              # Uruchamianie testów jednostkowych, integracyjnych i E2E
 ├─ app/                         # Główny folder aplikacji frontendowej (Vite + React)
 │   ├─ e2e/                     # Testy end-to-end (Playwright)

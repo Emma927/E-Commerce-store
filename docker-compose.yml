@@ -3,16 +3,23 @@ services:
     image: node:24
     container_name: e-commerce-store
     volumes:
-      - ./app:/app
-    working_dir: /app
+      - .:/workspace
+      # To MUSI być tutaj - bez tego tunel fizycznie nie powstanie:
+      - ${SSH_AUTH_SOCK}:/run/host-services/ssh-auth.sock
+      # DODAJ TĘ LINIĘ:
+      - ~/.gitconfig:/home/node/.gitconfig:ro
+    working_dir: /workspace/app
     user: "${USER_ID}:${GROUP_ID}"
+    environment: # DODAJ TĘ SEKCJĘ (LUB DOPISZ DO ISTNIEJĄCEJ):
+      # To MUSI być tutaj - bez tego tunel fizycznie nie powstanie:
+      - SSH_AUTH_SOCK=/run/host-services/ssh-auth.sock
     tty: true # Wirtualny terminal. Utrzymuje kontener aktywnym(bez niego kontener od razu może się zakońćzyć), ułatwia debug i kolorowy output.
     # stdin_open: true  # pozwala na otwarcie stdin, czyli interakcję z kontenerem, bez stdin nie można robić interaktywnych rzeczy typu podłączenie się do kontenera i pisanie w konsoli. - nie potrzbene bo wchodze przez -it
     ports:
       - "3000:3000" # dev server
     env_file:
       - .env
-    command: ["npm", "run", "dev"] # uruchamia frontend w trybie deweloperskim, potrzbene aby testy e2e dla user root sie odpalily. Ale nie dizała przez to npm run devna localhost 3000
+    command: ["npm", "run", "dev"] # Dev server startuje automatycznie, ale w kontenerze Vite będzie próbować kolejnego wolnego portu, dlatego że 3000 jest zajęty. W związku z tym nie możesz ręcznie uruchomić npm run dev w tym samym kontenerze, bo proces dev servera już działa i blokuje terminal. Możesz otworzyć przeglądarkę na hoście: http://localhost:3000
     # 1️⃣ Bez command: ["npm", "run", "dev"] w docker-compose
     # Kontener e-commerce-store nie uruchamia dev servera automatycznie.
     # Port 3000 w kontenerze jest wolny, bo nic tam nie nasłuchuje.
@@ -29,9 +36,9 @@ services:
   e2e-tests:
     image: mcr.microsoft.com/playwright:v1.57.0-noble
     container_name: e2e-tests
-    working_dir: /app
+    working_dir: /workspace/app
     volumes:
-      - ./app:/app
+      - .:/workspace
     depends_on:
       - e-commerce-store
     env_file:
