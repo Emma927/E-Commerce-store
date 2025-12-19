@@ -52,3 +52,4 @@ services:
     command: ["tail", "-f", "/dev/null"]
 
     # Testy E2E (Playwright) zostały usunięte z Dockerfile – słusznie, bo E2E najlepiej uruchamiać po uruchomieniu kontenera frontendowego, np. w docker-compose jako osobny serwis. Dzięki temu nie blokują builda i nie wymagają uruchamiania frontendu w tle w czasie builda.
+    
