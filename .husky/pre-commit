@@ -1,10 +1,5 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# Wejdź do folderu app, bo tam są Twoje skrypty i package.json
 cd app
-
-# Teraz odpalaj komendy
 npm run prettier && npm run lint && npm run test
-# Używaj kodu z rozwagą.
-
