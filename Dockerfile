@@ -12,7 +12,7 @@ COPY ./app/package*.json ./
 RUN npm install --ignore-scripts
 
 # Instalacja wszystkich zależności (dependencies + devDependencies)
-RUN npm install
+# RUN npm install
 # Kopiowanie całego kodu aplikacji
 COPY ./app .
 
