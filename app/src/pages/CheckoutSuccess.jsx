@@ -48,9 +48,9 @@ Usuwanie po kluczu (removeItem)	Tak, tylko ten klucz	Tak, tylko ten klucz */
   });
 
   // ŁADOWANIE → tylko raz, bez migania
-  if (lastOrder === undefined) {
-    return <Spinner />;
-  }
+  // if (lastOrder === undefined) {
+  //   return <Spinner />;
+  // }
 
   // BRAK ORDERU - Dane sprawdzone → brak wartości
   if (lastOrder === null) {

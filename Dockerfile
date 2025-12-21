@@ -7,6 +7,10 @@ WORKDIR /app
 # Kopiowanie CAŁEGO kodu i instalacja WSZYSTKICH zależności (devDependencies i dependencies)
 # Kopiowanie plików zależności do kontenera
 COPY ./app/package*.json ./
+
+# Dodajemy flagę --ignore-scripts, aby npm nie próbował konfigurować Husky/Git
+RUN npm install --ignore-scripts
+
 # Instalacja wszystkich zależności (dependencies + devDependencies)
 RUN npm install
 # Kopiowanie całego kodu aplikacji

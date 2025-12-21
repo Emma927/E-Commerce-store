@@ -158,7 +158,7 @@ const Checkout = () => {
 
       {user && (
         <Typography sx={{ mb: 1, color: 'primary.main' }}>
-          Welcome, {CAPITALIZE_WORDS(user.name.firstname)}{' '}
+          Welcome, {CAPITALIZE_WORDS(user.name.firstname)}
           {CAPITALIZE_WORDS(user.name.lastname)}
         </Typography>
       )}
@@ -184,7 +184,7 @@ const Checkout = () => {
 
       <Grid container spacing={4}>
         {/* Left column: form */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <form onSubmit={methods.handleSubmit(onSubmit)}>
             <TextFieldComponent name="name" label="Full Name" />
             <TextFieldComponent name="address" label="Address" />
@@ -254,7 +254,7 @@ const Checkout = () => {
         </Grid>
 
         {/* Right column: summary */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Box sx={{ border: '1px solid #ccc', borderRadius: 2, p: 3 }}>
             <Typography variant="h6" mb={2}>
               Order Summary
