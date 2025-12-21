@@ -147,8 +147,7 @@ Jeśli dodamy onSubmit={(e) => { e.preventDefault(); ... }}, to nic złego się 
             {methods.formState.errors.remember && (
               <p>{methods.formState.errors.remember.message}</p>
             )}
-
-            {isPending && <Spinner />}   {/* <=== SPINNER JEST TU */}
+            {isPending && <Spinner />} {/* <=== SPINNER JEST TU */}
             <Button
               type="submit"
               fullWidth
@@ -157,11 +156,15 @@ Jeśli dodamy onSubmit={(e) => { e.preventDefault(); ... }}, to nic złego się 
               disabled={isPending}
               data-testid={isPending ? 'login-button-loading' : 'login-button'}
             >
-                {isPending ? 'Logging in...' : 'Login'}
+              {isPending ? 'Logging in...' : 'Login'}
             </Button>
             {/* Komunikat błędu */}
             {isError && (
-              <Typography data-testid="login-error" color="error" align="center">
+              <Typography
+                data-testid="login-error"
+                color="error"
+                align="center"
+              >
                 {error?.message || 'Error occured'}
               </Typography>
             )}

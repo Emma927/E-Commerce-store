@@ -1,12 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
-import {
-  AppBar,
-  Toolbar,
-  IconButton,
-  Box,
-  Button,
-} from '@mui/material';
+import { AppBar, Toolbar, IconButton, Box, Button } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { selectUsername, selectIsAuthenticated } from '@/store/authSlice';
 import StoreIcon from '@mui/icons-material/Store';
@@ -29,7 +23,6 @@ const StyledNavLink = styled(NavLink)(({ theme }) => ({
   justifyContent: 'center',
   alignItems: 'center',
   height: '100%',
-  color: theme.palette.text.secondary,
   '&:hover': {
     color: theme.palette.primary.main,
     backgroundColor: theme.palette.action.hover,
@@ -40,28 +33,43 @@ const StyledNavLink = styled(NavLink)(({ theme }) => ({
 const Navigation = () => {
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [nextPath, setNextPath] = useState(null);
+  const pendingPathRef = useRef(null); // referencja do ścieżki, aby nie używać dodatkowego stanu
+  // const [nextPath, setNextPath] = useState(null);
   const username = useSelector(selectUsername);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const cartCount = useSelector(selectCartTotalItems);
 
   const favouritesCount = useSelector(selectFavouritesCount);
 
-  // Funkcja zamykająca Drawer i resetująca kategorie
-  const handleNavigate = (path) => {
-    // Drawer zostaje zamknięty (drawerOpen = false) i animacja kończy się naturalnie.
-    setDrawerOpen(false); // zamykamy Drawer,
-    setNextPath(path); // ustawiamy trasę do przejścia
-  };
+  // // Funkcja zamykająca Drawer i resetująca kategorie
+  // const handleNavigate = (path) => {
+  //   // Drawer zostaje zamknięty (drawerOpen = false) i animacja kończy się naturalnie.
+  //   setDrawerOpen(false); // zamykamy Drawer,
+  //   setNextPath(path); // ustawiamy trasę do przejścia
+  // };
 
   // useEffect nasłuchuje na drawerOpen i wywołuje navigate() dopiero, gdy Drawer jest zamknięty, dzięki czemu wszystko działa płynnie.
-  useEffect(() => {
-    if (!drawerOpen && nextPath) {
-      navigate(nextPath);
-      // setNextPath(null) resetuje stan, żeby nie wywoływać navigate() ponownie przy kolejnym renderze.
-      setNextPath(null);
+  // useEffect(() => {
+  //   if (!drawerOpen && nextPath) {
+  //     navigate(nextPath);
+  //     // setNextPath(null) resetuje stan, żeby nie wywoływać navigate() ponownie przy kolejnym renderze.
+  //     setNextPath(null);
+  //   }
+  // }, [drawerOpen, nextPath, navigate]);
+
+  // Funkcja obsługująca kliknięcie linku w Drawer
+  const handleNavigate = (path) => {
+    pendingPathRef.current = path; // zapisujemy ścieżkę, zapamiętaj dokąd iść
+    setDrawerOpen(false); // zamykamy Drawer (animacja), zamknij Drawer (start animacji)
+  };
+
+  // Callback wywołany po zakończeniu animacji Drawer (MUI)
+  const handleDrawerExited = () => {
+    if (pendingPathRef.current) {
+      navigate(pendingPathRef.current);
+      pendingPathRef.current = null;
     }
-  }, [drawerOpen, nextPath, navigate]);
+  };
 
   return (
     <>
@@ -70,7 +78,13 @@ const Navigation = () => {
         position="fixed"
         color="default"
         elevation={1}
-        sx={{ top: 0, left: 0, height: '90px', display: 'flex', justifyContent: 'center' }}
+        sx={{
+          top: 0,
+          left: 0,
+          height: '90px',
+          display: 'flex',
+          justifyContent: 'center',
+        }}
       >
         <Container maxWidth="lg" sx={{ height: '100%' }}>
           <Toolbar
@@ -110,8 +124,19 @@ const Navigation = () => {
             </Box>
 
             {/* Desktop menu */}
-            <Box sx={{ display: { xs: 'none', md: 'flex', height: '100%' }, alignItems: 'center', gap: 2.5 }}>
-              <Button color="inherit" component={StyledNavLink} to="/products" sx={{ fontSize: { md: '16px' } }}>
+            <Box
+              sx={{
+                display: { xs: 'none', md: 'flex', height: '100%' },
+                alignItems: 'center',
+                gap: 2.5,
+              }}
+            >
+              <Button
+                color="inherit"
+                component={StyledNavLink}
+                to="/products"
+                sx={{ fontSize: { md: '16px' } }}
+              >
                 Products
               </Button>
               {/* Stałe linki */}
@@ -141,7 +166,10 @@ const Navigation = () => {
                   alignItems: 'center',
                 }}
               >
-                <Badge badgeContent={favouritesCount ?? undefined} color="primary">
+                <Badge
+                  badgeContent={favouritesCount ?? undefined}
+                  color="primary"
+                >
                   <StarIcon sx={{ fontSize: { md: '25px' } }} />
                 </Badge>
               </Button>
@@ -152,7 +180,12 @@ const Navigation = () => {
                 </Button>
               ) : (
                 // kiedy zalogowany → pokazujemy username
-                <Button color="inherit" component={StyledNavLink} to="/dashboard" sx={{ fontSize: { md: '16px' } }}>
+                <Button
+                  color="inherit"
+                  component={StyledNavLink}
+                  to="/dashboard"
+                  sx={{ fontSize: { md: '16px' } }}
+                >
                   {username}
                 </Button>
               )}
@@ -160,7 +193,9 @@ const Navigation = () => {
             </Box>
 
             {/* Mobile hamburger */}
-            <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center' }}>
+            <Box
+              sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center' }}
+            >
               <IconButton color="inherit" onClick={() => setDrawerOpen(true)}>
                 <MenuIcon sx={{ fontSize: { xs: '22px', xsm: '30px' } }} />
               </IconButton>
@@ -174,6 +209,7 @@ const Navigation = () => {
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         handleNavigate={handleNavigate}
+        onExited={handleDrawerExited} // <- tutaj płynna nawigacja po animacji
         cartCount={cartCount}
         favouritesCount={favouritesCount}
         isAuthenticated={isAuthenticated}

@@ -30,7 +30,14 @@ export const FavouriteItemCard = ({ id, image, title, description, price }) => {
         sx={{ position: 'absolute', top: 8, right: 8 }}
       />
 
-      <Box sx={{ width: '100%', display: 'flex', alignItems: 'space-between', gap: 2 }}>
+      <Box
+        sx={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'space-between',
+          gap: 2,
+        }}
+      >
         {/* Obrazek */}
         <Box
           alignSelf="flex-start"
@@ -56,7 +63,13 @@ export const FavouriteItemCard = ({ id, image, title, description, price }) => {
             mr: 2,
           }}
         >
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+            }}
+          >
             <Typography variant="subtitle1" marginRight={6}>
               {title}
             </Typography>
@@ -72,10 +85,19 @@ export const FavouriteItemCard = ({ id, image, title, description, price }) => {
               gap: 2,
             }}
           >
-            <Button variant="contained" onClick={handleAddToCart} sx={{ minWidth: '155px' }}>
+            <Button
+              variant="contained"
+              onClick={handleAddToCart}
+              sx={{ minWidth: '155px' }}
+            >
               Add to cart
             </Button>
-            <Button variant="outlined" component={Link} to={`/product/${id}`} sx={{ minWidth: '155px' }}>
+            <Button
+              variant="outlined"
+              component={Link}
+              to={`/product/${id}`}
+              sx={{ minWidth: '155px' }}
+            >
               Show details
             </Button>
           </Box>

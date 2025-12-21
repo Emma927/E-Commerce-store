@@ -1,4 +1,11 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button } from '@mui/material';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography,
+  Button,
+} from '@mui/material';
 
 // ConfirmModal – nie warto memoizować, bo rerender jest rzadki i tani.
 export const ConfirmModal = ({
@@ -32,7 +39,10 @@ export const ConfirmModal = ({
         Można bezpiecznie je zignorować.
       */
     >
-      <DialogTitle id="confirm-dialog-title" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <DialogTitle
+        id="confirm-dialog-title"
+        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+      >
         {icon} {title}
       </DialogTitle>
 
@@ -43,7 +53,12 @@ export const ConfirmModal = ({
       <DialogActions>
         {onCancel && <Button onClick={onCancel}>{cancelText}</Button>}
         {onConfirm && (
-          <Button autoFocus variant="contained" color={confirmColor} onClick={onConfirm}>
+          <Button
+            autoFocus
+            variant="contained"
+            color={confirmColor}
+            onClick={onConfirm}
+          >
             {confirmText}
           </Button>
         )}

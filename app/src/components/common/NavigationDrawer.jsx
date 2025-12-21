@@ -1,4 +1,11 @@
-import { Drawer, List, ListItem, ListItemText, ListItemButton, Badge } from '@mui/material';
+import {
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemButton,
+  Badge,
+} from '@mui/material';
 import { styled } from '@mui/material/styles';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import StarIcon from '@mui/icons-material/Star';
@@ -27,9 +34,20 @@ export const NavigationDrawer = ({
   isAuthenticated,
   username,
   currentPath,
+  onExited, // <-- dodaj prop onExited
 }) => {
   return (
-    <Drawer anchor="right" open={open} onClose={onClose}>
+    <Drawer
+      anchor="right"
+      open={open}
+      onClose={onClose}
+      // Nowoczesne podejście slotowe
+      slotProps={{
+        transition: {
+          onExited: onExited, // callback wywołany po zakończeniu animacjico ten callback robi?
+        },
+      }}
+    >
       <List sx={{ width: 250, py: 2 }}>
         {/* Products */}
         <ListItem disablePadding>
@@ -62,7 +80,9 @@ export const NavigationDrawer = ({
             sx={{ color: 'text.primary' }}
           >
             <Badge badgeContent={favouritesCount ?? undefined} color="primary">
-              <StarIcon color={currentPath === '/favourites' ? 'primary' : 'inherit'} />
+              <StarIcon
+                color={currentPath === '/favourites' ? 'primary' : 'inherit'}
+              />
             </Badge>
           </DrawerNavButton>
         </ListItem>

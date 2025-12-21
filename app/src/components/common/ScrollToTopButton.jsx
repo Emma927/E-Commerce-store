@@ -33,7 +33,10 @@ export const ScrollToTopButton = () => {
         position: 'fixed',
         zIndex: 50,
         right: { xs: 40, md: 30, lg: 40 },
-        bottom: { xs: isDashboard ? '215px' : isCart ? '295px' : 110, md: '110px' },
+        bottom: {
+          xs: isDashboard ? '215px' : isCart ? '295px' : 110,
+          md: '110px',
+        },
       }}
     >
       <ArrowUpwardIcon />

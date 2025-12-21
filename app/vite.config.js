@@ -6,16 +6,21 @@ import path from 'path';
 export default defineConfig({
   server: {
     host: true,
-    port: 3000,
+    port: 3000, // jeśli nie podano PORT, domyślnie 3000
     open: false,
     allowedHosts: [
       'localhost', // dla lokalnego dev
-      'e-commerce-store', // dla kontenera e2e-tests
+      'e-commerce-store', // dla kontenera e2e-tests w sieci kontenerowej
     ],
   },
   test: {
     coverage: {
-      reporter: ['html'],
+      provider: 'c8', // c8 to narzędzie do mierzenia coverage
+      reporter: ['text', 'html'],
+      reportsDirectory: './test-results/coverage', // trafia do katalogu z wynikami testów
+      all: true, // <- obejmuje wszystkie pliki, nie tylko te testowane
+      include: ['src/**/*.{js,jsx}'], // <- folder z kodem źródłowym
+      exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**'],
     },
     environment: 'jsdom', // <- potrzebne dla RTL, to React Testing Library:
 
@@ -32,7 +37,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'), // Alias @ w resolve.alias pozwala używać skróconej ścieżki do katalogu src, co upraszcza importy.
+      '@': path.resolve('./src'), // Alias @ w resolve.alias pozwala używać skróconej ścieżki do katalogu src, co upraszcza importy.
     },
   },
   optimizeDeps: {

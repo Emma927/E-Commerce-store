@@ -29,13 +29,22 @@ const Profile = () => {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: { xs: '20px', md: 0 } }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 1,
+        mb: { xs: '20px', md: 0 },
+      }}
+    >
       <Typography variant="h4">Profile: {user.username}</Typography>
       <Typography>ID: {user.id}</Typography>
       <Typography>Email: {user.email}</Typography>
       <Typography>Phone: {user.phone}</Typography>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-        <Typography sx={{ minWidth: '180px' }}>Password: {show ? user.password : '*****'}</Typography>
+        <Typography sx={{ minWidth: '180px' }}>
+          Password: {show ? user.password : '*****'}
+        </Typography>
         <Button variant="outlined" size="small" onClick={() => setShow(!show)}>
           {show ? 'Hide' : 'Show'}
         </Button>
@@ -50,12 +59,13 @@ const Profile = () => {
         Address:
       </Typography>
       <Typography>
-        {CAPITALIZE_WORDS(user.address.street)} {user.address.number}, {CAPITALIZE(user.address.city)},{' '}
-        {user.address.zipcode}
+        {CAPITALIZE_WORDS(user.address.street)} {user.address.number},{' '}
+        {CAPITALIZE(user.address.city)}, {user.address.zipcode}
       </Typography>
       <Typography>
         {/* Wyrazy lat i long to skróty od latitude i longitude, czyli szerokości i długości geograficznej. */}
-        Geolocation: lat {user.address.geolocation.lat}, long {user.address.geolocation.long}
+        Geolocation: lat {user.address.geolocation.lat}, long{' '}
+        {user.address.geolocation.long}
       </Typography>
     </Box>
   );

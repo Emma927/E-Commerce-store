@@ -1,0 +1,13 @@
+# Ignoruj paczki i buildy
+node_modules
+dist
+build
+
+# Ignoruj wyniki testów i raporty
+test-results
+playwright-report
+blob-report
+
+# Ignoruj pliki systemowe
+.env
+.husky

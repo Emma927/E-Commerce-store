@@ -28,7 +28,16 @@ const Favourites = () => {
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 0.5, mx: 'auto', maxWidth: isAuthenticated ? 800 : '100%' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        mt: 0.5,
+        mx: 'auto',
+        maxWidth: isAuthenticated ? 800 : '100%',
+      }}
+    >
       {/* Lista dla niezalogowanych użytkowników */}
       {!isAuthenticated && <FavouritesList />}
 

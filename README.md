@@ -3,7 +3,7 @@
 Aplikacja e-commerce została stworzona w ramach kursu JavaScript Developer, moduł specjalistyczny. Projekt ma na celu odwzorowanie funkcjonalności popularnych sklepów internetowych, pozwalając użytkownikom na intuicyjne przeglądanie, wybieranie i zakup produktów.
 
 **Dostępna online:**  
-[https://e-commerce-store.netlify.app](https://e-commerce-store.netlify.app)
+[https://e-commerce-store-online.netlify.app//](https://e-commerce-store-online.netlify.app/)
 
 ---
 
@@ -44,7 +44,7 @@ API służy wyłącznie celom edukacyjnym i testowym.
   - Vitest – testy jednostkowe
   - React Testing Library – testy komponentów
   - MSW – przechwytywanie żądań do Fake Store API i zwracanie przygotowanych odpowiedzi
-  - Playwright – testy end-to-end (E2E), zintegrowane z GitHub Actions (CI/CD)
+  - Playwright – testy end-to-end (E2E), zintegrowane z GitHub Actions (CI)
   - Fake Store API – do symulacji działania backendu dla produktów i transakcji
 - Docker – do konteneryzacji aplikacji w środowisku deweloperskim, testowym i produkcyjnym
 
@@ -52,21 +52,21 @@ API służy wyłącznie celom edukacyjnym i testowym.
 
 ## 📸 Zrzuty ekranu
 
-Desktop i mobile znajdują się w folderze app/src/screenshots/.
+Mobile i desktop znajdują się w folderze app/src/screenshots/.
 
 <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; margin-bottom: 40px">
-  <img src="app/src/screenshots/desktop-view1.png" alt="Widok desktop" style="margin-right: 10px;">
   <img src="app/src/screenshots/mobile-view1.png" alt="Widok mobilny">
+  <img src="app/src/screenshots/desktop-view1.png" alt="Widok desktop" style="margin-right: 10px;">
 </div>
 
 <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; margin-bottom: 40px">
-  <img src="app/src/screenshots/desktop-view2.png" alt="Widok desktop" style="margin-right: 10px;">
   <img src="app/src/screenshots/mobile-view2.png" alt="Widok mobilny">
+  <img src="app/src/screenshots/desktop-view2.png" alt="Widok desktop" style="margin-right: 10px;">
 </div>
 
 <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; margin-bottom: 40px">
-  <img src="app/src/screenshots/desktop-view3.png" alt="Widok desktop" style="margin-right: 10px;">
   <img src="app/src/screenshots/mobile-view3.png" alt="Widok mobilny">
+  <img src="app/src/screenshots/desktop-view3.png" alt="Widok desktop" style="margin-right: 10px;">
 </div>
 
 ---
@@ -167,11 +167,13 @@ git clone https://github.com/Your-Account/E-Commerce-store.git
    npm install
 ```
 
-5. Uruchom środowisko developerskie:
+5. Uruchom środowi
 
+# Uruchomienie serwera developerskiego (Vite)
 ```bash
    npm run dev
 ```
+# → działa tylko lokalnie na hoście pod http://localhost:3000
 
 6. Buduj do produkcji (opcjonalnie)\*\*
 
@@ -181,23 +183,10 @@ git clone https://github.com/Your-Account/E-Commerce-store.git
 
 ### 🧪 Testy i Continuous Integration (CI)
 
-Aplikacja ma kilka rodzajów testów: jednostkowe, integracyjne oraz end-to-end (E2E). Możesz uruchomić je ręcznie albo korzystając z Husky przy pre-commit.
-Projekt korzysta również z automatycznych testów i skanów bezpieczeństwa, aby zapewnić jakość kodu oraz poprawne działanie aplikacji.
+Testy można uruchomić ręcznie lub automatycznie w ramach Continuous Integration (CI).
+Projekt posiada zautomatyzowane testy jednostkowe, integracyjne i end-to-end (E2E) oraz automatyczne skany bezpieczeństwa, które zapewniają jakość kodu i poprawne działanie aplikacji.
 
-1️⃣ GitHub Actions Workflow – Testy i Skan kodu źródłowego
-
-- Testy jednostkowe, integracyjne i E2E
-
-  - Uruchamiane przy pushu do branchy: main, develop, feature-fe
-  - Testy uruchamiane są na Node.js 24.x
-  - E2E testy Playwright wykonują się po zbudowaniu frontendu i uruchomieniu serwera developerskiego
-
-- Skan bezpieczeństwa source code (Trivy FS scan)
-  - Analizuje folder ./app oraz zależności (node_modules)
-  - Wykrywa podatności w bibliotekach i pakietach (CRITICAL/HIGH)
-  - Nie skanuje logiki biznesowej ani tajnych danych
-
-1. Testy jednostkowe i integracyjne
+1️⃣ Testy jednostkowe i integracyjne
 
 Uruchamiają się za pomocą Vitest:
 
@@ -206,7 +195,7 @@ npm test        # uruchamia wszystkie testy jednostkowe i integracyjne
 npm run coverage # uruchamia testy z raportem pokrycia
 ```
 
-2. Testy end-to-end (E2E) z Playwright
+2️⃣ Testy end-to-end (E2E) z Playwright
 
 Do testów E2E możesz wykorzystać wersję z UI (Trace Viewer) lub CI:
 
@@ -215,7 +204,7 @@ Do testów E2E możesz wykorzystać wersję z UI (Trace Viewer) lub CI:
 Uruchamia graficzny interfejs Playwrighta, przydatny do debugowania:
 
 ```bash
-npm run e2e # wersja z interfejsem graficznym (Trace Viewer) - lokalne bez konener
+npm run e2e # wersja z interfejsem graficznym (Trace Viewer)
 ```
 
 Działa tylko lokalnie — poza Dockerem.
@@ -225,8 +214,10 @@ Działa tylko lokalnie — poza Dockerem.
 1. Uruchom środowisko developerskie:
 
 ```bash
+chmod +x startdev-e2e.sh  # nadaj uprawnienia (tylko za pierwszym razem)
 ./startdev-e2e.sh
 ```
+
 - Skrypt uruchamia kontener e2e-tests.
   - Dzięki depends_on, jeśli kontener frontendowy (e-commerce-store) nie działa, zostanie również uruchomiony.
   - Kontener frontendowy pozostaje aktywny dzięki tty: true, więc nie zakończy się samoczynnie.
@@ -236,7 +227,7 @@ Skrypt wykona:
 
 ```bash
 docker compose up -d e2e-tests # Uruchomienie kontenera dla testów E2E
-docker compose exec -it e2e-tests bash # Wejście do kontenera jako standradowy użytkownik node
+docker compose exec -it e2e-tests bash # Wejście do kontenera jako standardowy użytkownik node
 ```
 
 Teraz jesteś w terminalu kontenera i możesz uruchomić:
@@ -247,14 +238,14 @@ npm run test:e2e-ci # uruchamia testy E2E w trybie CI (bez UI) - w kontenerze ja
 
 > ⚠️ Uwaga dotycząca uprawnień w kontenerze:
 > Dlaczego testy E2E muszą być uruchamiane jako root?
-Playwright w kontenerze tworzy cache i zapisuje trace’y w katalogach /root/.cache/, /root/.config/, /tmp/playwright* oraz /app/test-results/. Standardowy użytkownik node (UID 1000) nie ma pełnych praw zapisu, co powodowałoby błędy typu EACCES: permission denied.
+> Playwright w kontenerze tworzy cache i zapisuje trace’y w katalogach /root/.cache/, /root/.config/, /tmp/playwright\* oraz /app/test-results/. Standardowy użytkownik node (UID 1000) nie ma pełnych praw zapisu, co powodowałoby błędy typu EACCES: permission denied.
 
 Dlatego:
 ➡️ Testy E2E są uruchamiane tylko w izolowanym kontenerze i tylko jako root.
 ➡️ Jest to normalne i zgodne z zaleceniami Playwrighta dla środowisk Dockerowych.
 ➡️ Nie ma to żadnego wpływu na bezpieczeństwo środowiska produkcyjnego — dotyczy wyłącznie środowiska testowego.
 
-3. Uruchomienie frontendu do testów E2E
+2. Uruchomienie frontendu do testów E2E
 
 Testy E2E wymagają uruchomionej aplikacji.
 Aby to zrobić, najpierw zbuduj projekt, a następnie uruchom wersję statyczną:. Możesz to zrobić tak:
@@ -266,18 +257,42 @@ npm run start:e2e  # uruchamia statyczną wersję aplikacji na http://localhost:
 
 Ta wersja nie ma hot-reload, dev servera, ani narzędzi developerskich – działa jak finalna aplikacja użytkownika.
 
-4. Automatyczne testy przy commicie dzięki Husky 🐶
+3️⃣ Sprawdzanie kodu przed commitem
 
-Lokalnie przed każdym commitem uruchamiane są:
+Przed każdym commitem warto sprawdzić, czy kod jest poprawny i zgodny ze standardami projektu. W tym celu możesz użyć polecenia:
 
 ```bash
-npm run format   # automatycznie sformatuje wszystkie pliki zgodnie z Prettier
+npm run check
+```
+
+Polecenie check wykonuje kolejno:
+
+```bash
 npm run prettier   # sprawdzi, czy pliki są poprawnie sformatowane (bez zapisu zmian)
 npm run lint   # sprawdzi styl kodu zgodnie z ESLint
 npm run test   # uruchamia testy jednostkowe i integracyjne
 ```
 
+Jeżeli chcesz automatycznie poprawić formatowanie plików, możesz użyć:
+
+```bash
+npm run format   # automatycznie sformatuje wszystkie pliki zgodnie z Prettier
+```
+
 Dzięki temu kod w repozytorium jest zawsze poprawny i zgodny ze standardami projektu.
+
+4️⃣ GitHub Actions Workflow – Testy i Skan kodu źródłowego
+
+- Testy jednostkowe, integracyjne i E2E
+
+  - Uruchamiane przy pushu do branchy: main, develop, feature-fe
+  - Testy uruchamiane są na Node.js 24.x
+  - E2E testy Playwright wykonują się po zbudowaniu frontendu i uruchomieniu serwera developerskiego
+
+- Skan bezpieczeństwa source code (Trivy FS scan)
+  - Analizuje folder ./app oraz zależności (node_modules)
+  - Wykrywa podatności w bibliotekach i pakietach (CRITICAL/HIGH)
+  - Nie skanuje logiki biznesowej ani tajnych danych
 
 ### 🐳 Uruchomienie i obraz Docker oraz środowisko developerskie
 
@@ -294,11 +309,24 @@ Obraz jest przygotowany w kilku etapach:
 
 ### ⚠️ Uwagi dotyczące testów E2E w Dockerze
 
-> Testy E2E nie są uruchamiane w obrazie Docker podczas jego budowy, ponieważ:
+Testy E2E **nie są uruchamiane podczas budowania obrazu Docker (`docker build`)**, ponieważ:
 
->- Wymagają działającego backendu/frontendu w sieci, co w trakcie budowania obrazu jest trudne do zapewnienia.
->- Uruchamianie ich blokowałoby proces budowania (start serwera w tle pozostawałby w nieskończoność...).
->- Zamiast tego testy E2E są uruchamiane w osobnym kontenerze (`e2e-tests`) jako użytkownik root lub przez workflow `tests-ci.yml`.
+- **Izolacja środowiska budowania**  
+  Podczas fazy `docker build` środowisko jest tymczasowe i odizolowane.  
+  Testy E2E wymagają działającego serwera dostępnego pod konkretnym adresem URL, co w trakcie builda jest trudne lub niemożliwe do poprawnego skonfigurowania.
+
+- **Charakter procesów serwerowych**  
+  Uruchomienie serwera (np. Vite) to proces długotrwały, który nie kończy się samoczynnie.  
+  Docker Build wymaga, aby każda instrukcja zakończyła się sukcesem przed przejściem do kolejnej, co uniemożliwia jednoczesne uruchomienie serwera i wykonanie testów E2E w jednym kroku.
+
+- **Separacja odpowiedzialności**  
+  Testy E2E są uruchamiane w osobnym kontenerze (`e2e-tests`) dopiero po pełnym starcie aplikacji.  
+  Dzięki temu testy działają w warunkach zbliżonych do produkcyjnych i komunikują się z aplikacją przez sieć Dockera, dokładnie tak jak robi to realny użytkownik.
+
+Testy E2E są uruchamiane:
+- w osobnym kontenerze (`e2e-tests`) jako użytkownik `root` (zgodnie z wymaganiami Playwrighta),
+- lub w dedykowanym workflow CI (`tests-ci.yml`).
+
 
 2. Build frontendu
 
@@ -317,10 +345,16 @@ Dzięki temu obraz jest gotowy do użycia zarówno w środowisku developerskim, 
 Start środowiska developerskiego w katalogu głównym projektu:
 
 ```bash
+ chmod +x startdev.sh  # nadaj uprawnienia (tylko za pierwszym razem)
 ./startdev.sh
 ```
-
-Skrypt wykona:
+⚠️ Uwagi:
+Polecenie npm run dev działa tylko lokalnie na hoście, nie w kontenerze, ponieważ port 3000 w kontenerze jest już zajęty.
+Frontend w kontenerze (e-commerce-store) uruchamia się automatycznie i jest dostępny w przeglądarce pod adresem:
+```bash
+http://localhost:3000
+```
+Testy E2E w kontenerze wymagają działającego kontenera frontendowego, dlatego port 3000 musi być dostępny dla przeglądarki i kontenerów testowych.
 
 ```bash
 docker compose up -d e-commerce-store # Uruchomienie kontenera frontendowego
@@ -355,30 +389,31 @@ docker compose down
 
 To zatrzymuje i usuwa kontener, pozostawiając kod lokalnie.
 
-3️⃣ Obraz Docker do CI/CD
+3️⃣ Continuous Integration (CI) i Continuous Delivery (CD)
 
-- W repozytorium jest skonfigurowany workflow GitHub Actions, który:
-- Przeprowadza testy jednostkowe, integracyjne
-- Uruchamia testy E2E (Playwright, tryb headlessowy) w osobnym workflow GitHub Actions (`test-ci.yml`), niezależnie od procesu budowy obrazu Docker
-- Buduje obraz Docker (build frontendu dist)
+W repozytorium skonfigurowany jest workflow GitHub Actions, który:
+
+- Uruchamia testy jednostkowe i integracyjne
+- Uruchamia testy E2E (Playwright, tryb headless) w osobnym workflow (`tests-ci.yml`)
+- Buduje produkcyjny obraz Docker frontendu (statyczny build `dist`)
 - Serwuje aplikację przez Nginx (port 8080)
 - Publikuje obraz do GitHub Container Registry (ghcr.io)
 - Wykonuje skan bezpieczeństwa Trivy przy push’u tagów:
   - Analizuje gotowy obraz Docker
-  - Wykrywa podatności CRITICAL/HIGH w systemie operacyjnym oraz bibliotekach w obrazie
-  - Uruchamia się tylko przy tagowaniu obrazu (push tagów do GHCR)
+  - Wykrywa podatności CRITICAL/HIGH w systemie operacyjnym oraz bibliotekach
+  - Uruchamia się wyłącznie przy tagowaniu obrazu
 
-Dzięki temu użytkownik końcowy może od razu użyć gotowego obrazu bez ręcznego buildowania.
+Obraz Docker jest publikowany **wyłącznie po pomyślnym przejściu wszystkich testów**.
+Dzięki temu użytkownik końcowy może od razu użyć gotowego, zweryfikowanego obrazu bez ręcznego buildowania.
 
 📂 Struktura repozytorium
 
 ```bash
 E-Commerce-store/
 ├─ .github/workflows/           # Folder z workflow GitHub Actions
-│   ├─ cicd.yml                 # CI/CD: testy, build obrazu Docker, publikacja do GHCR
+│   ├─ ci-cd.yml                 # CI/CD: testy, build obrazu Docker, publikacja do GHCR
 │   └─ test-ci.yml              # Uruchamianie testów jednostkowych, integracyjnych i E2E
 ├─ app/                         # Główny folder aplikacji frontendowej (Vite + React)
-│   ├─ .husky/                  # Konfiguracja Husky do pre-commit hooks (formatowanie, lint, testy)
 │   ├─ e2e/                     # Testy end-to-end (Playwright)
 │   ├─ public/                  # Pliki statyczne dostępne publicznie (obrazy, favicon, itp.)
 │   ├─ src/                      # Kod źródłowy aplikacji
@@ -400,6 +435,7 @@ E-Commerce-store/
 │   └─ package.json              # Zależności i skrypty projektu (dla frontendu)
 ├─ README.md                     # Dokumentacja projektu
 ├─ startdev.sh                   # Skrypt uruchamiający środowisko developerskie w Dockerze
+├─ startdev-e2e.sh               # Skrypt uruchamiający środowisko dla testów E2E w Dockerze
 ├─ .dockerignore                 # Ignorowane pliki przy buildzie obrazu Docker
 ├─ .env                          # USER_ID=1000, GROUP_ID=1000
 ├─ .gitignore                    # Ignorowane pliki w repozytorium git

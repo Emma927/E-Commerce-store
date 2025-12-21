@@ -1,5 +1,15 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { Box, Grid, Typography, MenuItem, Select, FormControl, InputLabel, useTheme, Button } from '@mui/material';
+import {
+  Box,
+  Grid,
+  Typography,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Button,
+} from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { useIntersection } from '@mantine/hooks';
 import { useProductsInfinite } from '@/hooks/useProductsInfinite';
 import { ProductCard } from '@/components/common/ProductCard';
@@ -85,14 +95,28 @@ const Products = () => {
     if (selectedRating) params.rating = selectedRating;
 
     setSearchParams(params, { replace: true }); // bo przy normalnej zmianie filtrów nie chcemy tworzyć historii, historia ma być tylko dla url akcji użytkownika, nie przy każdej aktualizacji redux
-  }, [selectedCategory, sortOrder, debouncedSearch, setSearchParams, selectedRating]);
+  }, [
+    selectedCategory,
+    sortOrder,
+    debouncedSearch,
+    setSearchParams,
+    selectedRating,
+  ]);
 
   /** Następuje “wysłanie zapytania” w reakcji na zmianę filtra.
  Po lewej stronie (const { data, isPending, ... } =) – to dane i statusy, które hook zwraca do komponentu.
 
 Po prawej stronie (argumenty useProductsInfinite({ category: selectedCategory, sort: sortOrder, pageSize: PAGE_SIZE })) – to parametry wejściowe, czyli to, co hook wykorzysta do wykonania zapytania (fetchProductsInfinite).
  */
-  const { data, isPending, isError, error, fetchNextPage, isFetchingNextPage, hasNextPage } = useProductsInfinite({
+  const {
+    data,
+    isPending,
+    isError,
+    error,
+    fetchNextPage,
+    isFetchingNextPage,
+    hasNextPage,
+  } = useProductsInfinite({
     category: selectedCategory,
     sort: sortOrder,
     pageSize: PAGE_SIZE,
@@ -151,10 +175,16 @@ infinite scroll zaczyna dopiero przy ładowaniu następnych danych
     // 1. Wyczyszczenie Redux
     dispatch(resetFilters()); // reset Redux
     // 2. Reset URL
-    setSearchParams({ category: 'all', sort: 'asc', search: '', rating: 0 }, { replace: true });
+    setSearchParams(
+      { category: 'all', sort: 'asc', search: '', rating: 0 },
+      { replace: true },
+    );
     // 3. Reset i refetch React Query
     queryClient.resetQueries({ queryKey: ['products-infinite'], exact: false }); // Czyści,  po resetQueries kasuje stare strony (stary infinite scroll)
-    queryClient.invalidateQueries({ queryKey: ['products-infinite'], exact: false }); // fetch od nowa, po invalidateQueries pobiera nowy start (pierwszą stronę)
+    queryClient.invalidateQueries({
+      queryKey: ['products-infinite'],
+      exact: false,
+    }); // fetch od nowa, po invalidateQueries pobiera nowy start (pierwszą stronę)
     // 4. Scroll na górę
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -163,23 +193,46 @@ infinite scroll zaczyna dopiero przy ładowaniu następnych danych
   const filteredProducts = useMemo(
     () =>
       allProducts
-        .filter((product) => product.title.toLowerCase().includes(debouncedSearch.toLowerCase()))
+        .filter((product) =>
+          product.title.toLowerCase().includes(debouncedSearch.toLowerCase()),
+        )
         // Operator ? : zwraca wtedy true → czyli wszystkie produkty przechodzą przez filtr, bo true zawsze pozwala elementowi zostać w tablicy.
         // Jeśli selectedRating > 0 → wtedy filtr sprawdza, czy Math.round(product.rating?.rate) === selectedRating.
-        .filter((product) => (selectedRating === 0 ? true : Math.round(product.rating?.rate) === selectedRating)),
-    [allProducts, debouncedSearch, selectedRating]
+        .filter((product) =>
+          selectedRating === 0
+            ? true
+            : Math.round(product.rating?.rate) === selectedRating,
+        ),
+    [allProducts, debouncedSearch, selectedRating],
   );
 
-  const handleCategoryChange = useCallback((value) => dispatch(setCategory(value)), [dispatch]);
-  const handleSortChange = useCallback((value) => dispatch(setSortOrder(value)), [dispatch]);
-  const handleSearchChange = useCallback((value) => dispatch(setSearchQuery(value)), [dispatch]);
-  const handleRatingChange = useCallback((value) => dispatch(setRatingQuery(value)), [dispatch]);
+  const handleCategoryChange = useCallback(
+    (value) => dispatch(setCategory(value)),
+    [dispatch],
+  );
+
+  const handleSortChange = useCallback(
+    (value) => dispatch(setSortOrder(value)),
+    [dispatch],
+  );
+
+  const handleSearchChange = useCallback(
+    (value) => dispatch(setSearchQuery(value)),
+    [dispatch],
+  );
+
+  const handleRatingChange = useCallback(
+    (value) => dispatch(setRatingQuery(value)),
+    [dispatch],
+  );
 
   if (isPending) return <Spinner />;
   if (isError)
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
-        <Typography color="error">{error?.message || 'Cannot get the products.'}</Typography>
+        <Typography color="error">
+          {error?.message || 'Cannot get the products.'}
+        </Typography>
       </Box>
     );
 
@@ -280,7 +333,12 @@ infinite scroll zaczyna dopiero przy ładowaniu następnych danych
             </Select>
           </FormControl>
 
-          <Button variant="contained" color="secondary" onClick={handleReset} sx={{ ml: 2 }}>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={handleReset}
+            sx={{ ml: 2 }}
+          >
             Reset
           </Button>
         </Box>
@@ -322,35 +380,68 @@ infinite scroll zaczyna dopiero przy ładowaniu następnych danych
       {/* NO RESULTS SECTION */}
       {/* Brak produktów w ogóle */}
       {allProducts.length === 0 && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', mt: 4 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            mt: 4,
+          }}
+        >
           <Typography variant="h6">No products to view.</Typography>
         </Box>
       )}
 
       {/* Brak produktów po wyszukiwarce */}
-      {allProducts.length > 0 && filteredProducts.length === 0 && debouncedSearch && selectedRating === 0 && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', mt: 4 }}>
-          <Typography variant="h6">No products match your search.</Typography>
-          <Typography variant="subtitle1" color="error" sx={{ fontWeight: 'bold', mb: 3 }}>
-            “{debouncedSearch}”
-          </Typography>
-          <Typography variant="body2" sx={{ opacity: 0.7 }}>
-            Try using different keywords.
-          </Typography>
-        </Box>
-      )}
+      {allProducts.length > 0 &&
+        filteredProducts.length === 0 &&
+        debouncedSearch &&
+        selectedRating === 0 && (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              mt: 4,
+            }}
+          >
+            <Typography variant="h6">No products match your search.</Typography>
+            <Typography
+              variant="subtitle1"
+              color="error"
+              sx={{ fontWeight: 'bold', mb: 3 }}
+            >
+              “{debouncedSearch}”
+            </Typography>
+            <Typography variant="body2" sx={{ opacity: 0.7 }}>
+              Try using different keywords.
+            </Typography>
+          </Box>
+        )}
 
       {/* Brak produktów po filtrze rating */}
-      {allProducts.length > 0 && filteredProducts.length === 0 && selectedRating > 0 && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', mt: 4 }}>
-          <Typography variant="h6">No rating on this scale.</Typography>
-        </Box>
-      )}
+      {allProducts.length > 0 &&
+        filteredProducts.length === 0 &&
+        selectedRating > 0 && (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              mt: 4,
+            }}
+          >
+            <Typography variant="h6">No rating on this scale.</Typography>
+          </Box>
+        )}
 
       {/* LISTA PRODUKTÓW */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         {filteredProducts.map((product) => (
-          <Grid item key={product.id} xs={12} md={6} lg={4}>
+          <Grid key={product.id} size={{ xs: 12, md: 6, lg: 4 }}>
             <ProductCard {...product} />
           </Grid>
         ))}

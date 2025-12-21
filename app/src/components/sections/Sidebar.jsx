@@ -1,5 +1,11 @@
 import { NavLink } from 'react-router-dom';
-import { List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import {
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+} from '@mui/material';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '@/store/authSlice';
@@ -56,8 +62,10 @@ const Sidebar = () => {
               )}
               <ListItemText
                 primary={label}
-                primaryTypographyProps={{
-                  fontSize: { xs: '14px', md: '16px' },
+                slotProps={{
+                  primaryTypography: {
+                    fontSize: { xs: '14px', md: '16px' },
+                  },
                 }}
                 sx={{
                   display: { xs: 'none', xsm: 'block' }, // <400px tylko ikona
@@ -66,7 +74,11 @@ const Sidebar = () => {
             </ListItemButton>
           ) : (
             <ListItemButton
-              sx={{ gap: 1, justifyContent: { xs: 'center' }, flexDirection: { xs: 'column', md: 'row' } }}
+              sx={{
+                gap: 1,
+                justifyContent: { xs: 'center' },
+                flexDirection: { xs: 'column', md: 'row' },
+              }}
               onClick={() => handleClick(action)}
             >
               {Icon && (
@@ -76,8 +88,10 @@ const Sidebar = () => {
               )}
               <ListItemText
                 primary={label}
-                primaryTypographyProps={{
-                  fontSize: { xs: '14px', md: '16px' },
+                slotProps={{
+                  primaryTypography: {
+                    fontSize: { xs: '14px', md: '16px' },
+                  },
                 }}
                 sx={{
                   display: { xs: 'none', xsm: 'block' }, // <400px tylko ikona

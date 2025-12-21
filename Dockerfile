@@ -1,4 +1,4 @@
-# --- STAGE 1: TESTY E2E (Zawiera wszystko, by uruchomić testy) ---
+# --- STAGE 1: TESTY (Zawiera wszystko, by uruchomić testy jednostkowe i integracyjne) ---
 # Bazowy obraz Node.js 24, alias 'test_runner'
 FROM node:24 AS test_runner 
 # Ustawienie katalogu roboczego w kontenerze
@@ -7,8 +7,12 @@ WORKDIR /app
 # Kopiowanie CAŁEGO kodu i instalacja WSZYSTKICH zależności (devDependencies i dependencies)
 # Kopiowanie plików zależności do kontenera
 COPY ./app/package*.json ./
+
+# Dodajemy flagę --ignore-scripts, aby npm nie próbował konfigurować Husky/Git - W skrócie: Husky po ignore-scripts w Dockerze po prostu nie istnieje (jest uśpiony), i o to nam chodzi.
+RUN npm install --ignore-scripts
+
 # Instalacja wszystkich zależności (dependencies + devDependencies)
-RUN npm install
+# RUN npm install
 # Kopiowanie całego kodu aplikacji
 COPY ./app .
 

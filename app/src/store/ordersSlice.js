@@ -16,7 +16,9 @@ const ordersSlice = createSlice({
     },
     deleteOrder: (state, action) => {
       // action.payload = id zamówienia do usunięcia
-      state.orders = state.orders.filter((order) => order.id !== action.payload);
+      state.orders = state.orders.filter(
+        (order) => order.id !== action.payload,
+      );
       localStorage.setItem('orders', JSON.stringify(state.orders));
     },
     clearOrders: (state) => {

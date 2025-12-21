@@ -4,14 +4,11 @@ import Sidebar from '@/components/sections/Sidebar';
 
 const Dashboard = () => {
   return (
-    <Grid container direction={{ xs: 'column', md: 'row' }} >
+    <Grid container direction={{ xs: 'column', md: 'row' }}>
       {/* Sidebar */}
       <Grid
-        item
-        xs={12}
-        md={4}
+        size={{ xs: 12, md: 4 }}
         sx={{
-          width: { xs: '100%', md: 'auto' },
           p: { xs: 0, md: 2 },
           position: { xs: 'fixed', md: 'sticky' },
           top: { xs: 'auto', md: '90px' }, // desktop: przyklejony od góry
@@ -23,14 +20,14 @@ const Dashboard = () => {
           backgroundColor: 'background.default', // żeby nie było przezroczyste,
           display: 'flex',
           flexDirection: 'column', // ułożenie dzieci w kolumnie
-         justifyContent: 'center', // pionowe wyśrodkowanie
+          justifyContent: 'center', // pionowe wyśrodkowanie
         }}
       >
         <Sidebar />
       </Grid>
 
       {/* Główny content */}
-      <Grid item xs={12} md={8} pt={1} pl={{ xs: 0, md: 3 }}>
+      <Grid size={{ xs: 12, md: 8 }} pt={1} pl={{ xs: 0, md: 3 }}>
         <Outlet />
       </Grid>
     </Grid>

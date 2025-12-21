@@ -11,7 +11,10 @@ import { FAKE_API_URL } from '@/constants';
  * - Hook useProductsInfinite zajmuje się tylko paginacją po stronie klienta,
  *   cache'owaniem i react-query logic.
  */
-export const fetchProductsInfinite = async ({ category, sort = 'asc' } = {}) => {
+export const fetchProductsInfinite = async ({
+  category,
+  sort = 'asc',
+} = {}) => {
   // = {} na końcu ma inną rolę: gwarantuje, że jeśli funkcja zostanie wywołana bez argumentu w ogóle, np. fetchProductsInfinite(), to destrukturyzacja nie wyrzuci błędu.
   // Wartość domyślna sort = 'asc' działa tylko jeśli argument sort w ogóle nie istnieje w przekazanym obiekcie.
   const url = category
@@ -24,7 +27,9 @@ export const fetchProductsInfinite = async ({ category, sort = 'asc' } = {}) => 
   const data = await response.json();
 
   // 🔹 Sortujemy już tutaj po stronie „backendu” (API zwraca wszystkie produkty)
-  return data.sort((a, b) => (sort === 'asc' ? a.price - b.price : b.price - a.price));
+  return data.sort((a, b) =>
+    sort === 'asc' ? a.price - b.price : b.price - a.price,
+  );
 };
 
 /**
@@ -35,7 +40,13 @@ export const fetchProductsInfinite = async ({ category, sort = 'asc' } = {}) => 
  * - hook zajmuje się tylko: paginacją po stronie klienta i zarządzaniem query cache
  * - dzięki temu komponent Products nie musi znać logiki sortowania ani pobierać wszystkich danych
  */
-export const useProductsInfinite = ({ category, pageSize = 6, sort, search = '', rating = 0 } = {}) =>
+export const useProductsInfinite = ({
+  category,
+  pageSize = 6,
+  sort,
+  search = '',
+  rating = 0,
+} = {}) =>
   useInfiniteQuery({
     queryKey: ['products-infinite', { category, sort, search, rating }],
     // pageParam = 0 w hooku to startowy indeks w tablicy produktów, od którego zaczyna się wycinek (slice) dla pierwszej „strony” infinite scroll.
@@ -52,9 +63,11 @@ export const useProductsInfinite = ({ category, pageSize = 6, sort, search = '',
     // React Query używa getNextPageParam, żeby wiedzieć, od którego indeksu pobrać kolejną stronę:
     getNextPageParam: (lastPage, allPages) => {
       if (!lastPage || lastPage.length < pageSize) return undefined;
-      return allPages.flat().length;
+      return allPages.flat().length; // allPages.flat().length → daje liczbę produktów pobranych do tej pory, czyli indeks startowy dla następnej strony.
     },
-    staleTime: 1000 * 60 * 5,
-    cacheTime: 1000 * 60 * 10,
-    retry: 1,
+    staleTime: 1000 * 60 * 5, // 5 minut (ms) → przez ten czas React Query uważa dane za "świeże" i **nie będzie ponownie fetchować** przy remount lub ponownym użyciu queryKey
+    cacheTime: 1000 * 60 * 10, // 10 minut (ms) → ile czasu dane pozostają w pamięci cache **po tym jak query przestanie być używane**.
+    // Po tym czasie React Query usunie je z cache.
+    retry: 1, // Liczba prób ponowienia zapytania w przypadku błędu fetcha.
+    // Tutaj: jeśli fetch się nie powiedzie, React Query spróbuje jeszcze 1 raz przed ustawieniem isError = true
   });
