@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import { ColorModeProvider } from '@/context/color-mode/ColorModeContext';
+import { ColorModeProvider } from '@/context/color-mode/ColorModeProvider';
 import { Provider } from 'react-redux';
 import { store } from '@/store/store';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';

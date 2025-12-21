@@ -73,8 +73,6 @@ const Products = () => {
 
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const isTest = process.env.NODE_ENV === 'test'; // <-- flaga dla testów  ???czy zostawic
-
   // a) Pobieranie parametrów z URL przy mount:
   useEffect(() => {
     const categoryFromUrl = searchParams.get('category') || 'all';
@@ -443,7 +441,7 @@ infinite scroll zaczyna dopiero przy ładowaniu następnych danych
       {/* LISTA PRODUKTÓW */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         {filteredProducts.map((product) => (
-          <Grid item key={product.id} xs={12} md={6} lg={4}>
+          <Grid key={product.id} size={{ xs: 12, md: 6, lg: 4 }}>
             <ProductCard {...product} />
           </Grid>
         ))}

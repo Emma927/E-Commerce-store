@@ -4,14 +4,26 @@ services:
     container_name: e-commerce-store
     volumes:
       - .:/workspace
-      # To MUSI być tutaj - bez tego tunel fizycznie nie powstanie:
+        # Montuje socket SSH agenta z hosta do kontenera, żeby można było używać kluczy SSH bez kopiowania ich do kontenera
+        # MAPOWANIE SOCKETU AGENTA SSH:
+        # Pozwala kontenerowi "rozmawiać" z agentem SSH uruchomionym na systemie (hoście).
+        # Dzięki temu Git w kontenerze użyje prywatnych kluczy do uwierzytelnienia (np. przy git push),
+        # ale same klucze fizycznie nigdy nie zostaną skopiowane do środka kontenera.
       - ${SSH_AUTH_SOCK}:/run/host-services/ssh-auth.sock
-      # DODAJ TĘ LINIĘ:
+      # Montuje lokalny plik gitconfig do kontenera w trybie tylko do odczytu, żeby zachować konfigurację użytkownika git
+      # MAPOWANIE KONFIGURACJI GITA:
+      # Montuje lokalny plik .gitconfig w trybie tylko do odczytu (:ro).
+      # Dzięki temu w kontenerze od razu jest ustawione swoje Imię, Nazwisko i Email autora commitów.
+      # Tryb :ro chroni główny plik przed przypadkową zmianą z wnętrza kontenera.
       - ~/.gitconfig:/home/node/.gitconfig:ro
     working_dir: /workspace/app
     user: "${USER_ID}:${GROUP_ID}"
-    environment: # DODAJ TĘ SEKCJĘ (LUB DOPISZ DO ISTNIEJĄCEJ):
-      # To MUSI być tutaj - bez tego tunel fizycznie nie powstanie:
+    environment:
+      # ZMIENNA ŚRODOWISKOWA SSH:
+      # Wskazuje narzędziom w kontenerze (np. Gitowi), gdzie dokładnie znajduje się zamontowany socket.
+      # Bez tej zmiennej Git nie wiedziałby, przez który "plik" ma się komunikować z Twoim agentem SSH,
+      # i pytałby o hasło lub odrzucił połączenie przy próbie wypchnięcia zmian.
+      # Ustawia zmienną środowiskową w kontenerze, aby narzędzia SSH (np. git push/pull) wiedziały, gdzie jest socket agenta. To MUSI być tutaj - bez tego tunel fizycznie nie powstanie:
       - SSH_AUTH_SOCK=/run/host-services/ssh-auth.sock
     tty: true # Wirtualny terminal. Utrzymuje kontener aktywnym(bez niego kontener od razu może się zakońćzyć), ułatwia debug i kolorowy output.
     # stdin_open: true  # pozwala na otwarcie stdin, czyli interakcję z kontenerem, bez stdin nie można robić interaktywnych rzeczy typu podłączenie się do kontenera i pisanie w konsoli. - nie potrzbene bo wchodze przez -it
@@ -52,4 +64,3 @@ services:
     command: ["tail", "-f", "/dev/null"]
 
     # Testy E2E (Playwright) zostały usunięte z Dockerfile – słusznie, bo E2E najlepiej uruchamiać po uruchomieniu kontenera frontendowego, np. w docker-compose jako osobny serwis. Dzięki temu nie blokują builda i nie wymagają uruchamiania frontendu w tle w czasie builda.
-    

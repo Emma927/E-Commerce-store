@@ -62,8 +62,10 @@ const Sidebar = () => {
               )}
               <ListItemText
                 primary={label}
-                primaryTypographyProps={{
-                  fontSize: { xs: '14px', md: '16px' },
+                slotProps={{
+                  primaryTypography: {
+                    fontSize: { xs: '14px', md: '16px' },
+                  },
                 }}
                 sx={{
                   display: { xs: 'none', xsm: 'block' }, // <400px tylko ikona
@@ -86,8 +88,10 @@ const Sidebar = () => {
               )}
               <ListItemText
                 primary={label}
-                primaryTypographyProps={{
-                  fontSize: { xs: '14px', md: '16px' },
+                slotProps={{
+                  primaryTypography: {
+                    fontSize: { xs: '14px', md: '16px' },
+                  },
                 }}
                 sx={{
                   display: { xs: 'none', xsm: 'block' }, // <400px tylko ikona

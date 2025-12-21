@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
 import { AppBar, Toolbar, IconButton, Box, Button } from '@mui/material';
 import { styled } from '@mui/material/styles';
@@ -23,7 +23,6 @@ const StyledNavLink = styled(NavLink)(({ theme }) => ({
   justifyContent: 'center',
   alignItems: 'center',
   height: '100%',
-  color: theme.palette.text.secondary,
   '&:hover': {
     color: theme.palette.primary.main,
     backgroundColor: theme.palette.action.hover,
@@ -34,28 +33,43 @@ const StyledNavLink = styled(NavLink)(({ theme }) => ({
 const Navigation = () => {
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [nextPath, setNextPath] = useState(null);
+  const pendingPathRef = useRef(null); // referencja do ścieżki, aby nie używać dodatkowego stanu
+  // const [nextPath, setNextPath] = useState(null);
   const username = useSelector(selectUsername);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const cartCount = useSelector(selectCartTotalItems);
 
   const favouritesCount = useSelector(selectFavouritesCount);
 
-  // Funkcja zamykająca Drawer i resetująca kategorie
-  const handleNavigate = (path) => {
-    // Drawer zostaje zamknięty (drawerOpen = false) i animacja kończy się naturalnie.
-    setDrawerOpen(false); // zamykamy Drawer,
-    setNextPath(path); // ustawiamy trasę do przejścia
-  };
+  // // Funkcja zamykająca Drawer i resetująca kategorie
+  // const handleNavigate = (path) => {
+  //   // Drawer zostaje zamknięty (drawerOpen = false) i animacja kończy się naturalnie.
+  //   setDrawerOpen(false); // zamykamy Drawer,
+  //   setNextPath(path); // ustawiamy trasę do przejścia
+  // };
 
   // useEffect nasłuchuje na drawerOpen i wywołuje navigate() dopiero, gdy Drawer jest zamknięty, dzięki czemu wszystko działa płynnie.
-  useEffect(() => {
-    if (!drawerOpen && nextPath) {
-      navigate(nextPath);
-      // setNextPath(null) resetuje stan, żeby nie wywoływać navigate() ponownie przy kolejnym renderze.
-      setNextPath(null);
+  // useEffect(() => {
+  //   if (!drawerOpen && nextPath) {
+  //     navigate(nextPath);
+  //     // setNextPath(null) resetuje stan, żeby nie wywoływać navigate() ponownie przy kolejnym renderze.
+  //     setNextPath(null);
+  //   }
+  // }, [drawerOpen, nextPath, navigate]);
+
+  // Funkcja obsługująca kliknięcie linku w Drawer
+  const handleNavigate = (path) => {
+    pendingPathRef.current = path; // zapisujemy ścieżkę, zapamiętaj dokąd iść
+    setDrawerOpen(false); // zamykamy Drawer (animacja), zamknij Drawer (start animacji)
+  };
+
+  // Callback wywołany po zakończeniu animacji Drawer (MUI)
+  const handleDrawerExited = () => {
+    if (pendingPathRef.current) {
+      navigate(pendingPathRef.current);
+      pendingPathRef.current = null;
     }
-  }, [drawerOpen, nextPath, navigate]);
+  };
 
   return (
     <>
@@ -195,6 +209,7 @@ const Navigation = () => {
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         handleNavigate={handleNavigate}
+        onExited={handleDrawerExited} // <- tutaj płynna nawigacja po animacji
         cartCount={cartCount}
         favouritesCount={favouritesCount}
         isAuthenticated={isAuthenticated}

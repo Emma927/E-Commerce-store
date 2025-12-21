@@ -40,13 +40,13 @@ const ThemeToggleButtonComponent = () => {
         justifyContent: 'center',
         alignItems: 'center',
         height: '100%',
-        color: theme.palette.text.secondary,
         '&:hover': {
           color: theme.palette.primary.main,
           backgroundColor: theme.palette.action.hover,
         },
         '&.active': { color: theme.palette.primary.main, fontWeight: 'bold' },
       }}
+      centerRipple={false} // <--- ripple punktowy pod kursorem
     >
       {mode === 'dark' ? (
         <Brightness7Icon sx={{ fontSize: { md: '25px' } }} />

@@ -17,7 +17,7 @@
     "test:e2e-ci": "npx wait-on $PLAYWRIGHT_BASE_URL && npx playwright test ./e2e --reporter=list",
     "testing-tool": "set TESTING_TOOL=true& playwright test --ui",
     "start:e2e": "serve -s dist -l 3000",
-    "prepare": "husky"
+    "prepare": "cd .. && git config core.hooksPath .husky"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

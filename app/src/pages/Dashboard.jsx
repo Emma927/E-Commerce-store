@@ -7,11 +7,8 @@ const Dashboard = () => {
     <Grid container direction={{ xs: 'column', md: 'row' }}>
       {/* Sidebar */}
       <Grid
-        item
-        xs={12}
-        md={4}
+        size={{ xs: 12, md: 4 }}
         sx={{
-          width: { xs: '100%', md: 'auto' },
           p: { xs: 0, md: 2 },
           position: { xs: 'fixed', md: 'sticky' },
           top: { xs: 'auto', md: '90px' }, // desktop: przyklejony od góry
@@ -30,7 +27,7 @@ const Dashboard = () => {
       </Grid>
 
       {/* Główny content */}
-      <Grid item xs={12} md={8} pt={1} pl={{ xs: 0, md: 3 }}>
+      <Grid size={{ xs: 12, md: 8 }} pt={1} pl={{ xs: 0, md: 3 }}>
         <Outlet />
       </Grid>
     </Grid>

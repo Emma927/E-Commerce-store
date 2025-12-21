@@ -34,9 +34,20 @@ export const NavigationDrawer = ({
   isAuthenticated,
   username,
   currentPath,
+  onExited, // <-- dodaj prop onExited
 }) => {
   return (
-    <Drawer anchor="right" open={open} onClose={onClose}>
+    <Drawer
+      anchor="right"
+      open={open}
+      onClose={onClose}
+      // Nowoczesne podejście slotowe
+      slotProps={{
+        transition: {
+          onExited: onExited, // callback wywołany po zakończeniu animacjico ten callback robi?
+        },
+      }}
+    >
       <List sx={{ width: 250, py: 2 }}>
         {/* Products */}
         <ListItem disablePadding>

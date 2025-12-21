@@ -114,11 +114,8 @@ const Home = () => {
               {topProducts.length ? (
                 topProducts.map((product) => (
                   <Grid
-                    item
                     key={product.id}
-                    xs={12}
-                    md={6}
-                    lg={4}
+                    size={{ xs: 12, md: 6, lg: 4 }}
                     data-testid={`product-${product.id}`}
                   >
                     <ProductCard {...product} />

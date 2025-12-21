@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/hooks/useUser';
 import {
@@ -18,7 +18,7 @@ const CheckoutSuccess = () => {
   const { data: user } = useUser();
 
   // undefined = ładowanie, null = brak orderu, object = OK
-  const [lastOrder, setLastOrder] = useState(undefined); // undefined → Jeszcze nie sprawdzono /jeszcze nie załadowano danych
+  // const [lastOrder, setLastOrder] = useState(undefined); // undefined → Jeszcze nie sprawdzono /jeszcze nie załadowano danych
 
   /**
 Cecha	sessionStorage	localStorage
@@ -26,15 +26,26 @@ Czas przechowywania	Tylko w trakcie sesji (zamykanie karty = usunięcie)	Trwałe
 Odświeżenie strony	Dane zostają	Dane zostają
 Nawigacja między stronami	Dane zostają	Dane zostają
 Usuwanie po kluczu (removeItem)	Tak, tylko ten klucz	Tak, tylko ten klucz */
-  useEffect(() => {
-    const order = JSON.parse(sessionStorage.getItem('lastOrder'));
+  //   useEffect(() => {
+  //     const order = JSON.parse(sessionStorage.getItem('lastOrder'));
+  //
+  //     if (order) {
+  //       setLastOrder(order);
+  //     } else {
+  //       setLastOrder(null); // jawny brak
+  //     }
+  //   }, []);
 
-    if (order) {
-      setLastOrder(order);
-    } else {
-      setLastOrder(null); // jawny brak
-    }
-  }, []);
+  // const lastOrder = (() => {
+  //   const raw = sessionStorage.getItem('lastOrder');
+  //   return raw ? JSON.parse(raw) : null;
+  // })();
+  // const raw = sessionStorage.getItem('lastOrder');
+  // const lastOrder = raw ? JSON.parse(raw) : null;
+  const [lastOrder] = useState(() => {
+    const raw = sessionStorage.getItem('lastOrder');
+    return raw ? JSON.parse(raw) : null;
+  });
 
   // ŁADOWANIE → tylko raz, bez migania
   if (lastOrder === undefined) {

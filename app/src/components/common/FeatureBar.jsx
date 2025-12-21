@@ -7,10 +7,8 @@ export const FeatureBar = () => {
       <Grid container spacing={4} justifyContent="center" alignItems="center">
         {FEATURES.map(({ icon: Icon, title, subtitle }, index) => (
           <Grid
-            item
             key={index}
-            xs={12}
-            sm={4}
+            size={{ xs: 12, sm: 4 }}
             sx={{
               textAlign: 'center',
               display: 'flex',

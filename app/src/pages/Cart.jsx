@@ -58,9 +58,7 @@ const Cart = () => {
       </Typography>
       <Grid container spacing={2}>
         <Grid
-          item
-          xs={12}
-          md={8}
+          size={{ xs: 12, md: 8 }}
           sx={{
             mb: {
               xs: '185px',
@@ -145,7 +143,7 @@ const Cart = () => {
           ))}
         </Grid>
 
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <Box
             sx={{
               display: { xs: 'flex', md: 'block' },
