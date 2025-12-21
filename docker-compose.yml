@@ -16,8 +16,18 @@ services:
       # Dzięki temu w kontenerze od razu jest ustawione swoje Imię, Nazwisko i Email autora commitów.
       # Tryb :ro chroni główny plik przed przypadkową zmianą z wnętrza kontenera.
       - ~/.gitconfig:/home/node/.gitconfig:ro
+            # ZAUFANE HOSTY SSH:
+      # Mapuje listę znanych hostów (np. github.com, bitbucket.org) z Twojego systemu do kontenera.
+      # Dzięki temu SSH w kontenerze od razu "ufa" serwerom, które już znasz na hoście.
+      # Eliminuje to interaktywne pytania "Are you sure you want to continue connecting?" 
+      # podczas operacji Git (push/pull) i pozwala na pełną automatyzację pracy.
+      - ~/.ssh/known_hosts:/home/node/.ssh/known_hosts:ro
     working_dir: /workspace/app
+    # Zapis user: "${USER_ID}:${GROUP_ID}" mówi Dockerowi: "Nie uruchamiaj tego kontenera jako root, ale jako konkretny użytkownik o takich numerach ID".
     user: "${USER_ID}:${GROUP_ID}"
+    # group_add: ["1000"] – pozwala użytkownikowi node (wewnątrz kontenera) uzyskać dostęp do socketu agenta SSH z hosta.
+    group_add:
+      - "1000" # Pozwala użytkownikowi node czytać socket SSH należący do roota/systemu
     environment:
       # ZMIENNA ŚRODOWISKOWA SSH:
       # Wskazuje narzędziom w kontenerze (np. Gitowi), gdzie dokładnie znajduje się zamontowany socket.
