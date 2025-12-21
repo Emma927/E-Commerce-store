@@ -8,7 +8,7 @@ WORKDIR /app
 # Kopiowanie plików zależności do kontenera
 COPY ./app/package*.json ./
 
-# Dodajemy flagę --ignore-scripts, aby npm nie próbował konfigurować Husky/Git
+# Dodajemy flagę --ignore-scripts, aby npm nie próbował konfigurować Husky/Git - W skrócie: Husky po ignore-scripts w Dockerze po prostu nie istnieje (jest uśpiony), i o to nam chodzi.
 RUN npm install --ignore-scripts
 
 # Instalacja wszystkich zależności (dependencies + devDependencies)
