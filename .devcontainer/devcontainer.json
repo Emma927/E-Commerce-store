@@ -5,16 +5,33 @@
   "workspaceFolder": "/workspace",
   "customizations": {
     "vscode": {
+      "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        },
+        "autoRenameTag.enable": true,
+        "vitestExplorer.showCoverage": true,
+        "vitestExplorer.showInlineResults": true
+      },
       "extensions": [
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "dsznajder.es7-react-js-snippets",
-        "christian-kohler.path-intellisense",
-        "visualstudioexptteam.vscodeintellicode" // Lepsze podpowiedzi dla MUI
+        "Orta.vscode-jest",
+        "ms-playwright.playwright",
+        "formulahendry.auto-rename-tag",
+        "ms-azuretools.vscode-docker",
+        "GitHub.github-actions",
+        "CodeZombie.gitignore",
+        "ms-vscode.live-server",
+        "vitest-explorer.vitest-explorer"
       ]
     }
   },
   "remoteUser": "node",
   "forwardPorts": [3000],
-  "updateRemoteUserUID": true
+  "updateRemoteUserUID": true,
+  "postCreateCommand": "cp -f /workspace/.devcontainer/dotfiles/.bashrc /home/node/.bashrc && chown node:node /home/node/.bashrc"
 }
