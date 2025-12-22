@@ -1,4 +1,4 @@
-to tez zostaje? # 🏪 E-Commerce-store
+# 🏪 E-Commerce-store
 
 Aplikacja e-commerce została stworzona w ramach kursu JavaScript Developer, moduł specjalistyczny. Projekt ma na celu odwzorowanie funkcjonalności popularnych sklepów internetowych, pozwalając użytkownikom na intuicyjne przeglądanie, wybieranie i zakup produktów.
 
