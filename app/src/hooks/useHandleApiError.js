@@ -12,7 +12,7 @@ export const useHandleApiError = (queryKey, options = { useToast: true }) => {
   const queryClient = useQueryClient();
 
   /**
-   * Bez useCallback funkcja byłaby tworzona przy każdym renderze → useEffect odpalałby się za każdym razem. 
+   * Bez useCallback funkcja byłaby tworzona przy każdym renderze → useEffect odpalałby się za każdym razem.
    * Z useCallback referencja się nie zmienia, dopóki nie zmienią się zależności (queryClient, queryKey, options).
    */
   const handleError = useCallback(
@@ -41,7 +41,7 @@ export const useHandleApiError = (queryKey, options = { useToast: true }) => {
         return message || 'Unexpected error';
       }
     },
-    [queryClient, queryKey, options]
+    [queryClient, queryKey, options],
   );
 
   return handleError;
