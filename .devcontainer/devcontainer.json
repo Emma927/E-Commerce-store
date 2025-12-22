@@ -6,6 +6,7 @@
   "customizations": {
     "vscode": {
       "settings": {
+        "terminal.integrated.cwd": "/workspace/app",
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {
@@ -30,8 +31,10 @@
       ]
     }
   },
-  "remoteUser": "node",
+  // Zaloguj mnie jako zwykłego człowieka (node), a nie jako wszechmogącego administratora (root)”.
+  "remoteUser": "node", // Uprawnienia plików: Gwarantuje, że nie tworzysz plików jako root, więc nie będzie problemów z edycją ich w WSL (brak "kłódek").
   "forwardPorts": [3000],
+  // Rozwiązanie: Ten parametr sprawdza, jaki numer masz w WSL, i automatycznie zmienia numer użytkownika node w kontenerze, żeby pasował do Ciebie.
   "updateRemoteUserUID": true,
-  "postCreateCommand": "cp -f /workspace/.devcontainer/dotfiles/.bashrc /home/node/.bashrc && chown node:node /home/node/.bashrc"
+  "postCreateCommand": "cd app && npm install && cp -f /workspace/.devcontainer/dotfiles/.bashrc /home/node/.bashrc"
 }

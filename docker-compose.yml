@@ -1,9 +1,14 @@
 services:
   e-commerce-store:
-    image: node:24
+    build: 
+      context: .
+      dockerfile: Dockerfile # To jest Dockerfile dla środowiska Node 24
+      target: test_runner
     container_name: e-commerce-store
     volumes:
       - .:/workspace
+        # Dzięki temu operacje npm install są znacznie szybsze, bo nie muszą synchronizować tysięcy małych plików między kontenerem a Windowsem/Macem przez system plików.
+        # - /workspace/app/node_modules # Anonimowy wolumen dla szybkości
         # Montuje socket SSH agenta z hosta do kontenera, żeby można było używać kluczy SSH bez kopiowania ich do kontenera
         # MAPOWANIE SOCKETU AGENTA SSH:
         # Pozwala kontenerowi "rozmawiać" z agentem SSH uruchomionym na systemie (hoście).
@@ -16,10 +21,10 @@ services:
       # Dzięki temu w kontenerze od razu jest ustawione swoje Imię, Nazwisko i Email autora commitów.
       # Tryb :ro chroni główny plik przed przypadkową zmianą z wnętrza kontenera.
       - ~/.gitconfig:/home/node/.gitconfig:ro
-            # ZAUFANE HOSTY SSH:
+        # ZAUFANE HOSTY SSH:
       # Mapuje listę znanych hostów (np. github.com, bitbucket.org) z Twojego systemu do kontenera.
       # Dzięki temu SSH w kontenerze od razu "ufa" serwerom, które już znasz na hoście.
-      # Eliminuje to interaktywne pytania "Are you sure you want to continue connecting?" 
+      # Eliminuje to interaktywne pytania "Are you sure you want to continue connecting?"
       # podczas operacji Git (push/pull) i pozwala na pełną automatyzację pracy.
       - ~/.ssh/known_hosts:/home/node/.ssh/known_hosts:ro
     working_dir: /workspace/app
