@@ -83,7 +83,7 @@ jobs:
         working-directory: ./app # testy do e2e są w katalogu app
 
       - name: Run Playwright tests
-        run: npx playwright test  # Uruchamia testy end-to-end
+        run: npm run test:e2e-ci  # Uruchamia testy end-to-end
         working-directory: ./app 
 
       - uses: actions/upload-artifact@v4  # Upload raportu testów

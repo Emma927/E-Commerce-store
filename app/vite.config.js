@@ -23,7 +23,6 @@ export default defineConfig({
       exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**'],
     },
     environment: 'jsdom', // <- potrzebne dla RTL, to React Testing Library:
-
     // -nie renderuje komponentu w prawdziwej przeglądarce, tylko tworzy symulowany DOM (za pomocą jsdom) — w pamięci, w środowisku testowym.
     globals: true, // <- dodajemy globalne expect, test, describe - umożliwia to pomijanie importów:describe, expect, czy test z bibloteki vitest
     include: ['**/*.{spec,test}.{js,jsx}'],

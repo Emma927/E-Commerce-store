@@ -17,6 +17,15 @@ API służy wyłącznie celom edukacyjnym i testowym.
 
 ---
 
+⚙️ Uwagi dotyczące środowiska Docker i node_modules
+
+Projekt był rozwijany i testowany na WSL2, gdzie Docker działa na natywnym systemie plików Linux (ext4).
+W tym środowisku zastosowanie bind mountów nie powoduje problemów wydajnościowych, dlatego nie stosowano osobnych wolumenów Docker dla node_modules.
+
+Na macOS i Windows (bez WSL2) zalecane jest użycie osobnego wolumenu Docker dla node_modules, ze względu na koszt synchronizacji pomiędzy systemem plików hosta a maszyną wirtualną Dockera.
+
+---
+
 ## 🚀 Najważniejsze funkcje
 
 - Integracja z Fake Store API do uwierzytelniania użytkownika oraz pobierania danych o produktach
@@ -420,6 +429,8 @@ Testy E2E **nie są uruchamiane podczas budowania obrazu Docker (`docker build`)
 - **Izolacja środowiska budowania**  
   Podczas fazy `docker build` środowisko jest tymczasowe i odizolowane.  
   Testy E2E wymagają działającego serwera dostępnego pod konkretnym adresem URL, co w trakcie builda jest trudne lub niemożliwe do poprawnego skonfigurowania.
+
+  > TEGO NIE MAM: Testy E2E z przeglądarką wykonywane są po zbudowaniu obrazu, w dedykowanym kontenerze testowym. Umieszczenie ich wewnątrz Dockerfile niepotrzebnie zwiększyłoby rozmiar obrazu produkcyjnego o gigabajty danych przeglądarek i wydłużyłoby proces CI/CD. Moje podejście zapewnia czystość obrazu produkcyjnego (109 MB) i pełną izolację środowiska testowego.
 
 - **Charakter procesów serwerowych**  
   Uruchomienie serwera (np. Vite) to proces długotrwały, który nie kończy się samoczynnie.  
