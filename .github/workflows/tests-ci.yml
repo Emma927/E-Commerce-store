@@ -9,6 +9,8 @@ on:
 jobs:
   test:                         # Job o nazwie "test"
     runs-on: ubuntu-latest      # Uruchamia się na maszynie Ubuntu
+    env:
+      HUSKY: 0   # <-- dodajemy tu, aby wyłączyć Husky w CI
 
     strategy:
       matrix:
