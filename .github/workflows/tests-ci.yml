@@ -155,10 +155,10 @@ jobs:
 #        # Cache node_modules dla folderu app
 #       - uses: actions/cache@v3 # Używa akcji cache do przechowywania zależności między uruchomieniami workflow
 #         with:
-          path: ./app/node_modules  # Ścieżka do katalogu, który ma być zapisany w cache
-          key: ${{ runner.os }}-node-${{ hashFiles('app/package-lock.json') }} # Unikalny klucz cache oparty na systemie operacyjnym i hashu pliku package-lock.json
-          restore-keys: | # Klucz używany do przywrócenia cache, jeśli dokładny klucz nie istnieje (częściowe dopasowanie)
-            ${{ runner.os }}-node-
+          # path: ./app/node_modules  # Ścieżka do katalogu, który ma być zapisany w cache
+          # key: ${{ runner.os }}-node-${{ hashFiles('app/package-lock.json') }} # Unikalny klucz cache oparty na systemie operacyjnym i hashu pliku package-lock.json
+          # restore-keys: | # Klucz używany do przywrócenia cache, jeśli dokładny klucz nie istnieje (częściowe dopasowanie)
+          #   ${{ runner.os }}-node-
 #
 #       - run: npm i             # Instalacja zależności npm
 #         working-directory: ./app
