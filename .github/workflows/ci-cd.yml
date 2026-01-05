@@ -61,8 +61,7 @@ jobs:
         with:
           context: . # Kontekst builda (root repo)
           file: ./Dockerfile # Plik Dockerfile
-          push:
-            true # Wysyła obraz do GHCR
+          push: true # Wysyła obraz do GHCR
           # Generowanie atestacji zgodnie ze standardem SLSA (Supply-chain Levels for Software Artifacts).
           # sbom: Tworzy pełną listę składników obrazu (Software Bill of Materials) dla lepszego audytu bezpieczeństwa.
           # provenance: Zapisuje pełną historię budowania obrazu, co pozwala na weryfikację jego pochodzenia w Docker Scout.
@@ -122,6 +121,7 @@ jobs:
         run: npm run test:e2e-ci
         env:
           PLAYWRIGHT_BASE_URL: http://localhost:8080
+          PLAYWRIGHT_SKIP_WEBSERVER: 1
         working-directory: ./app
 
       - name: Upload Playwright Report
