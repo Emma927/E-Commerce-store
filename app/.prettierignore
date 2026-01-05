@@ -1,13 +1,38 @@
-# Ignoruj paczki i buildy
-node_modules
-dist
-build
+# --- Zależności i Wydajność ---
+# Omijamy node_modules, aby Prettier nie skanował tysięcy plików zewnętrznych.
+# Przyspiesza to działanie Husky i zapobiega blokowaniu procesora w WSL2/Dockerze.
+node_modules/
 
-# Ignoruj wyniki testów i raporty
-test-results
-playwright-report
-blob-report
+# --- Buildy i Optymalizacja ---
+# Folder dist zawiera zminimalizowany kod produkcyjny wygenerowany przez Vite. 
+# Prettier mógłby zepsuć jego strukturę i zwiększyć wagę plików.
+dist/
+build/
+stats.html
 
-# Ignoruj pliki systemowe
+# --- Testy i Jakość Kodu ---
+# Raporty Playwright, Vitest i Coverage są generowane automatycznie. 
+# Nie formatujemy ich, bo są nadpisywane przy każdym teście.
+test-results/
+playwright-report/
+blob-report/
+coverage/
+test-results.xml
+
+# --- Pliki Systemowe i Konfiguracyjne ---
+# package-lock.json jest zarządzany przez npm – ręczne formatowanie może powodować błędy.
+package-lock.json
 .env
-.husky
+.env.*
+.husky/
+.github/
+
+# --- Pliki Binarne i Statyczne ---
+# Prettier nie obsługuje formatowania obrazów i innych binariów.
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+*.pdf

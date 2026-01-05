@@ -34,6 +34,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { PAGE_SIZE, CAPITALIZE, RATINGS } from '@/constants';
 import { FiltersDrawer } from '@/components/common/FiltersDrawer';
 import { ScrollToTopButton } from '@/components/common/ScrollToTopButton';
+import { useHandleApiError } from '@/hooks/useHandleApiError';
+
 /**
  System wyszukiwania został zrealizowany z wykorzystaniem asynchronicznych zapytań HTTP i lokalnej filtracji. Wprowadzono debounce, aby uniknąć zbędnych wywołań sieciowych i poprawić wydajność. Wyszukiwarka wspiera filtrowanie po kategoriach, sortowanie oraz pełnotekstowe wyszukiwanie. Wszystkie filtry są synchronizowane z parametrami URL, dzięki czemu stan aplikacji pozostaje spójny po przeładowaniu strony.
  */
@@ -121,6 +123,18 @@ Po prawej stronie (argumenty useProductsInfinite({ category: selectedCategory, s
     sort: sortOrder,
     pageSize: PAGE_SIZE,
   });
+
+  // Tworzymy handler błędów API z użyciem naszego hooka.
+  // Przekazujemy queryKey (['products-infinite']), który hook wykorzysta tylko w przypadku błędu serwera (status ≥ 500),
+  // aby opcjonalnie wywołać refetch danych (queryClient.invalidateQueries) dla tego zapytania.
+  const handleApiError = useHandleApiError(['products-infinite']);
+
+  useEffect(() => {
+    if (isError) {
+      // Gdy wystąpi błąd, przekazujemy obiekt error do hooka.
+      handleApiError(error);
+    }
+  }, [isError, error, handleApiError]);
 
   /**
   useProductsInfinite zwraca dane stronicowane – czyli data.pages to tablica tablic,
@@ -231,7 +245,7 @@ infinite scroll zaczyna dopiero przy ładowaniu następnych danych
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
         <Typography color="error">
-          {error?.message || 'Cannot get the products.'}
+          Something went wrong. Please try again.
         </Typography>
       </Box>
     );

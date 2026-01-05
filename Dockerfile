@@ -8,7 +8,7 @@ WORKDIR /app
 # Kopiowanie plików zależności do kontenera
 COPY ./app/package*.json ./
 
-# Dodajemy flagę --ignore-scripts, aby npm nie próbował konfigurować Husky/Git - W skrócie: Husky po ignore-scripts w Dockerze po prostu nie istnieje (jest uśpiony), i o to nam chodzi.
+# Dodajemy flagę --ignore-scripts, aby npm nie próbował konfigurować Husky/Git - W skrócie: Husky po ignore-scripts w Dockerze po prostu nie istnieje, jest „uśpiony”, bo nie ma repozytorium Git w buildzie.
 RUN npm install --ignore-scripts
 
 # Instalacja wszystkich zależności (dependencies + devDependencies)
@@ -53,6 +53,9 @@ RUN npm run build
 # --- STAGE 3: SERWOWANIE GOTOWEJ APLIKACJI PRZEZ NGINX ---
 # Używamy lekkiego, bezpiecznego obrazu Nginx Alpine jako serwer produkcyjny
 FROM nginx:alpine AS production_nginx
+# Użycie obrazu bazowego nginx:alpine jest kluczowe. alpine to bardzo lekka, minimalistyczna dystrybucja Linuxa, która używa narzędzia o nazwie BusyBox.
+# BusyBox domyślnie udostępnia podstawową powłokę systemową jako /bin/sh.
+# Obraz ten nie zawiera Basha (/bin/bash), dlatego Twoja próba użycia go zakończyła się błędem executable file not found.
 
 # Załatanie nowych luk bezpieczeństwa jeśli się pojawią - Aktualizacja pakietów systemowych w kontenerze (łatki bezpieczeństwa)
 RUN apk update && apk upgrade 

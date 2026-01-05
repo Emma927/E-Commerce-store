@@ -1,0 +1,40 @@
+{
+  "name": "E-Commerce Dev Stack",
+  "dockerComposeFile": ["../docker-compose.yml"],
+  "service": "e-commerce-store",
+  "workspaceFolder": "/workspace",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.cwd": "/workspace/app",
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        },
+        "autoRenameTag.enable": true,
+        "vitestExplorer.showCoverage": true,
+        "vitestExplorer.showInlineResults": true
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "dsznajder.es7-react-js-snippets",
+        "Orta.vscode-jest",
+        "ms-playwright.playwright",
+        "formulahendry.auto-rename-tag",
+        "ms-azuretools.vscode-docker",
+        "GitHub.github-actions",
+        "CodeZombie.gitignore",
+        "ms-vscode.live-server",
+        "vitest-explorer.vitest-explorer"
+      ]
+    }
+  },
+  // Zaloguj mnie jako zwykłego człowieka (node), a nie jako wszechmogącego administratora (root)”.
+  // "remoteUser": "node", // Uprawnienia plików: Gwarantuje, że nie tworzysz plików jako root, więc nie będzie problemów z edycją ich w WSL (brak "kłódek").  - user jest ustawiony w docker-compose więc tutaj jest niepotrzbeny
+  "forwardPorts": [3000],
+  // Rozwiązanie: Ten parametr sprawdza, jaki numer masz w WSL, i automatycznie zmienia numer użytkownika node w kontenerze, żeby pasował do Ciebie.
+  "updateRemoteUserUID": true,
+  "postCreateCommand": "cd app && npm install && cp -f /workspace/.devcontainer/dotfiles/.bashrc /home/node/.bashrc"
+}
