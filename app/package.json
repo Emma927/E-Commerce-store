@@ -14,7 +14,7 @@
     "coverage": "vitest run -- --coverage",
     "check": "npm run prettier && npm run lint && npm run test",
     "e2e": "npx playwright test --ui",
-    "test:e2e-ci": "npx wait-on $PLAYWRIGHT_BASE_URL && npx playwright test ./e2e --reporter=list",
+    "test:e2e-ci": "playwright test",
     "testing-tool": "set TESTING_TOOL=true& playwright test --ui",
     "start:e2e": "serve -s dist -l 3000",
     "prepare": "cd .. && git config core.hooksPath .husky"

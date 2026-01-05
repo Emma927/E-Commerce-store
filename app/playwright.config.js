@@ -81,11 +81,13 @@ export default defineConfig({
   //   reuseExistingServer: !process.env.CI,
   // },
 
-  /* --- Uruchomienie lokalnego frontendu przed testami --- */
-  webServer: {
-    command: 'npm run start:e2e', // Start frontendu
-    url: 'http://localhost:3000', // Playwright czeka aż strona będzie dostępna
-    reuseExistingServer: !process.env.CI, // Lokalnie używa istniejącego serwera, CI zawsze stawia nowy
-    timeout: 120 * 1000, // 2 minuty na start serwera
-  },
+  // Uruchamiaj webServer tylko jeśli nie ustawiono PLAYWRIGHT_SKIP_WEBSERVER
+  webServer: process.env.PLAYWRIGHT_SKIP_WEBSERVER
+    ? undefined
+    : {
+        command: 'npm run start:e2e',
+        url: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
+        reuseExistingServer: !process.env.CI,
+        timeout: 240 * 1000,
+      },
 });
