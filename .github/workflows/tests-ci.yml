@@ -122,7 +122,7 @@ jobs:
         if: always() # Upload raportu nawet jeśli testy failną
         with:
           name: playwright-report-${{ matrix.node-version }} # Nazwa artefaktu
-          path: playwright-report/ # Folder z raportami Playwright
+          path: app/playwright-report/ # Folder z raportami Playwright
           retention-days: 30 # Przechowuje artefakt przez 30 dni
 
 # name: CI - Code Tests and Scans  # Nazwa całego workflow
