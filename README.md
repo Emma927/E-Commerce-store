@@ -245,10 +245,18 @@ Start środowiska developerskiego w katalogu głównym projektu:
 ./startdev.sh
 ```
 
+Skrypt wykona: 
+
+```bash
+docker compose up -d e-commerce-store # Uruchomienie kontenera frontendowego
+docker compose exec -it e-commerce-store bash # Wejście do kontenera jako standradowy użytkownik node
+```
+
 > ⚠️ WAŻNE: 
- > - Przy pierwszym uruchomieniu terminala w WSL/Dev Container może pojawić się prośba o podanie hasła do systemu /Linux/Unix/WSL.
- > - Jest to normalne i wynika z nadania uprawnień do wykonywania skryptu i konfiguracji środowiska. 
- > - Hasło podaje się tylko raz – przy kolejnych uruchomieniach kontenera nie będzie wymagane.
+ > - Przy pierwszym uruchomieniu terminala w WSL/Dev Container może pojawić się prośba o podanie hasła do systemu (Linux/Unix/WSL). Jest to normalne i wynika z nadania uprawnień do wykonywania skryptu i konfiguracji środowiska. Hasło podaje się tylko raz.
+ - Pierwsze uruchomienie wymaga również aktywnego agenta SSH (SSH_AUTH_SOCK) i działającego serwera frontendowego (./startdev.sh).
+> - Po pierwszym uruchomieniu, gdy agent SSH jest już aktywny, skrypt może automatycznie uruchamiać zarówno frontend, jak i kontener E2E przy kolejnych startach.
+ 
 
 Polecenie npm run dev działa tylko lokalnie na hoście, nie w kontenerze, ponieważ port 3000 w kontenerze jest już zajęty.
 Frontend w kontenerze (e-commerce-store) uruchamia się automatycznie i jest dostępny w przeglądarce pod adresem:
@@ -269,17 +277,10 @@ W środowisku deweloperskim aplikacja działa pod adresem:
 http://localhost:3000
 ```
 
-W środowisku produkcyjnym (w obrazie Dockerowym) Nginx wystawia aplikację pod adresem:
+W środowisku produkcyjnym, czyli w obrazie Dockerowym Nginx wystawia aplikację pod adresem:
 
 ```bash
 http://localhost:8080
-```
-
-Zatrzymanie środowiska
-Po zakończeniu pracy wystarczy:
-
-```bash
-docker compose down
 ```
 
 Zatrzymanie środowiska
@@ -329,8 +330,7 @@ Działa tylko lokalnie — poza Dockerem.
 Testy E2E w kontenerze wymagają działającego kontenera frontendowego, dlatego port 3000 musi być dostępny dla przeglądarki i kontenerów testowych.
 
 ```bash
-docker compose up -d e-commerce-store # Uruchomienie kontenera frontendowego
-docker compose exec -it e-commerce-store bash # Wejście do kontenera jako standradowy użytkownik node
+./startdev.sh # Uruchomienie kontenera frontendowego oraz wejście do kontenera jako standardowy użytkownik node. Przy pierwszym uruchomieniu wymaga aktywnego agenta SSH (SSH_AUTH_SOCK) i działającego serwera frontendowego.
 ```
 
 1. Uruchom środowisko developerskie:
@@ -340,12 +340,18 @@ chmod +x startdev-e2e.sh  # nadaj uprawnienia (tylko za pierwszym razem)
 ./startdev-e2e.sh
 ```
 
-- Skrypt uruchamia kontener e2e-tests.
-  - Dzięki depends_on, jeśli kontener frontendowy (e-commerce-store) nie działa, zostanie również uruchomiony.
-  - Kontener frontendowy pozostaje aktywny dzięki tty: true, więc nie zakończy się samoczynnie.
-  - Kontener E2E jest uruchamiany jako Twój użytkownik (UID 1000) – nie root. Obraz Playwright zawiera już wszystkie wymagane biblioteki i przeglądarki (pełne prawa zapisu do cache i trace’ów).
+- Skrypt uruchamia kontener e2e-tests
+- Kontener e2e-tests ma ustawione depends_on względem e-commerce-store, co oznacza, że Docker Compose uruchomi kontener frontendowy, jeśli jeszcze nie działa.
+- ⚠️ depends_on nie gwarantuje, że dev server (Vite) w frontendzie jest gotowy i nasłuchuje na porcie 3000.
+- Przy pierwszym uruchomieniu skrypt wymaga, aby agent SSH (SSH_AUTH_SOCK) był dostępny, ponieważ frontend może potrzebować autoryzacji dla operacji Git.
+- Po pierwszym uruchomieniu, jeśli agent jest już aktywny, startdev-e2e.sh może uruchamiać zarówno frontend, jak i kontener E2E automatycznie.
+- Dzięki tty: true kontener frontendowy pozostaje aktywny w tle, ale testy E2E nie wystartują automatycznie, dopóki dev server nie jest dostępny.
+- Rola depends_on: zapewnia jedynie logiczną kolejność startu kontenerów i uruchomienie e-commerce-store przed e2e-tests, co zapobiega błędom typu „kontener frontendowy nie istnieje”. Nie zastępuje sprawdzania gotowości serwera.
+- Kontener E2E jest uruchamiany jako Twój użytkownik (UID 1000) – nie root. Obraz Playwright zawiera wszystkie wymagane przeglądarki i zależności systemowe.
 
-Skrypt automatycznie wykona dla Ciebie:
+> 💡 Skrypt startdev-e2e.sh przygotowuje kontener e2e-tests do pracy z testami.
+     > - Przy pierwszym uruchomieniu wymaga aktywnego agenta SSH (SSH_AUTH_SOCK) i działającego serwera frontendowego (uruchomionego przez ./startdev.sh).
+     > - Po pierwszym uruchomieniu, gdy agent SSH jest już aktywny, można uruchamiać oba serwisy automatycznie za pomocą ./startdev-e2e.sh, po zatrzymaniu lub usunięciu kontenerów.
 
 ```bash
 docker compose up -d e2e-tests # Uruchomienie kontenera dla testów E2E
@@ -364,7 +370,7 @@ npm run test:e2e-ci # uruchamia testy E2E w trybie CI (bez UI) - wszystko dział
 ℹ️ Obraz Playwright (mcr.microsoft.com/playwright:v1.57.0-noble) ma już wbudowane wszystkie przeglądarki i zależności systemowe, więc nie trzeba nic instalować ani przełączać się na root.
 
 🛡️ Ważna uwaga dotycząca uprawnień (Non-Root)
-W przeciwieństwie do standardowych konfiguracji, w tym projekcie testy E2E nie są uruchamiane jako root.
+W tym projekcie testy E2E nie są uruchamiane jako root.
 Dlaczego to jest lepsze?
  - Spójność plików: Raporty i zrzuty ekranu tworzone w kontenerze należą do użytkownika na hoście. Możesz je otwierać, edytować i usuwać bez używania sudo.
  - Bezpieczeństwo: Przeglądarki działają z włączoną piaskownicą (sandbox), co jest zalecanym standardem bezpieczeństwa w 2026 roku.
