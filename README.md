@@ -20,9 +20,18 @@ API służy wyłącznie celom edukacyjnym i testowym.
 ⚙️ Uwagi dotyczące środowiska Docker i node_modules
 
 Projekt był rozwijany i testowany na WSL2, gdzie Docker działa na natywnym systemie plików Linux (ext4).
-W tym środowisku zastosowanie bind mountów nie powoduje problemów wydajnościowych, dlatego nie stosowano osobnych wolumenów Docker dla node_modules.
 
-Na macOS i Windows (bez WSL2) zalecane jest użycie osobnego wolumenu Docker dla node_modules, ze względu na koszt synchronizacji pomiędzy systemem plików hosta a maszyną wirtualną Dockera.
+W tym środowisku zastosowano bind mounty bez użycia anonimowych wolumenów dla `node_modules`, 
+ponieważ przy WSL2 + ext4 nie powoduje to problemów wydajnościowych, a zapewnia:
+
+- pełny dostęp do `node_modules` z poziomu VS Code (IntelliSense, Go to Definition),
+- łatwiejsze debugowanie bibliotek,
+- spójne uprawnienia plików (UID 1000),
+- prostszą konfigurację środowiska developerskiego.
+
+Na macOS oraz Windows (bez WSL2), gdzie Docker działa na maszynie wirtualnej i korzysta z systemów plików
+NTFS/APFS, zalecane jest użycie osobnego wolumenu Docker dla `node_modules` ze względu na koszt synchronizacji
+pomiędzy hostem a kontenerem.
 
 ---
 
@@ -48,6 +57,7 @@ Na macOS i Windows (bez WSL2) zalecane jest użycie osobnego wolumenu Docker dla
 - React Hook Forms – do tworzenia formularzy
 - Zod - do walidacji formularzy
 - MUI (Material-UI) – do budowy spójnego, responsywnego i estetycznego interfejsu
+- React-Toastify – do wyświetlania powiadomień i obsługi błędów w interfejsie
 - Podejście Mobile-First
 - Narzędzia testowe:
   - Vitest – testy jednostkowe
@@ -183,15 +193,23 @@ git clone https://github.com/Your-Account/E-Commerce-store.git
 
 > Uwagi:
 
-> - SSH pozwala na push/pull do repozytoriów prywatnych bez podawania loginu i tokenu, jeśli w kontenerze lub lokalnym systemie masz skonfigurowany klucz SSH.
+> - SSH pozwala na push/pull do repozytoriów publicznych i prywatnych bez podawania loginu i tokenu, jeśli w kontenerze lub lokalnym systemie masz skonfigurowany klucz SSH.
 
-> - HTTPS wymaga podania tokenu przy push do repozytorium, nawet jeśli repo jest publiczne, jeśli pracujesz w środowisku, które nie pamięta Twoich danych uwierzytelniających (np. w Dockerze).
+> - HTTPS wymaga podania tokenu przy operacji push, nawet jeśli repozytorium jest publiczne, jeżeli pracujesz w środowisku, które nie pamięta danych uwierzytelniających (np. w kontenerze Docker).
 
-> - Jeśli korzystasz z HTTPS, upewnij się, że masz skonfigurowany Git Credential Manager lub inny mechanizm przechowywania tokenów.
+> - Jeśli korzystasz z HTTPS, upewnij się, że masz skonfigurowany Git Credential Manager lub inny credential helper do przechowywania tokenów.
 
-> - W lokalnym systemie Git mógł wcześniej korzystać z cache credential helper, dlatego push działał bez pytania o token. W kontenerze Docker te ustawienia nie są dostępne, dlatego Git pyta teraz o token przy push/pull przez HTTPS.
+> - W lokalnym systemie Git mógł wcześniej korzystać z zapamiętanych poświadczeń (credential helper), dlatego operacja push działała bez pytania o token. W kontenerze Docker te ustawienia nie są dostępne, dlatego Git ponownie prosi o token przy operacjach push/pull wykonywanych przez HTTPS.
 
-> - Dla repozytorium publicznego operacje clone i pull działają zarówno przez HTTPS, jak i SSH. Przy HTTPS nie jest wymagane uwierzytelnienie, natomiast SSH zawsze weryfikuje użytkownika za pomocą klucza. Różnica staje się istotna przy pracy z repozytoriami prywatnymi oraz przy operacji push: HTTPS wymaga wtedy podania tokenu, podczas gdy SSH opiera się na autoryzacji kluczem
+> - Dla repozytorium publicznego operacje clone i pull działają zarówno przez HTTPS, jak i SSH bez uwierzytelnienia. Różnica staje się istotna przy pracy z repozytoriami prywatnymi, gdzie uwierzytelnienie jest wymagane przy każdej operacji (clone, pull, push), oraz przy operacji push do repozytorium publicznego: HTTPS wymaga wtedy podania tokenu, natomiast SSH opiera się na autoryzacji kluczem.
+
+## 🔐 Autoryzacja Git w kontenerze (HTTPS)
+Jeśli używasz HTTPS i Git w kontenerze pyta o dane logowania:
+ - Jako hasła użyj swojego Personal Access Token (PAT) z GitHub.
+ - Aby uniknąć ciągłego wpisywania danych, możesz włączyć tymczasowy cache w kontenerze:
+```bash
+git config --global credential.helper 'cache --timeout=3600'
+```
 
 3. Wejdź do katalogu:
 
@@ -241,7 +259,7 @@ http://localhost:3000
 Teraz jesteś w terminalu kontenera i możesz uruchomić:
 
 ```bash
-npm install     # opcjonalnie doinstalowanie paczek
+npm install     #  Instalacja zależności (konieczna tylko za pierwszym razem, potem opcjonalnie można doinatalować nowe paczki)
 npm run dev     # start serwera developerskiego
 ```
 
@@ -264,7 +282,15 @@ Po zakończeniu pracy wystarczy:
 docker compose down
 ```
 
-To zatrzymuje i usuwa kontener, pozostawiając kod lokalnie.
+Zatrzymanie środowiska
+Po zakończeniu pracy wystarczy:
+
+```bash
+docker compose down
+```
+
+- Dzięki temu, że w docker-compose.yml wolumeny są zdefiniowane jako bind mounty na WSL2, polecenie down usuwa tylko kontenery (system operacyjny, przeglądarki), ale pozostawia Twój kod źródłowy i folder node_modules bezpiecznie na dysku (EXT4).
+- Przy kolejnym uruchomieniu ./startdev.sh, Docker użyje istniejących plików, co eliminuje konieczność ponownej instalacji zależności.
 
 ### 🧪 Testy i jakość kodu
 
@@ -293,6 +319,9 @@ Uruchamia graficzny interfejs Playwrighta, przydatny do debugowania:
 npm run e2e # wersja z interfejsem graficznym (Trace Viewer)
 ```
 
+- Komenda ta uruchamia testy w trybie UI (z okienekami).
+- Wyniki testów zostaną zapisane w folderze app/test-results/ oraz app/playwright-report/.
+
 Działa tylko lokalnie — poza Dockerem.
 
 ### 🐳 W kontenerze Docker (zalecane)
@@ -314,31 +343,50 @@ chmod +x startdev-e2e.sh  # nadaj uprawnienia (tylko za pierwszym razem)
 - Skrypt uruchamia kontener e2e-tests.
   - Dzięki depends_on, jeśli kontener frontendowy (e-commerce-store) nie działa, zostanie również uruchomiony.
   - Kontener frontendowy pozostaje aktywny dzięki tty: true, więc nie zakończy się samoczynnie.
-  - Kontener E2E jest uruchamiany jako root (user: "0:0"), co jest wymagane dla Playwrighta (pełne prawa zapisu do cache i trace’ów).
+  - Kontener E2E jest uruchamiany jako Twój użytkownik (UID 1000) – nie root. Obraz Playwright zawiera już wszystkie wymagane biblioteki i przeglądarki (pełne prawa zapisu do cache i trace’ów).
 
-Skrypt wykona:
+Skrypt automatycznie wykona dla Ciebie:
 
 ```bash
 docker compose up -d e2e-tests # Uruchomienie kontenera dla testów E2E
-docker compose exec -it e2e-tests bash # Wejście do kontenera jako standardowy użytkownik node
+docker compose exec -it e2e-tests bash # Wejście do kontenera jako użytkownik ubuntu (UID 1000)
 ```
 
-Teraz jesteś w terminalu kontenera i możesz uruchomić:
+2. Teraz jesteś w terminalu kontenera i możesz uruchomić:
 
 ```bash
-npm run test:e2e-ci # uruchamia testy E2E w trybie CI (bez UI) - w kontenerze jako root (zgodnie z wymaganiami Playwrighta)
+npm run test:e2e-ci # uruchamia testy E2E w trybie CI (bez UI) - wszystko działa jako zwykły użytkownik
 ```
 
-> ⚠️ Uwaga dotycząca uprawnień w kontenerze:
-> Dlaczego testy E2E muszą być uruchamiane jako root?
-> Playwright w kontenerze tworzy cache i zapisuje trace’y w katalogach /root/.cache/, /root/.config/, /tmp/playwright\* oraz /app/test-results/. Standardowy użytkownik node (UID 1000) nie ma pełnych praw zapisu, co powodowałoby błędy typu EACCES: permission denied.
+- Komenda ta uruchamia testy w trybie headless (bez okienek)
+- Wyniki testów zostaną zapisane w folderze app/test-results/
 
-Dlatego:
+ℹ️ Obraz Playwright (mcr.microsoft.com/playwright:v1.57.0-noble) ma już wbudowane wszystkie przeglądarki i zależności systemowe, więc nie trzeba nic instalować ani przełączać się na root.
+
+🛡️ Ważna uwaga dotycząca uprawnień (Non-Root)
+W przeciwieństwie do standardowych konfiguracji, w tym projekcie testy E2E nie są uruchamiane jako root.
+Dlaczego to jest lepsze?
+ - Spójność plików: Raporty i zrzuty ekranu tworzone w kontenerze należą do użytkownika na hoście. Możesz je otwierać, edytować i usuwać bez używania sudo.
+ - Bezpieczeństwo: Przeglądarki działają z włączoną piaskownicą (sandbox), co jest zalecanym standardem bezpieczeństwa w 2026 roku.
+ - Zgodność: Środowisko odzwierciedla bezpieczne ustawienia stosowane w profesjonalnych systemach CI/CD.
+
+> 💡 TIP: Jeśli napotkasz błąd Permission denied, upewnij się, że nie masz starych folderów test-results stworzonych przez roota. Możesz je usunąć komendą:
+``` bash 
+sudo rm -rf app/test-results app/playwright-report
+```
+
+<!-- > ⚠️ Uwaga dotycząca uprawnień w kontenerze:
+> Dlaczego testy E2E nie muszą być uruchamiane jako root?
+> Playwright w kontenerze tworzy cache i zapisuje trace’y w katalogach /root/.cache/, /root/.config/, /tmp/playwright\* oraz /app/test-results/. Standardowy użytkownik node (UID 1000) nie ma pełnych praw zapisu, co powodowałoby błędy typu EACCES: permission denied. -->
+
+<!-- Dlatego:
 ➡️ Testy E2E są uruchamiane tylko w izolowanym kontenerze i tylko jako root.
 ➡️ Jest to normalne i zgodne z zaleceniami Playwrighta dla środowisk Dockerowych.
-➡️ Nie ma to żadnego wpływu na bezpieczeństwo środowiska produkcyjnego — dotyczy wyłącznie środowiska testowego.
+➡️ Nie ma to żadnego wpływu na bezpieczeństwo środowiska produkcyjnego — dotyczy wyłącznie środowiska testowego. -->
 
-2. Symulacja środowiska produkcyjnego pod testy:
+---
+
+🏗️ Symulacja środowiska produkcyjnego pod testy
 Zamiast serwera dev, możesz przetestować statyczny build:
 
 Testy E2E wymagają uruchomionej aplikacji. Aby to zrobić, najpierw zbuduj projekt, a następnie uruchom wersję statyczną. 
@@ -482,13 +530,11 @@ http://localhost:3000
 ```
 
 🔑 SSH w Dev Containerze
-
-Dev Container automatycznie obsługuje SSH agent forwarding:-
-- SSH agent z hosta jest forwardowany do kontenera przez VS Code
-- Prywatne klucze SSH nie są kopiowane do kontenera
-- Git w kontenerze korzysta z lokalnej konfiguracji użytkownika
-- Operacje git pull / git push działają bez dodatkowej konfiguracji
-- Nie jest wymagane ręczne mapowanie SSH_AUTH_SOCK ani plików SSH w docker-compose.yml – VS Code obsługuje to automatycznie.
+- Dev Container może automatycznie forwardować SSH agent z hosta, jeśli używasz standardowej konfiguracji i otwierasz projekt bezpośrednio przez VS Code.
+- Prywatne klucze SSH nie są kopiowane do kontenera – działają „przez socket” agenta SSH.
+- Git w kontenerze może korzystać z lokalnej konfiguracji użytkownika, jeśli pliki .gitconfig i .ssh/known_hosts są dostępne w kontenerze.
+- Operacje git pull / git push działają bez dodatkowej konfiguracji tylko w standardowym Dev Container, czyli bez własnego docker-compose.yml.
+- W przypadku używania własnego docker-compose.yml, trzeba ręcznie mapować socket SSH (SSH_AUTH_SOCK) oraz pliki .ssh i .gitconfig, aby push/pull przez SSH działał.
 
 ---
 💡 Konfiguracja i wolumeny

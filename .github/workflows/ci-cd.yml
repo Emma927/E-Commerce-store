@@ -15,9 +15,9 @@ jobs:
   build_docker: # Job do budowania i publikowania obrazu Docker
     runs-on: ubuntu-latest # Uruchamiany na maszynie Ubuntu
     outputs: # Outputy joba, które mogą być użyte w innych jobach
-    # steps – odwołanie do kroków w tym jobie
-    # set_repo – id kroku, który produkuje output
-    # outputs.gh_repo_lc – nazwa outputu zdefiniowanego w kroku
+      # steps – odwołanie do kroków w tym jobie
+      # set_repo – id kroku, który produkuje output
+      # outputs.gh_repo_lc – nazwa outputu zdefiniowanego w kroku
       GH_REPO_LC: ${{ steps.set_repo.outputs.gh_repo_lc }} # Nazwa repo w małych literach
       TAG_NAME: ${{ steps.set_tag.outputs.tag_name }} # Nazwa tagu obrazu
     steps:
@@ -61,7 +61,12 @@ jobs:
         with:
           context: . # Kontekst builda (root repo)
           file: ./Dockerfile # Plik Dockerfile
-          push: true # Wysyła obraz do GHCR
+          push:
+            true # Wysyła obraz do GHCR
+          # Generowanie atestacji zgodnie ze standardem SLSA (Supply-chain Levels for Software Artifacts).
+          # sbom: Tworzy pełną listę składników obrazu (Software Bill of Materials) dla lepszego audytu bezpieczeństwa.
+          # provenance: Zapisuje pełną historię budowania obrazu, co pozwala na weryfikację jego pochodzenia w Docker Scout.
+          sbom: true
           # Użycie outputów kroków do utworzenia tagu obrazu
           tags: ghcr.io/${{ steps.set_repo.outputs.gh_repo_lc }}:${{ steps.set_tag.outputs.tag_name }}
 
@@ -85,7 +90,7 @@ jobs:
         env:
           TRIVY_USERNAME: ${{ github.actor }} # Tymczasowe dane logowania
           TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }} # Token do logowania
-# To jest do SPRAWDZENIA I DOPASOWANIA, ŻEBY SPRWDZIĆ e2e W TRYBIE HEADLESS po zbudownaiu obrazu
+  # To jest do SPRAWDZENIA I DOPASOWANIA, ŻEBY SPRWDZIĆ e2e W TRYBIE HEADLESS po zbudownaiu obrazu
   e2e_production_check:
     runs-on: ubuntu-latest
     needs: [build_docker, secure_scan]

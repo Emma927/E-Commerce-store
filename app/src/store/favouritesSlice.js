@@ -1,7 +1,14 @@
 import { createSlice, createSelector } from '@reduxjs/toolkit';
 
-// Wczytanie ulubionych produktów z localStorage przy starcie
-const savedFavourites = JSON.parse(localStorage.getItem('favourites')) || []; // Pusta tablica = bezpieczny stan początkowy, który pozwala operować na ulubionych produktach bez dodatkowych warunków.
+// Bezpośrednia synchronizacja z localStorage wewnątrz reducera ze względu na
+// pragmatyzm i czytelność przy obecnej skali projektu (prosty E-commerce).
+// Jestem świadoma, że w dużych systemach "Side Effects" (efekty uboczne) takie jak
+// localStorage powinny być wyniesione do Middleware (np. RTK Listener Middleware),
+// aby zachować czystość funkcji (Pure Functions) i ułatwić testy jednostkowe.
+
+// Pobieramy dane z localStorage przy starcie modułu.
+// Pusta tablica [] jako fallback to tzw. "bezpieczny stan początkowy" (zapobiega błędom .map() na undefined).
+const savedFavourites = JSON.parse(localStorage.getItem('favourites')) || [];
 
 const initialState = {
   favouritesProducts: savedFavourites,
@@ -12,12 +19,18 @@ const favouritesSlice = createSlice({
   initialState,
   reducers: {
     addToFavourites: (state, action) => {
+      // Sprawdzamy czy produkt już istnieje, aby uniknąć duplikatów w stanie i localStorage.
       const exists = state.favouritesProducts.find(
         (p) => p.id === action.payload.id,
-      ); // Jeśli id produktu z tablicy ulubionych produktów jest równe wybranemu przez użytkownika, to znaczy, że produkt w ulubionych już istnieje
+      );
+
       if (!exists) {
-        // Jeśli produktu w tablicy ulubionych jeszcze nie ma, to dodajemy go tam i zapisujemy w localStorage
-        state.favouritesProducts.push(action.payload);
+        // INŻYNIERIA (Unshift): Dodajemy na początek tablicy, aby najnowsze produkty były pierwsze.
+        // Dzięki temu unikamy kosztownego procesowania danych (.reverse()) w selektorach.
+        // IMMER: Dzięki bibliotece Immer (wbudowanej w Toolkit) możemy mutować stan bezpośrednio (.unshift),
+        // a pod spodem Redux i tak stworzy nową, bezpieczną kopię stanu.
+        state.favouritesProducts.unshift(action.payload);
+
         localStorage.setItem(
           'favourites',
           JSON.stringify(state.favouritesProducts),
@@ -25,6 +38,7 @@ const favouritesSlice = createSlice({
       }
     },
     removeFromFavourites: (state, action) => {
+      // Tworzymy nową tablicę bez usuwanego ID.
       state.favouritesProducts = state.favouritesProducts.filter(
         (p) => p.id !== action.payload,
       );
@@ -34,27 +48,34 @@ const favouritesSlice = createSlice({
       );
     },
     clearFavourites: (state) => {
+      // Resetujemy stan i czyścimy pamięć przeglądarki.
       state.favouritesProducts = [];
       localStorage.removeItem('favourites');
     },
   },
 });
 
-// Selektor jest do odczytu stanu favourites w kolejności od najnowszego do najstarszego, z memoizacją dla wydajności.
-export const selectFavouritesProducts = createSelector(
-  [(state) => state.favourites.favouritesProducts], // ← tablica funkcji wejściowych
-  (products) => [...products].reverse(),
+/**
+ * SELEKTORY (Data Derivation)
+ */
+
+// Selektor dostępowy (Basic Selector).
+// Zwraca surową referencję. Nie wymaga createSelector (memoizacji), ponieważ pobranie
+// wartości z obiektu po kluczu jest szybsze niż narzut (overhead) samej biblioteki memoizującej.
+export const selectFavouritesProducts = (state) =>
+  state.favourites.favouritesProducts;
+
+// Selektor obliczeniowy (Memoized Selector).
+// Używamy createSelector, ponieważ .length jest "obliczeniem".
+// Dzięki memoizacji, wynik zostanie przeliczony tylko wtedy, gdy tablica favouritesProducts faktycznie się zmieni.
+export const selectFavouritesCount = createSelector(
+  [selectFavouritesProducts],
+  (products) => products.length,
 );
 
-// Memoizowany selector do liczenia produktów w favourites
-export const selectFavouritesCount = createSelector(
-  [selectFavouritesProducts], // ← tablica funkcji wejściowych
-  (products) => products.length,
-); // ← funkcja obliczająca wynik
-
-// Eksport akcji
+// Eksport akcji do komponentów
 export const { addToFavourites, removeFromFavourites, clearFavourites } =
   favouritesSlice.actions;
 
-// Eksport reducer
+// Eksport reducera do store.js
 export default favouritesSlice.reducer;

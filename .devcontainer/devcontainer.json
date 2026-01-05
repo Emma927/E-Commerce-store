@@ -32,7 +32,7 @@
     }
   },
   // Zaloguj mnie jako zwykłego człowieka (node), a nie jako wszechmogącego administratora (root)”.
-  "remoteUser": "node", // Uprawnienia plików: Gwarantuje, że nie tworzysz plików jako root, więc nie będzie problemów z edycją ich w WSL (brak "kłódek").
+  // "remoteUser": "node", // Uprawnienia plików: Gwarantuje, że nie tworzysz plików jako root, więc nie będzie problemów z edycją ich w WSL (brak "kłódek").  - user jest ustawiony w docker-compose więc tutaj jest niepotrzbeny
   "forwardPorts": [3000],
   // Rozwiązanie: Ten parametr sprawdza, jaki numer masz w WSL, i automatycznie zmienia numer użytkownika node w kontenerze, żeby pasował do Ciebie.
   "updateRemoteUserUID": true,

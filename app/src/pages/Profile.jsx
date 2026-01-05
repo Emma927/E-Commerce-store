@@ -10,17 +10,27 @@ import { CAPITALIZE_WORDS } from '@/constants';
 // Fake Store API (https://fakestoreapi.com) NIE ZWRACA użytkownika po tokenie JWT. Nie dostaniemy ID użytkownika, ani jego pełnych danych po samym logowaniu.
 const Profile = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
+  // const isReady = useSelector(selectIsReady); // pobierz stan gotowości
 
   // pobiera userId po username (enndpoint auth ma tylko username i password) → potem pobiera usera po userId (endpoint users może już pobierać po id)
   const { data: user, isPending, isError } = useUser();
 
   const [show, setShow] = useState(false);
 
-  if (isPending) return <Spinner />;
+  // 1. Najpierw sprawdź, czy Redux w ogóle wczytał stan z localStorage -  tutaj nie potrzeba tylo w ProteceedRoute konieczne
+  // if (!isReady) return <Spinner />;
+  // 2. Potem sprawdź, czy zapytanie do API o dane usera jest w toku
+  if (isPending || !user) return <Spinner />;
   if (isError) return <p>Error loading profile</p>;
 
+  /**
+   Mignięcie brało się stąd, że React widział isAuthenticated: false przez ułamek sekundy, zanim Redux "zauważył", że w initialState jednak coś jest. Dodając isReady i stawiając isPending na samej górze, tworzysz szczelną zaporę.
+
+  3. Dopiero TERAZ, gdy wiemy, że Redux jest gotowy i API nie ładuje,
+  // możemy z czystym sumieniem powiedzieć: "Nie jesteś zalogowany"
+   */
   // Jeśli nie ma tokena lub nie udało się pobrać usera
-  if (!isAuthenticated || !user) {
+  if (!isAuthenticated) {
     return (
       <Box sx={{ mt: { xs: 0, md: 5 } }} textAlign="center">
         <Typography variant="h6">You are not logged in.</Typography>

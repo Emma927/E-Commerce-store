@@ -8,6 +8,7 @@ services:
     volumes:
       - .:/workspace
         # Dzięki temu operacje npm install są znacznie szybsze, bo nie muszą synchronizować tysięcy małych plików między kontenerem a Windowsem/Macem przez system plików.
+        # Jeśli zrobisz docker compose down, kontenery są usuwane, ALE anonimowe wolumeny (te, w których masz node_modules) nadal zostają w pamięci Dockera, dopóki nie użyjesz flagi -v.
         # - /workspace/app/node_modules # Anonimowy wolumen dla szybkości
         # Montuje socket SSH agenta z hosta do kontenera, żeby można było używać kluczy SSH bez kopiowania ich do kontenera
         # MAPOWANIE SOCKETU AGENTA SSH:
@@ -33,6 +34,8 @@ services:
     # group_add: ["1000"] – pozwala użytkownikowi node (wewnątrz kontenera) uzyskać dostęp do socketu agenta SSH z hosta.
     group_add:
       - "1000" # Pozwala użytkownikowi node czytać socket SSH należący do roota/systemu
+      # Kontenerowy użytkownik nadal UID=1000, GID=1001, ale jest dodatkowo w grupie 1000.
+      # Teraz może czytać socket hosta (bo należy do grupy, która ma prawa do socketu).
     environment:
       # ZMIENNA ŚRODOWISKOWA SSH:
       # Wskazuje narzędziom w kontenerze (np. Gitowi), gdzie dokładnie znajduje się zamontowany socket.
@@ -46,6 +49,7 @@ services:
       - "3000:3000" # dev server
     env_file:
       - .env
+      # Dla lokalnego developmenty wystarczy zakomentować poniższy command (command: ["npm", "run", "dev"]), jeśli Docker będzie używany tylko na końcu, ponieważ podczas lokalnego developmentu na hoście, nie potrzebuje się, żeby kontener automatycznie uruchamiał dev server.
     command: ["npm", "run", "dev"] # Dev server startuje automatycznie, ale w kontenerze Vite będzie próbować kolejnego wolnego portu, dlatego że 3000 jest zajęty. W związku z tym nie możesz ręcznie uruchomić npm run dev w tym samym kontenerze, bo proces dev servera już działa i blokuje terminal. Możesz otworzyć przeglądarkę na hoście: http://localhost:3000
     # 1️⃣ Bez command: ["npm", "run", "dev"] w docker-compose
     # Kontener e-commerce-store nie uruchamia dev servera automatycznie.
@@ -70,7 +74,7 @@ services:
       - e-commerce-store
     env_file:
       - .env
-    user: "0:0" # uruchamia kontener jako root tylko do testów e2e
+    user: "${USER_ID}:${GROUP_ID}" #"0:0" - uruchamia kontener jako root tylko do testów e2e
     tty: true # Wirtualny terminal. Utrzymuje kontener aktywnym(bez niego kontener od razu może się zakońćzyć), ułatwia debug i kolorowy output.
     # stdin_open: true  # pozwala na otwarcie stdin, czyli interakcję z kontenerem, bez stdin nie można robić interaktywnych rzeczy typu podłączenie się do kontenera i pisanie w konsoli. - nie potrzbene bo wchodze przez it
     # TRYB AUTOMATYCZNY: odkomentuj linię poniżej
