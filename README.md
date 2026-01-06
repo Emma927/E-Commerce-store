@@ -236,9 +236,65 @@ Budowanie wersji produkcyjnej (opcjonalnie)\*\*
 
 ### 🐳 3. Uruchomienie i obraz Docker oraz środowisko developerskie
 
-Konteneryzacja zapewnia gotowe środowisko bez konieczności instalacji Node.js na hoście.
+Konteneryzacja zapewnia gotowe środowisko do uruchomienia aplikacji, w którym Node.js jest już zainstalowany, dzięki czemu nie jest konieczne posiadanie Node.js na hoście. Pliki projektu są mapowane za pomocą bind mount między hostem, a kontenerem, co pozwala na edycję kodu lokalnie, przy jednoczesnym korzystaniu z Node.js i innych narzędzi w kontenerze.
 
-Start środowiska developerskiego w katalogu głównym projektu:
+3.1. 🛠️ Skrypty pomocnicze
+
+W projekcie znajdują się trzy główne skrypty:
+
+1. **ssh-agent.sh** – uruchamia agenta SSH i ładuje klucze prywatne (dla clone/push/pull na githu z kontenera).
+2. **startdev.sh** – uruchamia kontener frontendowy (`e-commerce-store`) z UID/GID hosta i wchodzi do niego.
+3. **startdev-e2e.sh** – uruchamia kontener E2E (`e2e-tests`) i opcjonalnie wchodzi do niego interaktywnie.
+
+💡 Dla większości użytkowników: `startdev.sh` wystarczy do pracy developerskiej. `startdev-e2e.sh` używamy tylko do testów E2E.
+
+> ⚠️ Uwaga dotycząca użytkowników kontenerów:
+> - Frontend dev container (`e-commerce-store`) używa **dynamicznie UID/GID hosta**, gdy uruchamiasz go przez `startdev.sh`. Jeśli uruchamiasz `docker compose up` ręcznie, UID/GID zostaną pobrane z `.env`.
+> - Kontener E2E (e2e-tests) pochodzi z obrazu Playwright, który ma domyślnego użytkownika ubuntu. W docker-compose.yml UID/GID kontenera jest nadpisywane wartościami hosta (z .env lub startdev-e2e.sh), aby pliki w bind mount miały poprawne uprawnienia.
+
+---
+
+3.2. 📝 Konfiguracja UID/GID dla Dockera / Dev Containera
+
+> ⚠️ Jeśli Twój lokalny użytkownik ma inne UID/GID niż domyślne (1000:1000), musisz zmienić wartości w pliku `.env`, aby kontenery miały poprawne uprawnienia do plików projektu i SSH.
+
+💡 W skrócie: każdy użytkownik na swoim komputerze ustawia swoje UID/GID w .env i wtedy ma pełną kontrolę nad swoimi plikami w projekcie. Bind mount gwarantuje synchronizację plików między kontenerem a hostem. To daje w praktyce – pełny dostęp do plików, bez ryzyka problemów z uprawnieniami.
+
+Przykład `.env`:
+
+```bash
+.env
+USER_ID=1000
+GROUP_ID=1000
+```
+Sprawdzenie swojego UID/GID w systemie Linux/WSL:
+```bash
+id -u   # Twój UID
+id -g   # Twój GID
+``` 
+
+Jeśli wyniki są inne niż 1000, zmień wartości w .env:
+```bash
+USER_ID=1004 # Wartość przykłdowa
+GROUP_ID=1004 # Wartość przykłdowa
+```
+
+> 🔑 Dodatkowo group_add: "${GROUP_ID}" pozwala kontenerowemu użytkownikowi Node (UID z .env) odczytywać hostowy socket SSH, niezależnie od tego, jakie UID/GID ma na hoście.
+
+Dzięki temu kontener frontendowy (e-commerce-store) oraz kontener testowy (e2e-tests) będą działały poprawnie, a pliki i socket SSH będą miały odpowiednie uprawnienia.
+
+---
+
+3.3. Start środowiska developerskiego w katalogu głównym projektu:
+
+3.3.1. Uruchomienie agenta SSH (tylko jeśli chcesz korzystać z Git z kontenera):
+
+```bash
+ chmod +x ssh-agent.sh  # nadaj uprawnienia (tylko za pierwszym razem)
+./ssh-agent.sh
+```
+
+3.3.2. Start kontenera frontendowego:
 
 ```bash
  chmod +x startdev.sh  # nadaj uprawnienia (tylko za pierwszym razem)
@@ -252,13 +308,14 @@ docker compose up -d e-commerce-store # Uruchomienie kontenera frontendowego
 docker compose exec -it e-commerce-store bash # Wejście do kontenera jako standradowy użytkownik node
 ```
 
-> ⚠️ WAŻNE: 
- > - Przy pierwszym uruchomieniu terminala w WSL/Dev Container może pojawić się prośba o podanie hasła do systemu (Linux/Unix/WSL). Jest to normalne i wynika z nadania uprawnień do wykonywania skryptu i konfiguracji środowiska. Hasło podaje się tylko raz.
- - Pierwsze uruchomienie wymaga również aktywnego agenta SSH (SSH_AUTH_SOCK) i działającego serwera frontendowego (./startdev.sh).
-> - Po pierwszym uruchomieniu, gdy agent SSH jest już aktywny, skrypt może automatycznie uruchamiać zarówno frontend, jak i kontener E2E przy kolejnych startach.
+> ⚠️ WAŻNE:
+> - Skrypt `ssh-agent.sh` automatycznie uruchamia agenta SSH, sprawdza i ładuje klucze, oraz zapewnia prawidłowe uprawnienia do socketu SSH dla kontenera. Nie ma potrzeby podawania hasła ani ręcznej zmiany uprawnień.
+> - Skrypt `startdev.sh` przy pierwszym uruchomieniu kontenera frontendowego ten skrypt uruchomi serwer developerski i otworzy terminal w kontenerze.
+> - Przy kolejnych startach, gdy agent SSH jest już aktywny, `startdev.sh` może automatycznie uruchamiać frontend bez dodatkowej konfiguracji.
+> - Jeśli nie korzystasz z Git w kontenerze, wykonanie skryptu `ssh-agent.sh` można pominąć.
  
-
 Polecenie npm run dev działa tylko lokalnie na hoście, nie w kontenerze, ponieważ port 3000 w kontenerze jest już zajęty.
+
 Frontend w kontenerze (e-commerce-store) uruchamia się automatycznie i jest dostępny w przeglądarce pod adresem:
 
 ```bash
@@ -292,6 +349,9 @@ docker compose down
 
 - Dzięki temu, że w docker-compose.yml wolumeny są zdefiniowane jako bind mounty na WSL2, polecenie down usuwa tylko kontenery (system operacyjny, przeglądarki), ale pozostawia Twój kod źródłowy i folder node_modules bezpiecznie na dysku (EXT4).
 - Przy kolejnym uruchomieniu ./startdev.sh, Docker użyje istniejących plików, co eliminuje konieczność ponownej instalacji zależności.
+- Bind mounty pozostają nienaruszone, więc node_modules nie trzeba od nowa instalować.
+
+---
 
 ### 🧪 Testy i jakość kodu
 
@@ -320,20 +380,18 @@ Uruchamia graficzny interfejs Playwrighta, przydatny do debugowania:
 npm run e2e # wersja z interfejsem graficznym (Trace Viewer)
 ```
 
-- Komenda ta uruchamia testy w trybie UI (z okienekami).
-- Wyniki testów zostaną zapisane w folderze app/test-results/ oraz app/playwright-report/.
-
-Działa tylko lokalnie — poza Dockerem.
+- Komenda ta uruchamia testy w trybie UI (z okienekami)
+- Wyniki testów zostaną zapisane w folderze app/test-results/
+- Raport HTML Playwrighta jest generowany w app/playwright-report/ 
+- Działa tylko lokalnie — poza Dockerem
 
 ### 🐳 W kontenerze Docker (zalecane)
 
-Testy E2E w kontenerze wymagają działającego kontenera frontendowego, dlatego port 3000 musi być dostępny dla przeglądarki i kontenerów testowych.
+Testy E2E w kontenerze wymagają działającego kontenera frontendowego, dlatego port 3000 musi być dostępny zarówno dla przeglądarki i kontenerów testowych. 
 
-```bash
-./startdev.sh # Uruchomienie kontenera frontendowego oraz wejście do kontenera jako standardowy użytkownik node. Przy pierwszym uruchomieniu wymaga aktywnego agenta SSH (SSH_AUTH_SOCK) i działającego serwera frontendowego.
-```
+Można uruchomić kontener frontendowy samodzielnie lub automatycznie poprzez skrypt startowy.
 
-1. Uruchom środowisko developerskie:
+1. Uruchom środowisko developerskie (frontend):
 
 ```bash
 chmod +x startdev-e2e.sh  # nadaj uprawnienia (tylko za pierwszym razem)
@@ -341,24 +399,20 @@ chmod +x startdev-e2e.sh  # nadaj uprawnienia (tylko za pierwszym razem)
 ```
 
 - Skrypt uruchamia kontener e2e-tests
-- Kontener e2e-tests ma ustawione depends_on względem e-commerce-store, co oznacza, że Docker Compose uruchomi kontener frontendowy, jeśli jeszcze nie działa.
-- ⚠️ depends_on nie gwarantuje, że dev server (Vite) w frontendzie jest gotowy i nasłuchuje na porcie 3000.
-- Przy pierwszym uruchomieniu skrypt wymaga, aby agent SSH (SSH_AUTH_SOCK) był dostępny, ponieważ frontend może potrzebować autoryzacji dla operacji Git.
-- Po pierwszym uruchomieniu, jeśli agent jest już aktywny, startdev-e2e.sh może uruchamiać zarówno frontend, jak i kontener E2E automatycznie.
+- Kontener e2e-tests ma ustawione depends_on względem e-commerce-store, więc Docker Compose automatycznie uruchomi frontend, jeśli jeszcze nie działa. Testy E2E i frontend mogą być uruchamiane razem bez ręcznego startu frontendowego kontenera.
 - Dzięki tty: true kontener frontendowy pozostaje aktywny w tle, ale testy E2E nie wystartują automatycznie, dopóki dev server nie jest dostępny.
-- Rola depends_on: zapewnia jedynie logiczną kolejność startu kontenerów i uruchomienie e-commerce-store przed e2e-tests, co zapobiega błędom typu „kontener frontendowy nie istnieje”. Nie zastępuje sprawdzania gotowości serwera.
-- Kontener E2E jest uruchamiany jako Twój użytkownik (UID 1000) – nie root. Obraz Playwright zawiera wszystkie wymagane przeglądarki i zależności systemowe.
+- Kontener E2E uruchamiany jest jako Twój użytkownik (UID z hosta), nie jako root. Obraz Playwright zawiera wszystkie potrzebne przeglądarki i zależności systemowe.
 
 > 💡 Skrypt startdev-e2e.sh przygotowuje kontener e2e-tests do pracy z testami.
-     > - Przy pierwszym uruchomieniu wymaga aktywnego agenta SSH (SSH_AUTH_SOCK) i działającego serwera frontendowego (uruchomionego przez ./startdev.sh).
-     > - Po pierwszym uruchomieniu, gdy agent SSH jest już aktywny, można uruchamiać oba serwisy automatycznie za pomocą ./startdev-e2e.sh, po zatrzymaniu lub usunięciu kontenerów.
+     > - Przy pierwszym uruchomieniu, jeśli planujesz wykonywać operacje Git (push/pull), potrzebny jest aktywny agent SSH (SSH_AUTH_SOCK), który możesz uruchomić przez ./ssh-agent.sh oraz działający serwer frontendowy (./startdev.sh lub ./startdev-e2e.sh).
+     > - Bez operacji Git: wystarczy uruchomić ./startdev-e2e.sh, który automatycznie uruchomi zarówno kontener frontendowy, jak i kontener E2E.
 
 ```bash
 docker compose up -d e2e-tests # Uruchomienie kontenera dla testów E2E
 docker compose exec -it e2e-tests bash # Wejście do kontenera jako użytkownik ubuntu (UID 1000)
 ```
 
-2. Teraz jesteś w terminalu kontenera i możesz uruchomić:
+Teraz jesteś w terminalu kontenera i możesz uruchomić:
 
 ```bash
 npm run test:e2e-ci # uruchamia testy E2E w trybie CI (bez UI) - wszystko działa jako zwykły użytkownik
@@ -366,6 +420,7 @@ npm run test:e2e-ci # uruchamia testy E2E w trybie CI (bez UI) - wszystko dział
 
 - Komenda ta uruchamia testy w trybie headless (bez okienek)
 - Wyniki testów zostaną zapisane w folderze app/test-results/
+- Raport HTML Playwrighta jest generowany w app/playwright-report/ i jest widoczny na hoście dzięki bind mount.
 
 ℹ️ Obraz Playwright (mcr.microsoft.com/playwright:v1.57.0-noble) ma już wbudowane wszystkie przeglądarki i zależności systemowe, więc nie trzeba nic instalować ani przełączać się na root.
 
@@ -380,15 +435,6 @@ Dlaczego to jest lepsze?
 ``` bash 
 sudo rm -rf app/test-results app/playwright-report
 ```
-
-<!-- > ⚠️ Uwaga dotycząca uprawnień w kontenerze:
-> Dlaczego testy E2E nie muszą być uruchamiane jako root?
-> Playwright w kontenerze tworzy cache i zapisuje trace’y w katalogach /root/.cache/, /root/.config/, /tmp/playwright\* oraz /app/test-results/. Standardowy użytkownik node (UID 1000) nie ma pełnych praw zapisu, co powodowałoby błędy typu EACCES: permission denied. -->
-
-<!-- Dlatego:
-➡️ Testy E2E są uruchamiane tylko w izolowanym kontenerze i tylko jako root.
-➡️ Jest to normalne i zgodne z zaleceniami Playwrighta dla środowisk Dockerowych.
-➡️ Nie ma to żadnego wpływu na bezpieczeństwo środowiska produkcyjnego — dotyczy wyłącznie środowiska testowego. -->
 
 ---
 
@@ -510,6 +556,22 @@ Dzięki temu obraz jest gotowy do użycia zarówno w środowisku developerskim, 
   - Analizuje gotowy obraz Docker
   - Wykrywa podatności CRITICAL/HIGH w systemie operacyjnym oraz bibliotekach
   - Uruchamia się wyłącznie przy tagowaniu obrazu
+
+3.3 Testy orbazu produkcyjnego
+> ℹ️ **GitHub Actions (CI)**  
+> W pipeline CI aplikacja jest uruchamiana **z gotowego obrazu Docker**
+> (serwowanego przez Nginx) na runnerze GitHub Actions
+> i jest dostępna lokalnie pod adresem:
+>
+```bash
+ http://localhost:8080
+```
+> Testy end-to-end (Playwright) uruchamiane są w trybie headless
+> **bezpośrednio przeciwko działającemu obrazowi produkcyjnemu**,
+> bez użycia serwera developerskiego (Vite).
+
+> Dzięki temu testy w CI weryfikują dokładnie ten sam artefakt,
+> który jest publikowany do GitHub Container Registry (ghcr.io).
 
 ---
 
