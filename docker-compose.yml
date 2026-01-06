@@ -33,7 +33,9 @@ services:
     user: "${USER_ID}:${GROUP_ID}"
     # group_add: ["1000"] – pozwala użytkownikowi node (wewnątrz kontenera) uzyskać dostęp do socketu agenta SSH z hosta.
     group_add:
-      - "1000" # Pozwala użytkownikowi node czytać socket SSH należący do roota/systemu
+      # - "1000" # Stałe ID grupy (często domyślne dla użytkownika/dockera na wielu systemach)
+      - "${GROUP_ID}" # Dynamiczne ID grupy Twojego aktualnego użytkownika
+      # Pozwala użytkownikowi node czytać socket SSH należący do roota/systemu
       # Kontenerowy użytkownik nadal UID=1000, GID=1001, ale jest dodatkowo w grupie 1000.
       # Teraz może czytać socket hosta (bo należy do grupy, która ma prawa do socketu).
     environment:
