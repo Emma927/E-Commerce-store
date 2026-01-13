@@ -240,11 +240,10 @@ Konteneryzacja zapewnia gotowe środowisko do uruchomienia aplikacji, w którym 
 
 3.1. 🛠️ Skrypty pomocnicze
 
-W projekcie znajdują się trzy główne skrypty:
+W projekcie znajdują się dwa główne skrypty:
 
-1. **ssh-agent.sh** – uruchamia agenta SSH i ładuje klucze prywatne (dla clone/push/pull na githu z kontenera).
-2. **startdev.sh** – uruchamia kontener frontendowy (`e-commerce-store`) z UID/GID hosta i wchodzi do niego.
-3. **startdev-e2e.sh** – uruchamia kontener E2E (`e2e-tests`) i opcjonalnie wchodzi do niego interaktywnie.
+1. **startdev.sh** – uruchamia kontener frontendowy (`e-commerce-store`) z UID/GID hosta i wchodzi do niego.
+2. **startdev-e2e.sh** – uruchamia kontener E2E (`e2e-tests`) i opcjonalnie wchodzi do niego interaktywnie.
 
 💡 Dla większości użytkowników: `startdev.sh` wystarczy do pracy developerskiej. `startdev-e2e.sh` używamy tylko do testów E2E.
 
@@ -287,14 +286,7 @@ Dzięki temu kontener frontendowy (e-commerce-store) oraz kontener testowy (e2e-
 
 3.3. Start środowiska developerskiego w katalogu głównym projektu:
 
-3.3.1. Uruchomienie agenta SSH (tylko jeśli chcesz korzystać z Git z kontenera):
-
-```bash
- chmod +x ssh-agent.sh  # nadaj uprawnienia (tylko za pierwszym razem)
-./ssh-agent.sh
-```
-
-3.3.2. Start kontenera frontendowego:
+ Start kontenera frontendowego:
 
 ```bash
  chmod +x startdev.sh  # nadaj uprawnienia (tylko za pierwszym razem)
@@ -309,14 +301,15 @@ docker compose exec -it e-commerce-store bash # Wejście do kontenera jako stand
 ```
 
 > ⚠️ WAŻNE:
-> - Skrypt `ssh-agent.sh` automatycznie uruchamia agenta SSH, sprawdza i ładuje klucze, oraz zapewnia prawidłowe uprawnienia do socketu SSH dla kontenera. Nie ma potrzeby podawania hasła ani ręcznej zmiany uprawnień.
-> - Skrypt `startdev.sh` przy pierwszym uruchomieniu kontenera frontendowego ten skrypt uruchomi serwer developerski i otworzy terminal w kontenerze.
-> - Przy kolejnych startach, gdy agent SSH jest już aktywny, `startdev.sh` może automatycznie uruchamiać frontend bez dodatkowej konfiguracji.
-> - Jeśli nie korzystasz z Git w kontenerze, wykonanie skryptu `ssh-agent.sh` można pominąć.
- 
-Polecenie npm run dev działa tylko lokalnie na hoście, nie w kontenerze, ponieważ port 3000 w kontenerze jest już zajęty.
+> - Skrypt `startdev.sh`:
+    > - Automatycznie uruchamia agenta SSH, sprawdza i ładuje klucze, oraz zapewnia prawidłowe uprawnienia do socketu SSH dla kontenera. Nie ma potrzeby podawania hasła ani ręcznej zmiany uprawnień.
+    > - Przy pierwszym uruchomieniu kontenera frontendowego uruchomi serwer developerski i otworzy terminal w kontenerze.
 
-Frontend w kontenerze (e-commerce-store) uruchamia się automatycznie i jest dostępny w przeglądarce pod adresem:
+💡 Jeśli nie korzystasz z Git w kontenerze, agent SSH jest nadal uruchamiany, ale nie wymaga dodatkowej konfiguracji.
+ 
+Polecenie `npm run dev` nie jest potrzebne w kontenerze, ponieważ serwer developerski uruchamia się automatycznie przy starcie kontenera frontendowego. Jeśli spróbujesz uruchomić je ręcznie w tym samym kontenerze, port 3000 będzie już zajęty i może wystąpić konflikt.
+
+W środowisku deweloperskim aplikacja działa pod adresem frontendu w kontenerze (e-commerce-store) uruchamia się automatycznie i jest dostępny w przeglądarce pod adresem:
 
 ```bash
 http://localhost:3000
@@ -324,14 +317,8 @@ http://localhost:3000
 Teraz jesteś w terminalu kontenera i możesz uruchomić:
 
 ```bash
-npm install     #  Instalacja zależności (konieczna tylko za pierwszym razem, potem opcjonalnie można doinatalować nowe paczki)
-npm run dev     # start serwera developerskiego
-```
-
-W środowisku deweloperskim aplikacja działa pod adresem:
-
-```bash
-http://localhost:3000
+npm install # Instalacja wszystkich zależności po pierwszym sklonowaniu projektu.
+            # Później używaj tylko jeśli dodajesz nowe paczki.
 ```
 
 W środowisku produkcyjnym, czyli w obrazie Dockerowym Nginx wystawia aplikację pod adresem:
@@ -389,9 +376,18 @@ npm run e2e # wersja z interfejsem graficznym (Trace Viewer)
 
 Testy E2E w kontenerze wymagają działającego kontenera frontendowego, dlatego port 3000 musi być dostępny zarówno dla przeglądarki i kontenerów testowych. 
 
-Można uruchomić kontener frontendowy samodzielnie lub automatycznie poprzez skrypt startowy.
-
 1. Uruchom środowisko developerskie (frontend):
+
+Uruchomienie konenera frontendowego: 
+
+```bash
+./startdev.sh # Uruchomienie kontenera frontendowego oraz wejście do kontenera jako standardowy użytkownik node.
+```
+
+- Skrypt uruchomi kontener frontendowy (e-commerce-store) z UID/GID hosta, automatycznie uruchomi agenta SSH i dev server, oraz otworzy terminal w kontenerze.
+- Jeśli nie korzystasz z Git w kontenerze, agent SSH zostanie uruchomiony bez dodatkowej konfiguracji.
+
+2. Uruchomienie konenera z testami E2E
 
 ```bash
 chmod +x startdev-e2e.sh  # nadaj uprawnienia (tylko za pierwszym razem)
@@ -399,17 +395,21 @@ chmod +x startdev-e2e.sh  # nadaj uprawnienia (tylko za pierwszym razem)
 ```
 
 - Skrypt uruchamia kontener e2e-tests
-- Kontener e2e-tests ma ustawione depends_on względem e-commerce-store, więc Docker Compose automatycznie uruchomi frontend, jeśli jeszcze nie działa. Testy E2E i frontend mogą być uruchamiane razem bez ręcznego startu frontendowego kontenera.
+- Kontener e2e-tests ma ustawione depends_on względem e-commerce-store, co oznacza, że Docker Compose uruchomi kontener frontendowy, jeśli jeszcze nie działa.
+- ⚠️ depends_on nie gwarantuje, że dev server (Vite) w frontendzie jest gotowy i nasłuchuje na porcie 3000.
+- Przy pierwszym uruchomieniu skrypt wymaga, aby agent SSH (SSH_AUTH_SOCK) był dostępny, ponieważ frontend może potrzebować autoryzacji dla operacji Git.
+- Po pierwszym uruchomieniu, jeśli agent jest już aktywny, startdev-e2e.sh może uruchamiać zarówno frontend, jak i kontener E2E automatycznie.
 - Dzięki tty: true kontener frontendowy pozostaje aktywny w tle, ale testy E2E nie wystartują automatycznie, dopóki dev server nie jest dostępny.
-- Kontener E2E uruchamiany jest jako Twój użytkownik (UID z hosta), nie jako root. Obraz Playwright zawiera wszystkie potrzebne przeglądarki i zależności systemowe.
+- Rola depends_on: zapewnia jedynie logiczną kolejność startu kontenerów i uruchomienie e-commerce-store przed e2e-tests, co zapobiega błędom typu „kontener frontendowy nie istnieje”. Nie zastępuje sprawdzania gotowości serwera.
+- Kontener E2E jest uruchamiany jako Twój użytkownik (UID z hosta) – nie root. Obraz Playwright zawiera wszystkie wymagane przeglądarki i zależności systemowe.
 
 > 💡 Skrypt startdev-e2e.sh przygotowuje kontener e2e-tests do pracy z testami.
-     > - Przy pierwszym uruchomieniu, jeśli planujesz wykonywać operacje Git (push/pull), potrzebny jest aktywny agent SSH (SSH_AUTH_SOCK), który możesz uruchomić przez ./ssh-agent.sh oraz działający serwer frontendowy (./startdev.sh lub ./startdev-e2e.sh).
-     > - Bez operacji Git: wystarczy uruchomić ./startdev-e2e.sh, który automatycznie uruchomi zarówno kontener frontendowy, jak i kontener E2E.
+     > - Przy pierwszym uruchomieniu wymaga aktywnego agenta SSH (SSH_AUTH_SOCK) i działającego serwera frontendowego (uruchomionego przez ./startdev.sh).
+     > - Po pierwszym uruchomieniu, gdy agent SSH jest już aktywny, można uruchamiać oba serwisy automatycznie za pomocą ./startdev-e2e.sh, po zatrzymaniu lub usunięciu kontenerów.
 
 ```bash
 docker compose up -d e2e-tests # Uruchomienie kontenera dla testów E2E
-docker compose exec -it e2e-tests bash # Wejście do kontenera jako użytkownik ubuntu (UID 1000)
+docker compose exec -it e2e-tests bash # Wejście do kontenera jako użytkownik ubuntu (z UID/GID hosta)
 ```
 
 Teraz jesteś w terminalu kontenera i możesz uruchomić:
