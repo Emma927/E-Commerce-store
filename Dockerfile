@@ -20,6 +20,14 @@ COPY ./app .
 # Jeśli testy zakończą się błędem, budowanie obrazu zatrzyma się.
 RUN npm test
 
+# 🔥 Najważniejsze: E2E – Twoje rozumowanie jest w 100% poprawne
+# 
+# Ten fragment komentarzy:
+# 
+# Próba uruchomienia npm run start:e2e & w RUN zawiesza build
+# Testy E2E wymagają działającego serwera
+# Dlatego uruchamiamy je w runtime przez docker-compose
+
 # Instalacja zależności systemowych wymaganych przez Playwright
 # RUN apt-get update && apt-get install -y \
 #     libnss3 libnspr4 libx11-xcb1 libxrandr2 libxcomposite1 libxcursor1 \

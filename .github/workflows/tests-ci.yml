@@ -3,7 +3,7 @@ name: CI - Code Tests and Scans # Nazwa całego workflow, widoczna w GitHub Acti
 # Wyzwalacze workflow
 on:
   push: # Workflow uruchamia się przy pushu
-    branches: ["main", "develop", "feature-fe"] # Tylko dla tych branchy
+    branches: ["main", "develop", "feature-fe"] # - push: workflow odpala się przy pushu do branchy main, develop, feature-fe (w tym push powstały z merge PR)
   pull_request: # Workflow uruchamia się przy otwarciu PR
     branches: ["main", "develop"] # Tylko dla tych branchy
 
