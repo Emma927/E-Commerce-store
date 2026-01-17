@@ -1,7 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/hooks/useUser';
-import { Box, Typography, Button, Divider, List, ListItem, ListItemText } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Button,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+} from '@mui/material';
 import { Spinner } from '@/components/common/Spinner';
 import { CAPITALIZE_WORDS } from '@/constants';
 
@@ -10,7 +18,7 @@ const CheckoutSuccess = () => {
   const { data: user } = useUser();
 
   // undefined = ładowanie, null = brak orderu, object = OK
-  const [lastOrder, setLastOrder] = useState(undefined); // undefined → Jeszcze nie sprawdzono /jeszcze nie załadowano danych
+  // const [lastOrder, setLastOrder] = useState(undefined); // undefined → Jeszcze nie sprawdzono /jeszcze nie załadowano danych
 
   /**
 Cecha	sessionStorage	localStorage
@@ -18,20 +26,31 @@ Czas przechowywania	Tylko w trakcie sesji (zamykanie karty = usunięcie)	Trwałe
 Odświeżenie strony	Dane zostają	Dane zostają
 Nawigacja między stronami	Dane zostają	Dane zostają
 Usuwanie po kluczu (removeItem)	Tak, tylko ten klucz	Tak, tylko ten klucz */
-  useEffect(() => {
-    const order = JSON.parse(sessionStorage.getItem('lastOrder'));
+  //   useEffect(() => {
+  //     const order = JSON.parse(sessionStorage.getItem('lastOrder'));
+  //
+  //     if (order) {
+  //       setLastOrder(order);
+  //     } else {
+  //       setLastOrder(null); // jawny brak
+  //     }
+  //   }, []);
 
-    if (order) {
-      setLastOrder(order);
-    } else {
-      setLastOrder(null); // jawny brak
-    }
-  }, []);
+  // const lastOrder = (() => {
+  //   const raw = sessionStorage.getItem('lastOrder');
+  //   return raw ? JSON.parse(raw) : null;
+  // })();
+  // const raw = sessionStorage.getItem('lastOrder');
+  // const lastOrder = raw ? JSON.parse(raw) : null;
+  const [lastOrder] = useState(() => {
+    const raw = sessionStorage.getItem('lastOrder');
+    return raw ? JSON.parse(raw) : null;
+  });
 
   // ŁADOWANIE → tylko raz, bez migania
-  if (lastOrder === undefined) {
-    return <Spinner />;
-  }
+  // if (lastOrder === undefined) {
+  //   return <Spinner />;
+  // }
 
   // BRAK ORDERU - Dane sprawdzone → brak wartości
   if (lastOrder === null) {
@@ -50,7 +69,11 @@ Usuwanie po kluczu (removeItem)	Tak, tylko ten klucz	Tak, tylko ten klucz */
           No order found.
         </Typography>
 
-        <Button variant="contained" color="primary" onClick={() => navigate(user ? '/dashboard/orders' : '/')}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate(user ? '/dashboard/orders' : '/')}
+        >
           {user ? 'Go to Orders' : 'Back to Home'}
         </Button>
       </Box>
@@ -129,14 +152,18 @@ Usuwanie po kluczu (removeItem)	Tak, tylko ten klucz	Tak, tylko ten klucz */
           <strong>Total:</strong> ${lastOrder.total.toFixed(2)}
         </Typography>
         <Typography variant="body2" mt={1}>
-          <strong>Delivery Method:</strong> {CAPITALIZE_WORDS(lastOrder.deliveryMethod)}
+          <strong>Delivery Method:</strong>{' '}
+          {CAPITALIZE_WORDS(lastOrder.deliveryMethod)}
         </Typography>
         <Typography variant="body2">
-          <strong>Payment Method:</strong> {CAPITALIZE_WORDS(lastOrder.paymentMethod)}
+          <strong>Payment Method:</strong>{' '}
+          {CAPITALIZE_WORDS(lastOrder.paymentMethod)}
         </Typography>
         <Typography variant="body2" mt={1}>
-          <strong>Shipping Address:</strong> {lastOrder.deliveryAddress.address}, {lastOrder.deliveryAddress.city},{' '}
-          {lastOrder.deliveryAddress.postalCode}, {lastOrder.deliveryAddress.country}
+          <strong>Shipping Address:</strong> {lastOrder.deliveryAddress.address}
+          , {lastOrder.deliveryAddress.city},{' '}
+          {lastOrder.deliveryAddress.postalCode},{' '}
+          {lastOrder.deliveryAddress.country}
         </Typography>
 
         <Button

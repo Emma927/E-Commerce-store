@@ -22,6 +22,7 @@ import { describe, it, expect } from 'vitest';
 import { server } from '@/__mocks__/server';
 // Import funkcji do bardziej precyzyjnych zapytań w obrębie elementu
 import { within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 // --- Helper: funkcja do tworzenia QueryClient dla React Query ---
 // Wyłączamy retry w testach, żeby nie czekało przy błędzie API
@@ -56,7 +57,6 @@ const renderWithProviders = (ui) => {
 
 // --- Definicja testów integracyjnych dla komponentu Products ---
 describe('Products integration tests', () => {
-
   // Test: sprawdzamy, czy spinner ładowania się pojawia
   it('shows spinner while loading', () => {
     renderWithProviders(<Products />); // renderujemy komponent
@@ -84,23 +84,41 @@ describe('Products integration tests', () => {
     expect(message).toBeInTheDocument();
   });
 
+  // UWAGA: Test może generować ostrzeżenie w konsoli:
+  // "MUI: The anchorEl prop provided to the component is invalid."
+  //
+  // PRZYCZYNA: Jest to znany problem podczas testowania MUI Select w środowisku JSDOM.
+  // JSDOM nie renderuje fizycznie układu strony (layoutu), więc elementy nie mają wymiarów.
+  // MUI nie może przez to obliczyć pozycji "elementu zakotwiczającego" (anchorEl),
+  // czyli przycisku Selecta, do którego menu powinno zostać "przyczepione".
+  // Ponieważ JSDOM widzi wymiary Selecta jako 0x0, MUI zgłasza błąd pozycjonowania.
+  //
+  // STATUS: Testy przechodzą poprawnie, a funkcjonalność filtrowania jest w pełni
+  // zweryfikowana przez asercje. Ostrzeżenie można bezpiecznie zignorować
+  // w środowisku testowym.
+
   // Test: sprawdzamy filtrowanie po kategorii
   it('filters products by category', async () => {
+    // 2. Zainicjuj sesję użytkownika
+    const user = userEvent.setup();
+
     renderWithProviders(<Products />);
     await screen.findByText('Product 1');
 
-    // Otwieramy dropdown z kategoriami (MUI Select)
-    const categorySelect = screen.getByLabelText(/Category/i);
-    fireEvent.mouseDown(categorySelect);
+    // 3. Znajdź Select (MUI Select ma rolę 'combobox')
+    const categorySelect = screen.getByRole('combobox', { name: /Category/i });
 
-    // Czekamy na pojawienie się listy opcji
+    // 4. Kliknij w Select, żeby otworzyć menu
+    await user.click(categorySelect);
+
+    // 5. Czekamy na pojawienie się listy opcji
     const listbox = await screen.findByRole('listbox');
 
-    // Wybieramy opcję "Electronics"
+    // 6. Wybieramy opcję
     const electronicsOption = within(listbox).getByText(/Electronics/i);
-    fireEvent.click(electronicsOption);
+    await user.click(electronicsOption);
 
-    // Sprawdzamy, czy produkty zostały przefiltrowane
+    // Sprawdzamy wyniki
     await waitFor(() => {
       expect(screen.getByText(/Product 1 Electronics/i)).toBeInTheDocument();
     });

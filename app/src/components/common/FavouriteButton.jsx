@@ -2,12 +2,16 @@ import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import { IconButton, styled } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
-import { addToFavourites, removeFromFavourites, selectFavouritesProducts } from '@/store/favouritesSlice';
+import {
+  addToFavourites,
+  removeFromFavourites,
+  selectFavouritesProducts,
+} from '@/store/favouritesSlice';
 import { useMemo, memo } from 'react';
 
 const FavoriteIconButton = styled(IconButton, {
   shouldForwardProp: (prop) => prop !== 'active', //shouldForwardProp filtruje propsy, które są używane tylko do stylowania,
-// aby nie trafiały do DOM i nie generowały ostrzeżeń Reacta.
+  // aby nie trafiały do DOM i nie generowały ostrzeżeń Reacta.
 })(({ theme, active }) => ({
   position: 'absolute',
   margin: theme.spacing(0.5),
@@ -37,7 +41,6 @@ const FavouriteButtonComponent = ({ product }) => {
   }, [favourites, product]);
 
   const toggleFavourite = () => {
-    
     if (!product) return;
 
     if (isFavourite) {
@@ -48,7 +51,11 @@ const FavouriteButtonComponent = ({ product }) => {
   };
 
   return (
-    <FavoriteIconButton size="medium" onClick={toggleFavourite} active={isFavourite}>
+    <FavoriteIconButton
+      size="medium"
+      onClick={toggleFavourite}
+      active={isFavourite}
+    >
       {isFavourite ? <StarIcon /> : <StarBorderIcon />}
     </FavoriteIconButton>
   );

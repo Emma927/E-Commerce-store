@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+
+cd app && npm run prettier && npm run lint && npm run test

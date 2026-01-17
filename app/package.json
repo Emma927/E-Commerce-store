@@ -10,13 +10,14 @@
     "prettier": "prettier . --check",
     "format": "prettier . --write",
     "preview": "vite preview",
-    "prepare": "husky",
     "test": "vitest run --",
     "coverage": "vitest run -- --coverage",
+    "check": "npm run prettier && npm run lint && npm run test",
     "e2e": "npx playwright test --ui",
-    "test:e2e-ci": "npx wait-on $PLAYWRIGHT_BASE_URL && npx playwright test ./e2e",
+    "test:e2e-ci": "playwright test",
     "testing-tool": "set TESTING_TOOL=true& playwright test --ui",
-    "start:e2e": "serve -s dist -l 3000"
+    "start:e2e": "serve -s dist -l 3000",
+    "prepare": "cd .. && git config core.hooksPath .husky"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -25,8 +26,8 @@
     "@lottiefiles/dotlottie-react": "^0.17.10",
     "@mantine/core": "^8.3.10",
     "@mantine/hooks": "^8.3.10",
-    "@mui/icons-material": "^5.18.0",
-    "@mui/material": "^5.18.0",
+    "@mui/icons-material": "^7.3.6",
+    "@mui/material": "^7.3.6",
     "@reduxjs/toolkit": "^2.11.1",
     "@tanstack/react-query": "^5.90.12",
     "@tanstack/react-query-devtools": "^5.91.1",
@@ -35,8 +36,10 @@
     "react-hook-form": "^7.68.0",
     "react-icons": "^5.5.0",
     "react-redux": "^9.2.0",
+    "react-router": "^7.12.0",
     "react-router-dom": "^7.10.1",
     "react-select": "^5.10.2",
+    "react-toastify": "^11.0.5",
     "serve": "^14.2.5",
     "zod": "^4.1.13"
   },
@@ -67,7 +70,7 @@
     "prettier": "^3.7.4",
     "sass": "^1.95.1",
     "vite": "^7.2.4",
-    "vitest": "^4.0.15",
+    "vitest": "^4.0.16",
     "wait-on": "^9.0.3"
   }
 }

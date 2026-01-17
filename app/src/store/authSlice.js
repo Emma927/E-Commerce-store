@@ -9,11 +9,13 @@ const initialState =
         username: savedUser.username,
         token: savedUser.token,
         isAuthenticated: true,
+        isLoadingUser: false, // ✅ Zalogowany użytkownik → dane z localStorage są już gotowe, nie trzeba nic ładować
       }
     : {
         username: '',
         token: null,
         isAuthenticated: false,
+        isLoadingUser: false, // ✅ Niezalogowany użytkownik → nie ma usera, nie trzeba czekać, od razu możemy renderować przekierowanie
       };
 // Reducer = zmienia stan → logowanie/wylogowanie użytkownika.
 const authSlice = createSlice({
@@ -39,6 +41,7 @@ const authSlice = createSlice({
 export const selectUsername = (state) => state.user.username;
 export const selectToken = (state) => state.user.token;
 export const selectIsAuthenticated = (state) => state.user.isAuthenticated;
+export const selectIsLoadingUser = (state) => state.user.isLoadingUser;
 
 export const { login, logout } = authSlice.actions;
 export default authSlice.reducer;

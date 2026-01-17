@@ -1,95 +1,228 @@
-name: CI - Code Tests and Scans  # Nazwa całego workflow
+name: CI - Code Tests and Scans # Nazwa całego workflow, widoczna w GitHub Actions
 
+# Wyzwalacze workflow
 on:
-  push:                         # Wyzwala workflow przy pushu
-    branches: ['main', 'develop', 'feature-fe']  # Tylko dla tych branchy
-  pull_request:                 # Wyzwala workflow przy PR
-    branches: ['main', 'develop']  # Tylko dla tych branchy
+  push: # Workflow uruchamia się przy pushu
+    branches: ["main", "develop", "feature-fe"] # - push: workflow odpala się przy pushu do branchy main, develop, feature-fe (w tym push powstały z merge PR)
+  pull_request: # Workflow uruchamia się przy otwarciu PR
+    branches: ["main", "develop"] # Tylko dla tych branchy
 
+# ===========================
+# Job: Testy jednostkowe i integracyjne
+# ===========================
 jobs:
-  test:                         # Job o nazwie "test"
-    runs-on: ubuntu-latest      # Uruchamia się na maszynie Ubuntu
+  test:
+    runs-on: ubuntu-latest # Runner: Ubuntu
+    env:
+      # W workflow CI nie potrzebne jest pre-commit hooks z .husky – nie robi się commitów ani pushów w trakcie workflow.
+      HUSKY: 0 # Wyłączenie Husky w CI, aby pre-commit hooks nie blokowały workflow
 
     strategy:
       matrix:
-        node-version: [24.x]    # Testy uruchamiane dla Node.js 24.x
+        node-version: [24.x] # Matrix – testujemy dla Node.js 24.x (można dodać więcej wersji)
 
-    steps:                      # Kroki w jobie "test"
-      - uses: actions/checkout@v4   # Pobiera kod źródłowy repozytorium do środowiska runnera
-      - name: Use Node.js ${{ matrix.node-version }}  # Ustawienie Node.js
-        uses: actions/setup-node@v4   # Ustawia określoną wersję Node.js do użycia w workflow
-        with:
-          node-version: ${{ matrix.node-version }}  # Wersja Node.js z matrix
-          #cache: 'npm'  # Włącza cache dla zależności npm - tutaj nie będzie, ponieważ on działa tylko dla package-lock.json w katalogu root repo, a mój lockfile jest w app/. Ta opcja działa tylko, jeśli package-lock.json jest w root repozytorium.
+    steps:
+      # 1. Pobranie repozytorium do runnera
+      - uses: actions/checkout@v4 # Checkout kodu źródłowego
 
-      #Określa katalog, który ma być zapisany w cache.
-       # Cache node_modules dla folderu app
-      - uses: actions/cache@v3 # Używa akcji cache do przechowywania zależności między uruchomieniami workflow
+      # 2. Ustawienie Node.js w wersji z matrix
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
-          path: ./app/node_modules  # Ścieżka do katalogu, który ma być zapisany w cache
-          key: ${{ runner.os }}-node-${{ hashFiles('app/package-lock.json') }} # Unikalny klucz cache oparty na systemie operacyjnym i hashu pliku package-lock.json
+          node-version: ${{ matrix.node-version }} # Node.js z matrix
+
+      # 3. Cache node_modules, aby przyspieszyć kolejne uruchomienia
+      - uses: actions/cache@v3
+        with:
+          path: ./app/node_modules # Folder do zapisania w cache
+          
+          key: ${{ runner.os }}-node-${{ hashFiles('app/package-lock.json') }} # Unikalny klucz cache
           restore-keys: | # Klucz używany do przywrócenia cache, jeśli dokładny klucz nie istnieje (częściowe dopasowanie)
-            ${{ runner.os }}-node- 
+            ${{ runner.os }}-node-
 
-      - run: npm i             # Instalacja zależności npm
+      # 4. Instalacja zależności npm
+      - name: Install dependencies
+        run: npm i
+        working-directory: ./app # Folder projektu z package.json
+
+      # 5. Uruchomienie testów jednostkowych i integracyjnych
+      - name: Run unit & integration tests
+        run: npm test
         working-directory: ./app
-      - run: npm test          # Uruchamia testy jednostkowe i integracyjne
-        working-directory: ./app
 
-  source_scan:                  # Job do skanowania kodu źródłowego
-      runs-on: ubuntu-latest    # Uruchamiany na Ubuntu
-      steps:                    # Kroki w jobie "source_scan"
-        - name: Checkout code
-          uses: actions/checkout@v4  # Pobiera repozytorium do runnera
-        - name: Trivy scan source code
-          uses: aquasecurity/trivy-action@master  # Używa Trivy do skanowania
-          with:
-            scan-type: fs       # Typ skanu: File System (pliki w folderze)
-            input: ./app        # Folder aplikacji do zeskanowania
-            format: table       # Format raportu: tabela
-            exit-code: 1        # Zwraca kod błędu jeśli wykryje CRITICAL/HIGH
-            vuln-type: os,library  # Typy podatności: system i biblioteki
-            severity: CRITICAL,HIGH  # Skupia się na wysokich/krytycznych podatnościach
+  # ===========================
+  # Job: Skanowanie kodu źródłowego (Trivy)
+  # ===========================
+  source_scan:
+    runs-on: ubuntu-latest # Runner: Ubuntu
 
-  e2e:                          # Job do testów end-to-end
-    needs: test                 # Wykonuje się dopiero po jobie "test"
-    runs-on: ubuntu-latest      # Uruchamiany na Ubuntu
+    defaults:
+      run:
+        working-directory: ./app # Ustawiamy globalnie katalog dla wszystkich komend run w tym jobie
+
+    steps:
+      # 1. Checkout repozytorium
+      - uses: actions/checkout@v4
+
+      # 2. Skanowanie kodu źródłowego za pomocą Trivy
+      - name: Trivy scan source code
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs # Typ skanowania: File System
+          scan-ref: ./app # Katalog do zeskanowania
+          format: table # Format raportu w tabeli
+          exit-code: 1 # Workflow fail jeśli wykryto CRITICAL/HIGH
+          vuln-type: os,library # Skanowanie OS i bibliotek Node
+          severity: CRITICAL,HIGH # Skupia się na krytycznych i wysokich podatnościach
+
+  # ===========================
+  # Job: Testy End-to-End (Playwright)
+  # ===========================
+  e2e:
+    needs: test # E2E uruchamia się dopiero po zakończeniu jobu 'test'
+    timeout-minutes: 60 # Maksymalny czas trwania joba
+    runs-on: ubuntu-latest # Runner: Ubuntu
+
     strategy:
       matrix:
-        node-version: [24.x]    # Testy uruchamiane dla Node.js 24.x
-    steps:                      # Kroki w jobie "e2e"
-      - uses: actions/checkout@v4  # Pobiera repozytorium
-      - uses: actions/setup-node@v4  # Ustawia Node.js
+        node-version: [24.x] # Testy dla Node.js 24.x
+
+    defaults:
+      run:
+        working-directory: ./app # Wszystkie komendy run będą uruchamiane w katalogu ./app
+
+    steps:
+      # 1. Checkout repozytorium
+      - uses: actions/checkout@v4
+
+      # 2. Ustawienie Node.js
+      - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}  # Wersja Node.js
+          node-version: ${{ matrix.node-version }}
+
+      # 3. Instalacja zależności (czysta instalacja według lockfile)
       - name: Install dependencies
-        run: npm ci              # Instalacja zależności według lockfile
-        working-directory: ./app # testy do e2e są w katalogu app
+        run: npm ci
 
+      # 4. Budowanie aplikacji frontendowej
       - name: Build application
-        run: npm run build       # Buduje frontend (dist)
-        working-directory: ./app # testy do e2e są w katalogu app
+        run: npm run build # Tworzy folder dist z gotową aplikacją
 
+      # 5. Instalacja przeglądarek Playwright do testów E2E
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps  # Instaluje przeglądarki do E2E
-        working-directory: ./app # testy do e2e są w katalogu app
+        run: npx playwright install --with-deps
 
-      - name: frontend
-        run: npm run start:e2e &  # Uruchamia frontend w tle dla testów
-        working-directory: ./app # testy do e2e są w katalogu app
-
-      - name: Wait for frontend
-        run: npx wait-on http://localhost:3000  # Czeka aż frontend będzie dostępny
-        working-directory: ./app # testy do e2e są w katalogu app
-
+      # 6. Uruchomienie testów Playwright
+      # WebServer w playwright.config.ts automatycznie startuje frontend
       - name: Run Playwright tests
-        run: npx playwright test  # Uruchamia testy end-to-end
-        working-directory: ./app 
+        run: npx playwright test
 
-      - uses: actions/upload-artifact@v4  # Upload raportu testów
-        # Nawet jeśli testy się nie powiodą ( always() )
-        if: always()            
+      # 7. Upload raportu Playwright
+      - uses: actions/upload-artifact@v4
+        if: always() # Upload raportu nawet jeśli testy failną
         with:
-          name: playwright-report-${{ matrix.node-version }}  # Nazwa artefaktu
-          path: app/playwright-report/  # Folder z raportami
-          retention-days: 30        # Przechowuje artefakt przez 30 dni
+          name: playwright-report-${{ matrix.node-version }} # Nazwa artefaktu
+          path: app/playwright-report/ # Folder z raportami Playwright
+          retention-days: 30 # Przechowuje artefakt przez 30 dni
+
+# name: CI - Code Tests and Scans  # Nazwa całego workflow
+#
+# on:
+#   push:                         # Wyzwala workflow przy pushu
+#     branches: ['main', 'develop', 'feature-fe']  # Tylko dla tych branchy
+#   pull_request:                 # Wyzwala workflow przy PR
+#     branches: ['main', 'develop']  # Tylko dla tych branchy
+#
+# jobs:
+#   test:                         # Job o nazwie "test"
+#     runs-on: ubuntu-latest      # Uruchamia się na maszynie Ubuntu
+#     env:
+#       HUSKY: 0   # <-- dodajemy tu, aby wyłączyć Husky w CI
+#
+#     strategy:
+#       matrix:
+#         node-version: [24.x]    # Testy uruchamiane dla Node.js 24.x
+#
+#     steps:                      # Kroki w jobie "test"
+#       - uses: actions/checkout@v4   # Pobiera kod źródłowy repozytorium do środowiska runnera
+#       - name: Use Node.js ${{ matrix.node-version }}  # Ustawienie Node.js
+#         uses: actions/setup-node@v4   # Ustawia określoną wersję Node.js do użycia w workflow
+#         with:
+#           node-version: ${{ matrix.node-version }}  # Wersja Node.js z matrix
+#           #cache: 'npm'  # Włącza cache dla zależności npm - tutaj nie będzie, ponieważ on działa tylko dla package-lock.json w katalogu root repo, a mój lockfile jest w app/. Ta opcja działa tylko, jeśli package-lock.json jest w root repozytorium.
+#
+#       #Określa katalog, który ma być zapisany w cache.
+#        # Cache node_modules dla folderu app
+#       - uses: actions/cache@v3 # Używa akcji cache do przechowywania zależności między uruchomieniami workflow
+#         with:
+          # path: ./app/node_modules  # Ścieżka do katalogu, który ma być zapisany w cache
+          # key: ${{ runner.os }}-node-${{ hashFiles('app/package-lock.json') }} # Unikalny klucz cache oparty na systemie operacyjnym i hashu pliku package-lock.json
+          # restore-keys: | # Klucz używany do przywrócenia cache, jeśli dokładny klucz nie istnieje (częściowe dopasowanie)
+          #   ${{ runner.os }}-node-
+#
+#       - run: npm i             # Instalacja zależności npm
+#         working-directory: ./app
+#       - run: npm test          # Uruchamia testy jednostkowe i integracyjne
+#         working-directory: ./app
+#
+#   source_scan:                  # Job do skanowania kodu źródłowego
+#       runs-on: ubuntu-latest    # Uruchamiany na Ubuntu
+#       defaults:
+#         run:
+#           working-directory: ./app # Ustawiamy globalnie dla całego joba
+#       steps:                    # Kroki w jobie "source_scan"
+#         - name: Checkout code
+#           uses: actions/checkout@v4  # Pobiera repozytorium do runnera
+#         - name: Trivy scan source code
+#           uses: aquasecurity/trivy-action@master  # Używa Trivy do skanowania
+#           with:
+#             scan-type: fs       # Typ skanu: File System (pliki w folderze)
+#             scan-ref: ./app        # Folder aplikacji do zeskanowania
+#             format: table       # Format raportu: tabela
+#             exit-code: 1        # Zwraca kod błędu jeśli wykryje CRITICAL/HIGH
+#             vuln-type: os,library  # Typy podatności: system i biblioteki
+#             severity: CRITICAL,HIGH  # Skupia się na wysokich/krytycznych podatnościach
+#
+#   e2e:                          # Job do testów end-to-end
+#     needs: test                 # Wykonuje się dopiero po jobie "test"
+#     timeout-minutes: 60
+#     runs-on: ubuntu-latest      # Uruchamiany na Ubuntu
+#     strategy:
+#       matrix:
+#         node-version: [24.x]    # Testy uruchamiane dla Node.js 24.x
+#     steps:                      # Kroki w jobie "e2e"
+#       - uses: actions/checkout@v4  # Pobiera repozytorium
+#       - uses: actions/setup-node@v4  # Ustawia Node.js
+#         with:
+#           node-version: ${{ matrix.node-version }}  # Wersja Node.js
+#       - name: Install dependencies
+#         run: npm ci              # Instalacja zależności według lockfile
+#         working-directory: ./app # testy do e2e są w katalogu app
+#
+#       - name: Build application
+#         run: npm run build       # Buduje frontend (dist)
+#         working-directory: ./app # testy do e2e są w katalogu app
+#
+#       - name: Install Playwright Browsers
+#         run: npx playwright install --with-deps  # Instaluje przeglądarki do E2E
+#         working-directory: ./app # testy do e2e są w katalogu app
+#
+#       - name: frontend
+#         run: npm run start:e2e &  # Uruchamia frontend w tle dla testów
+#         working-directory: ./app # testy do e2e są w katalogu app
+#
+#       - name: Wait for frontend
+#         run: npx wait-on http://localhost:3000  # Czeka aż frontend będzie dostępny
+#         working-directory: ./app # testy do e2e są w katalogu app
+#
+#       - name: Run Playwright tests
+#         run: npm run test:e2e-ci  # Uruchamia testy end-to-end
+#         working-directory: ./app
+#
+#       - uses: actions/upload-artifact@v4  # Upload raportu testów
+#         # Nawet jeśli testy się nie powiodą ( always() )
+#         if: always()
+#         with:
+#           name: playwright-report-${{ matrix.node-version }}  # Nazwa artefaktu
+#           path: app/playwright-report/  # Folder z raportami
+#           retention-days: 30        # Przechowuje artefakt przez 30 dni

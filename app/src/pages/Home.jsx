@@ -1,6 +1,7 @@
 import Hero from '@/components/sections/Hero';
 import { ProductCard } from '@/components/common/ProductCard';
-import { Box, Grid, Typography, useTheme } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { Spinner } from '@/components/common/Spinner';
 import { useCategories } from '@/hooks/useCategories';
 import { fetchProducts } from '@/hooks/useProducts';
@@ -113,11 +114,8 @@ const Home = () => {
               {topProducts.length ? (
                 topProducts.map((product) => (
                   <Grid
-                    item
                     key={product.id}
-                    xs={12}
-                    md={6}
-                    lg={4}
+                    size={{ xs: 12, md: 6, lg: 4 }}
                     data-testid={`product-${product.id}`}
                   >
                     <ProductCard {...product} />

@@ -1,19 +1,17 @@
-import { render, screen } from '@testing-library/react'; 
+import { render, screen } from '@testing-library/react';
 import { CartItemCard } from '@/components/common/CartItemCard';
 
 // Grupa testów dla komponentu CartItemCard
 describe('CartItemCard', () => {
-
   // Definiujemy przykładowe propsy, które zostaną przekazane do komponentu w testach
   const props = {
     image: 'test-image.jpg', // ścieżka do obrazka produktu
-    title: 'Test Product',   // nazwa produktu
-    price: 25.5,             // cena produktu
+    title: 'Test Product', // nazwa produktu
+    price: 25.5, // cena produktu
   };
 
   // Test sprawdzający czy tytuł i cena produktu są poprawnie renderowane
   it('renders title and price correctly', () => {
-
     // Renderujemy komponent CartItemCard w DOM z przekazanymi propsami
     render(<CartItemCard {...props} />);
 
@@ -26,7 +24,6 @@ describe('CartItemCard', () => {
 
   // Test sprawdzający poprawne renderowanie obrazka produktu
   it('renders image with correct src and alt', () => {
-
     // Renderujemy komponent z tymi samymi propsami
     render(<CartItemCard {...props} />);
 

@@ -1,11 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import { ColorModeProvider } from '@/context/color-mode/ColorModeContext';
+import { ColorModeProvider } from '@/context/color-mode/ColorModeProvider';
 import { Provider } from 'react-redux';
 import { store } from '@/store/store';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import GlobalAppStyles from './GlobalAppStyles';
+import { ToastContainer } from 'react-toastify';
 
 /* Tworzymy globalny QueryClient dla całej aplikacji
 * Jest odpowiedzialny za cache zapytań, refetchowanie i zarządzanie danymi asynchronicznymi
@@ -23,8 +24,17 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <ColorModeProvider>
           <GlobalAppStyles />
           <App />
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            pauseOnHover
+            draggable
+          />
         </ColorModeProvider>
       </Provider>
     </QueryClientProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

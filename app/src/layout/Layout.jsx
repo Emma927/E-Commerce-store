@@ -14,7 +14,7 @@ const Layout = () => {
     <>
       <Navigation />
       <Main>
-        <Container maxWidth="lg" >
+        <Container maxWidth="lg">
           <Outlet />
         </Container>
       </Main>

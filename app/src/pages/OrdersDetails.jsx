@@ -9,7 +9,9 @@ const OrdersDetails = () => {
   const orders = useSelector(selectOrders);
   const order = orders.find((o) => o.id.toString() === id);
 
-  const selectedDelivery = DELIVERY_OPTIONS.find((opt) => opt.value === order.deliveryMethod);
+  const selectedDelivery = DELIVERY_OPTIONS.find(
+    (opt) => opt.value === order.deliveryMethod,
+  );
 
   const { name, address, city, postalCode, country } = order.deliveryAddress;
 
@@ -26,12 +28,17 @@ const OrdersDetails = () => {
       <Typography variant="h5" mb={2}>
         Order Details - ID: {order.id}
       </Typography>
-      <Typography variant="subtitle1">Date: {new Date(order.serverDate).toLocaleString()}</Typography>
+      <Typography variant="subtitle1">
+        Date: {new Date(order.serverDate).toLocaleString()}
+      </Typography>
       <Typography variant="subtitle1" sx={{ fontWeight: 'bold', my: 2 }}>
         Products:
       </Typography>
       {order.products.map((p, index) => (
-        <Box key={`${order.id}-${p.id}-${index}`} sx={{ display: 'flex', mb: 1, alignItems: 'center' }}>
+        <Box
+          key={`${order.id}-${p.id}-${index}`}
+          sx={{ display: 'flex', mb: 1, alignItems: 'center' }}
+        >
           <Box
             component="img"
             src={p.image}
@@ -53,15 +60,20 @@ const OrdersDetails = () => {
           </Box>
         </Box>
       ))}
-      <Typography sx={{ fontWeight: 'bold', mt: 2 }}>Total: ${order.total.toFixed(2)}</Typography>
+      <Typography sx={{ fontWeight: 'bold', mt: 2 }}>
+        Total: ${order.total.toFixed(2)}
+      </Typography>
       <Typography sx={{ mt: 1 }}>
         Delivery Address:{' '}
         {`${CAPITALIZE_WORDS(name)}, ${CAPITALIZE_WORDS(address)}, ${CAPITALIZE_WORDS(city)}, ${postalCode}, ${country}`}
       </Typography>
       <Typography sx={{ mt: 1 }}>
-        Delivery Method: {selectedDelivery ? `${selectedDelivery.label} ($${selectedDelivery.price})` : 'Unknown'}
+        Delivery Method:{' '}
+        {selectedDelivery
+          ? `${selectedDelivery.label} ($${selectedDelivery.price})`
+          : 'Unknown'}
       </Typography>
-      <Typography  sx={{ mt: 1 }}>
+      <Typography sx={{ mt: 1 }}>
         Payment Method:{' '}
         {order.paymentMethod === 'cash'
           ? 'Cash on Delivery'

@@ -1,4 +1,4 @@
-# --- STAGE 1: TESTY E2E (Zawiera wszystko, by uruchomić testy) ---
+# --- STAGE 1: TESTY (Zawiera wszystko, by uruchomić testy jednostkowe i integracyjne) ---
 # Bazowy obraz Node.js 24, alias 'test_runner'
 FROM node:24 AS test_runner 
 # Ustawienie katalogu roboczego w kontenerze
@@ -7,14 +7,26 @@ WORKDIR /app
 # Kopiowanie CAŁEGO kodu i instalacja WSZYSTKICH zależności (devDependencies i dependencies)
 # Kopiowanie plików zależności do kontenera
 COPY ./app/package*.json ./
+
+# Dodajemy flagę --ignore-scripts, aby npm nie próbował konfigurować Husky/Git - W skrócie: Husky po ignore-scripts w Dockerze po prostu nie istnieje, jest „uśpiony”, bo nie ma repozytorium Git w buildzie.
+RUN npm install --ignore-scripts
+
 # Instalacja wszystkich zależności (dependencies + devDependencies)
-RUN npm install
+# RUN npm install
 # Kopiowanie całego kodu aplikacji
 COPY ./app .
 
 # Uruchomienie wszystkich testów
 # Jeśli testy zakończą się błędem, budowanie obrazu zatrzyma się.
 RUN npm test
+
+# 🔥 Najważniejsze: E2E – Twoje rozumowanie jest w 100% poprawne
+# 
+# Ten fragment komentarzy:
+# 
+# Próba uruchomienia npm run start:e2e & w RUN zawiesza build
+# Testy E2E wymagają działającego serwera
+# Dlatego uruchamiamy je w runtime przez docker-compose
 
 # Instalacja zależności systemowych wymaganych przez Playwright
 # RUN apt-get update && apt-get install -y \
@@ -49,6 +61,9 @@ RUN npm run build
 # --- STAGE 3: SERWOWANIE GOTOWEJ APLIKACJI PRZEZ NGINX ---
 # Używamy lekkiego, bezpiecznego obrazu Nginx Alpine jako serwer produkcyjny
 FROM nginx:alpine AS production_nginx
+# Użycie obrazu bazowego nginx:alpine jest kluczowe. alpine to bardzo lekka, minimalistyczna dystrybucja Linuxa, która używa narzędzia o nazwie BusyBox.
+# BusyBox domyślnie udostępnia podstawową powłokę systemową jako /bin/sh.
+# Obraz ten nie zawiera Basha (/bin/bash), dlatego Twoja próba użycia go zakończyła się błędem executable file not found.
 
 # Załatanie nowych luk bezpieczeństwa jeśli się pojawią - Aktualizacja pakietów systemowych w kontenerze (łatki bezpieczeństwa)
 RUN apk update && apk upgrade 

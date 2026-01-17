@@ -1,31 +1,83 @@
 services:
   e-commerce-store:
-    image: node:24
+    build: 
+      context: .
+      dockerfile: Dockerfile # To jest Dockerfile dla środowiska Node 24
+      target: test_runner
     container_name: e-commerce-store
     volumes:
-      - ./app:/app
-    working_dir: /app
+      - .:/workspace
+        # Dzięki temu operacje npm install są znacznie szybsze, bo nie muszą synchronizować tysięcy małych plików między kontenerem a Windowsem/Macem przez system plików.
+        # Jeśli zrobisz docker compose down, kontenery są usuwane, ALE anonimowe wolumeny (te, w których masz node_modules) nadal zostają w pamięci Dockera, dopóki nie użyjesz flagi -v.
+        # - /workspace/app/node_modules # Anonimowy wolumen dla szybkości
+        # Montuje socket SSH agenta z hosta do kontenera, żeby można było używać kluczy SSH bez kopiowania ich do kontenera
+        # MAPOWANIE SOCKETU AGENTA SSH:
+        # Pozwala kontenerowi "rozmawiać" z agentem SSH uruchomionym na systemie (hoście).
+        # Dzięki temu Git w kontenerze użyje prywatnych kluczy do uwierzytelnienia (np. przy git push),
+        # ale same klucze fizycznie nigdy nie zostaną skopiowane do środka kontenera.
+      - ${SSH_AUTH_SOCK}:/run/host-services/ssh-auth.sock
+      # Montuje lokalny plik gitconfig do kontenera w trybie tylko do odczytu, żeby zachować konfigurację użytkownika git
+      # MAPOWANIE KONFIGURACJI GITA:
+      # Montuje lokalny plik .gitconfig w trybie tylko do odczytu (:ro).
+      # Dzięki temu w kontenerze od razu jest ustawione swoje Imię, Nazwisko i Email autora commitów.
+      # Tryb :ro chroni główny plik przed przypadkową zmianą z wnętrza kontenera.
+      - ~/.gitconfig:/home/node/.gitconfig:ro
+        # ZAUFANE HOSTY SSH:
+      # Mapuje listę znanych hostów (np. github.com, bitbucket.org) z Twojego systemu do kontenera.
+      # Dzięki temu SSH w kontenerze od razu "ufa" serwerom, które już znasz na hoście.
+      # Eliminuje to interaktywne pytania "Are you sure you want to continue connecting?"
+      # podczas operacji Git (push/pull) i pozwala na pełną automatyzację pracy.
+      - ~/.ssh/known_hosts:/home/node/.ssh/known_hosts:ro
+    working_dir: /workspace/app
+    # Zapis user: "${USER_ID}:${GROUP_ID}" mówi Dockerowi: "Nie uruchamiaj tego kontenera jako root, ale jako konkretny użytkownik o takich numerach ID".
     user: "${USER_ID}:${GROUP_ID}"
-    tty: true   # Wirtualny terminal. Utrzymuje kontener aktywnym(bez niego kontener od razu może się zakońćzyć), ułatwia debug i kolorowy output.
+    # group_add: ["1000"] – pozwala użytkownikowi node (wewnątrz kontenera) uzyskać dostęp do socketu agenta SSH z hosta.
+    group_add:
+      # - "1000" # Stałe ID grupy (często domyślne dla użytkownika/dockera na wielu systemach)
+      - "${GROUP_ID}" # Dynamiczne ID grupy Twojego aktualnego użytkownika
+      # Pozwala użytkownikowi node czytać socket SSH należący do roota/systemu
+      # Kontenerowy użytkownik nadal UID=1000, GID=1001, ale jest dodatkowo w grupie 1000.
+      # Teraz może czytać socket hosta (bo należy do grupy, która ma prawa do socketu).
+    environment:
+      # ZMIENNA ŚRODOWISKOWA SSH:
+      # Wskazuje narzędziom w kontenerze (np. Gitowi), gdzie dokładnie znajduje się zamontowany socket.
+      # Bez tej zmiennej Git nie wiedziałby, przez który "plik" ma się komunikować z Twoim agentem SSH,
+      # i pytałby o hasło lub odrzucił połączenie przy próbie wypchnięcia zmian.
+      # Ustawia zmienną środowiskową w kontenerze, aby narzędzia SSH (np. git push/pull) wiedziały, gdzie jest socket agenta. To MUSI być tutaj - bez tego tunel fizycznie nie powstanie:
+      - SSH_AUTH_SOCK=/run/host-services/ssh-auth.sock
+    tty: true # Wirtualny terminal. Utrzymuje kontener aktywnym(bez niego kontener od razu może się zakońćzyć), ułatwia debug i kolorowy output.
     # stdin_open: true  # pozwala na otwarcie stdin, czyli interakcję z kontenerem, bez stdin nie można robić interaktywnych rzeczy typu podłączenie się do kontenera i pisanie w konsoli. - nie potrzbene bo wchodze przez -it
     ports:
-        - "3000:3000"  # dev server
+      - "3000:3000" # dev server
     env_file:
       - .env
-    command: ["npm", "run", "dev"]  # uruchamia frontend w trybie deweloperskim
+      # Dla lokalnego developmenty wystarczy zakomentować poniższy command (command: ["npm", "run", "dev"]), jeśli Docker będzie używany tylko na końcu, ponieważ podczas lokalnego developmentu na hoście, nie potrzebuje się, żeby kontener automatycznie uruchamiał dev server.
+    command: ["npm", "run", "dev"] # Dev server startuje automatycznie, ale w kontenerze Vite będzie próbować kolejnego wolnego portu, dlatego że 3000 jest zajęty. W związku z tym nie możesz ręcznie uruchomić npm run dev w tym samym kontenerze, bo proces dev servera już działa i blokuje terminal. Możesz otworzyć przeglądarkę na hoście: http://localhost:3000
+    # 1️⃣ Bez command: ["npm", "run", "dev"] w docker-compose
+    # Kontener e-commerce-store nie uruchamia dev servera automatycznie.
+    # Port 3000 w kontenerze jest wolny, bo nic tam nie nasłuchuje.
+    # Jeśli wejdziesz do kontenera i zrobisz ręcznie:
+    # npm run dev
+    # Next.js lub Vite widzi, że port 3000 jest dostępny → startuje na nim.
+    # W konsoli widzisz http://localhost:3000.
+  # 2️⃣ Gdy odkomentujesz command: ["npm", "run", "dev"]
+  # Kontener startuje automatycznie dev server na tym samym porcie 3000.
+  # Port 3000 wewnątrz kontenera jest już zajęty → ręczne uruchomienie npm run dev w tym samym kontenerze wykryje konflikt:
+  # Vite → spróbuje kolejnego wolnego portu (3001, 3002…)
+  # Next.js → może wywalić błąd EADDRINUSE albo spróbuje dalej 3000 → konflikt
 
   e2e-tests:
     image: mcr.microsoft.com/playwright:v1.57.0-noble
     container_name: e2e-tests
-    working_dir: /app
+    working_dir: /workspace/app
     volumes:
-      - ./app:/app
+      - .:/workspace
     depends_on:
       - e-commerce-store
     env_file:
       - .env
-    user: "0:0"   # uruchamia kontener jako root tylko do testów e2e
-    tty: true   # Wirtualny terminal. Utrzymuje kontener aktywnym(bez niego kontener od razu może się zakońćzyć), ułatwia debug i kolorowy output.
+    user: "${USER_ID}:${GROUP_ID}" #"0:0" - uruchamia kontener jako root tylko do testów e2e
+    tty: true # Wirtualny terminal. Utrzymuje kontener aktywnym(bez niego kontener od razu może się zakońćzyć), ułatwia debug i kolorowy output.
     # stdin_open: true  # pozwala na otwarcie stdin, czyli interakcję z kontenerem, bez stdin nie można robić interaktywnych rzeczy typu podłączenie się do kontenera i pisanie w konsoli. - nie potrzbene bo wchodze przez it
     # TRYB AUTOMATYCZNY: odkomentuj linię poniżej
     # command: ["sh", "-c", "npx wait-on $PLAYWRIGHT_BASE_URL && npx playwright test ./e2e; tail -f /dev/null"]
