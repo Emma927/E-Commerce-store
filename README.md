@@ -66,7 +66,7 @@ On macOS and Windows (without WSL2), where Docker runs in a virtual machine and 
 
 ---
 
-## 📸 Zrzuty ekranu
+## 📸 Screenshots
 
 Mobile and desktop screenshots can be found in the `app/src/screenshots/` folder.
 
@@ -95,9 +95,9 @@ Users can seamlessly switch between light and dark themes, ensuring UI readabili
 Login is handled via the Fake Store API endpoint - POST:
 
 ```bash
-Autoryzacja - POST `/auth/login`
-Id użytkwonika wybranego po username - GET `/users`
-Dane użytkownika wybrane po id oraz tokenie - GET `/users/:id`
+Authentication - POST `/auth/login`
+Get user ID by username - GET `/users`
+Get user data by ID and token - GET `/users/:id`
 ```
 
 Test login credentials:
@@ -135,9 +135,12 @@ Submitting an order returns only a simulated ID and server date via the endpoint
 Submit order - POST: `/carts`
 ```
 
-### 🛍️ 5. Proces realizacji zakupów
+### 🛍️ 5. Checkout process
 
-Ze względu na brak trwałości danych proces realizacji zakupów jest w całości lokalnie. Jedyne id zamówienia oraz data pochodzi z API po wysłaniu zamówienia POST na endpoint `/carts`. Użytkownik przechodzi przez wszystkie etapy: logowanie, podanie adresu wysyłki, wybór metody dostawy, wybór metody płatności i potwierdzenie zamówienia.
+Due to the lack of persistent data storage, the entire checkout process is handled locally on the frontend.
+Only the order ID and order date are returned from the API after submitting the order via a POST request to the `/carts` endpoint.
+
+The user goes through all checkout steps: logging in, providing a shipping address, selecting a delivery method, choosing a payment method, and confirming the order.
 
 ### 📑 6. User Dashboard
 
@@ -263,14 +266,14 @@ GROUP_ID=1000
 ```
 Check your UID/GID on Linux/WSL:
 ```bash
-id -u   # Twój UID
-id -g   # Twój GID
+id -u   # Your UID
+id -g   # Your GID
 ``` 
 
 If the values are different from 1000, update them in .env:
 ```bash
-USER_ID=1004 # Wartość przykłdowa
-GROUP_ID=1004 # Wartość przykłdowa
+USER_ID=1004 # Example value
+GROUP_ID=1004 # Example value
 ```
 
 > 🔑Additionally, group_add: "${GROUP_ID}" allows the Node user inside the container (UID from .env) to access the host SSH socket, regardless of the host’s UID/GID configuration.
@@ -284,7 +287,7 @@ Thanks to this setup, both the frontend container (e-commerce-store) and the tes
 Start the frontend container:
 
 ```bash
- chmod +x startdev.sh  # grant execute permissions (only required the first time)
+ chmod +x startdev.sh  # Grant execute permissions (only required the first time)
 ./startdev.sh
 ```
 
