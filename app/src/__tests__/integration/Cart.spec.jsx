@@ -1,49 +1,26 @@
-import {
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-  within,
-} from '@testing-library/react';
-import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
-import cartReducer from '@/store/cartSlice';
-import authReducer from '@/store/authSlice';
+import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { renderWithProviders } from './helpers/renderWithProviders';
 import Cart from '@/pages/Cart';
-import { BrowserRouter } from 'react-router-dom';
-import { vi } from 'vitest';
 
-// 🔹 Mock useNavigate
+// 🔹 mock useNavigate
 const mockNavigate = vi.fn();
+
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
-  return { ...actual, useNavigate: () => mockNavigate };
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
 });
 
-// 🔹 Helper do renderowania z Redux i Router
-const renderWithProviders = (ui, { preloadedState } = {}) => {
-  const store = configureStore({
-    reducer: { cart: cartReducer, user: authReducer },
-    preloadedState,
-  });
-
-  return {
-    store,
-    ...render(
-      <Provider store={store}>
-        <BrowserRouter>{ui}</BrowserRouter>
-      </Provider>,
-    ),
-  };
-};
-
-describe('Cart component', () => {
+describe('Cart integration tests', () => {
   beforeEach(() => {
     localStorage.clear();
     mockNavigate.mockClear();
   });
 
-  // 🔹 Test: pusty koszyk
+  // EMPTY CART
   it('renders empty cart message', () => {
     renderWithProviders(<Cart />, {
       preloadedState: {
@@ -55,7 +32,7 @@ describe('Cart component', () => {
     expect(screen.getByText(/Your cart is empty/i)).toBeInTheDocument();
   });
 
-  // 🔹 Test: wyświetlanie produktów i podsumowania
+  // PRODUCTS + SUMMARY
   it('renders cart products and summary', () => {
     const preloadedState = {
       cart: {
@@ -88,8 +65,10 @@ describe('Cart component', () => {
     expect(screen.getByText(/Delivery and payment/i)).toBeInTheDocument();
   });
 
-  // 🔹 Test: inkrementacja i dekrementacja ilości produktu
+  // QUANTITY CHANGE (🔥 uproszczone)
   it('increments and decrements product quantity', async () => {
+    const user = userEvent.setup();
+
     const preloadedState = {
       cart: {
         cartProducts: [
@@ -110,26 +89,27 @@ describe('Cart component', () => {
     const incrementBtn = screen.getByTestId('increment-button-1');
     const decrementBtn = screen.getByTestId('decrement-button-1');
 
-    // 🔹 Poprawny sposób na input z MUI
-    const quantityInput = () =>
-      within(screen.getByTestId('quantity-input-1')).getByRole('spinbutton');
+    // 🔥 łapiemy PRAWDZIWY <input />, nie wrapper
+    const quantityInput = screen.getByLabelText('Quantity for product #1');
 
-    // 🔹 Increment
-    fireEvent.click(incrementBtn);
+    await user.click(incrementBtn);
+
     await waitFor(() => {
-      expect(quantityInput().value).toBe('3');
+      expect(quantityInput).toHaveValue(3);
     });
 
-    // 🔹 Decrement (min 1)
-    fireEvent.click(decrementBtn);
-    fireEvent.click(decrementBtn);
+    await user.click(decrementBtn);
+    await user.click(decrementBtn);
+
     await waitFor(() => {
-      expect(quantityInput().value).toBe('1');
+      expect(quantityInput).toHaveValue(1);
     });
   });
 
-  // 🔹 Test: usuwanie produktu z koszyka
-  it('removes product from cart', () => {
+  // REMOVE PRODUCT
+  it('removes product from cart', async () => {
+    const user = userEvent.setup();
+
     const preloadedState = {
       cart: {
         cartProducts: [
@@ -147,15 +127,16 @@ describe('Cart component', () => {
 
     const { store } = renderWithProviders(<Cart />, { preloadedState });
 
-    const removeButton = screen.getByRole('button', { name: /remove/i });
-    fireEvent.click(removeButton);
+    await user.click(screen.getByRole('button', { name: /remove/i }));
 
     expect(store.getState().cart.cartProducts).toHaveLength(0);
     expect(screen.getByText(/Your cart is empty/i)).toBeInTheDocument();
   });
 
-  // 🔹 Test: przejście do checkout
-  it('navigates to checkout when clicking Checkout button', () => {
+  // NAVIGATION
+  it('navigates to checkout when clicking Checkout button', async () => {
+    const user = userEvent.setup();
+
     const preloadedState = {
       cart: {
         cartProducts: [
@@ -173,8 +154,7 @@ describe('Cart component', () => {
 
     renderWithProviders(<Cart />, { preloadedState });
 
-    const checkoutButton = screen.getByText(/Delivery and payment/i);
-    fireEvent.click(checkoutButton);
+    await user.click(screen.getByText(/Delivery and payment/i));
 
     expect(mockNavigate).toHaveBeenCalledWith('/checkout');
   });

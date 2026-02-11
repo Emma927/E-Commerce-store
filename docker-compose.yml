@@ -1,20 +1,24 @@
 services:
   e-commerce-store:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile # To jest Dockerfile dla środowiska Node 24
       target: test_runner
     container_name: e-commerce-store
     volumes:
-      - .:/workspace
-        # Dzięki temu operacje npm install są znacznie szybsze, bo nie muszą synchronizować tysięcy małych plików między kontenerem a Windowsem/Macem przez system plików.
-        # Jeśli zrobisz docker compose down, kontenery są usuwane, ALE anonimowe wolumeny (te, w których masz node_modules) nadal zostają w pamięci Dockera, dopóki nie użyjesz flagi -v.
-        # - /workspace/app/node_modules # Anonimowy wolumen dla szybkości
-        # Montuje socket SSH agenta z hosta do kontenera, żeby można było używać kluczy SSH bez kopiowania ich do kontenera
-        # MAPOWANIE SOCKETU AGENTA SSH:
-        # Pozwala kontenerowi "rozmawiać" z agentem SSH uruchomionym na systemie (hoście).
-        # Dzięki temu Git w kontenerze użyje prywatnych kluczy do uwierzytelnienia (np. przy git push),
-        # ale same klucze fizycznie nigdy nie zostaną skopiowane do środka kontenera.
+      - .:/workspace # bind mount – cały katalog hosta jest współdzielony z kontenerem (w tym node_modules)
+
+      # Jeśli użyje się w volumes dodakowo anonimowego volumenu to operacje npm install są znacznie szybsze, bo nie muszą synchronizować tysięcy małych plików między kontenerem a Windowsem/Macem przez system plików.
+      # Jeśli zrobisz docker compose down, kontenery są usuwane, ALE anonimowe wolumeny (te, w których masz node_modules) nadal zostają w pamięci Dockera, dopóki nie użyjesz flagi -v.
+      # - /workspace/node_modules # Anonimowy wolumen dla szybkości
+      # Poniższe polecenie montuje socket SSH agenta z hosta do kontenera, żeby można było używać kluczy SSH bez kopiowania ich do kontenera
+
+      # Montowanie socketu SSH agenta – kontener może używać kluczy SSH hosta
+      # bez kopiowania ich do środka (bezpieczniejsze git push/pull)
+      # MAPOWANIE SOCKETU AGENTA SSH:
+      # Pozwala kontenerowi "rozmawiać" z agentem SSH uruchomionym na systemie (hoście).
+      # Dzięki temu Git w kontenerze użyje prywatnych kluczy do uwierzytelnienia (np. przy git push),
+      # ale same klucze fizycznie nigdy nie zostaną skopiowane do środka kontenera.
       - ${SSH_AUTH_SOCK}:/run/host-services/ssh-auth.sock
       # Montuje lokalny plik gitconfig do kontenera w trybie tylko do odczytu, żeby zachować konfigurację użytkownika git
       # MAPOWANIE KONFIGURACJI GITA:
@@ -69,14 +73,14 @@ services:
   e2e-tests:
     image: mcr.microsoft.com/playwright:v1.57.0-noble
     container_name: e2e-tests
-    working_dir: /workspace/app
     volumes:
-      - .:/workspace
+      - .:/workspace # bind mount – cały katalog hosta jest współdzielony z kontenerem (w tym node_modules)
+    working_dir: /workspace/app
     depends_on:
       - e-commerce-store
     env_file:
       - .env
-    user: "${USER_ID}:${GROUP_ID}" #"0:0" - uruchamia kontener jako root tylko do testów e2e
+    user: "${USER_ID}:${GROUP_ID}" # "0:0" - uruchamia kontener jako root tylko do testów e2e
     tty: true # Wirtualny terminal. Utrzymuje kontener aktywnym(bez niego kontener od razu może się zakońćzyć), ułatwia debug i kolorowy output.
     # stdin_open: true  # pozwala na otwarcie stdin, czyli interakcję z kontenerem, bez stdin nie można robić interaktywnych rzeczy typu podłączenie się do kontenera i pisanie w konsoli. - nie potrzbene bo wchodze przez it
     # TRYB AUTOMATYCZNY: odkomentuj linię poniżej

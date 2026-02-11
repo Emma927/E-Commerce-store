@@ -9,6 +9,7 @@ import { useQueries } from '@tanstack/react-query';
 import { ScrollToTopButton } from '@/components/common/ScrollToTopButton';
 import { CAPITALIZE_WORDS } from '@/constants';
 import { FeatureBar } from '@/components/common/FeatureBar';
+import { keyframes } from '@mui/system';
 
 const Home = () => {
   const { data: categories = [], isPending, isError } = useCategories();
@@ -27,14 +28,18 @@ const Home = () => {
     })),
   });
 
-  // Jeśli cokolwiek jest w trakcie pobierania danych, pokaż animację ładowania.
-  //isPending odnosi się tylko do hooka useCategories(), czyli mówi: „czy kategorie wciąż się ładują?”.
-  // productsQueries.some(q => q.isPending) dotyczy fetchy produktów dla każdej kategorii. Mogą one wciąż się ładować, nawet jeśli isPending już jest false.
+  // Pokazujemy spinner dopóki dane nie są gotowe:
+  // - isPending → kategorie wciąż się ładują
+  // - productsQueries.some(q => q.isPending) → produkty dla którejkolwiek kategorii wciąż się ładują
   if (isPending || productsQueries.some((q) => q.isPending)) {
     return <Spinner />;
   }
 
-  // Jeśli coś się nie udało pobrać, pokaż komunikat błędu użytkownikowi.
+  // Jeśli którykolwiek fetch produktów lub hook useCategories() zwróci błąd,
+  // pokazujemy go inline (Typography), a nie jako toast.
+  // Dlaczego? useQueries pobiera produkty dla wielu kategorii równocześnie.
+  // Toasty dla każdego fetcha mogłyby dać wiele powiadomień naraz → złe UX.
+  // Inline error daje czytelny komunikat w miejscu komponentu.
   if (isError || productsQueries.some((q) => q.isError)) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
@@ -51,9 +56,15 @@ const Home = () => {
     );
   }
 
+  const marquee = keyframes`
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-100%); }
+`;
+
   return (
     <Box>
-      <Hero data-testid="hero" /> {/* identyfikator do testów */}
+      {/* <Hero data-testid="hero" /> identyfikator do testów */}
+      <Hero /> {/* identyfikator do testów */}
       <FeatureBar />
       <Box
         sx={{
@@ -73,21 +84,12 @@ const Home = () => {
           sx={{
             display: 'inline-block',
             paddingLeft: '100%', // start poza ekranem
-            animation: 'marquee 10s linear infinite',
+            animation: `${marquee} 10s linear infinite`,
             color: theme.palette.info,
           }}
         >
           Our top picks for You!
         </Box>
-
-        <style>
-          {`
-      @keyframes marquee {
-        0% { transform: translateX(0%); }
-        100% { transform: translateX(-100%); }
-      }
-    `}
-        </style>
       </Box>
       {categories.map((category, index) => {
         const products = productsQueries[index].data || []; // productsQueries[index] – wybieramy wynik dla konkretnej kategorii (indeks z categories.map).
@@ -103,9 +105,9 @@ const Home = () => {
             id={category}
             sx={{
               mt: 5,
-              scrollMarginTop: '120px', // <-- offset dla fixed navbaru
+              scrollMarginTop: '120px', // offset dla fixed navbaru
             }}
-            data-testid={`category-${category.id}`}
+            // data-testid={`category-${category.id}`}
           >
             <Typography variant="h5" sx={{ mb: 2 }}>
               {CAPITALIZE_WORDS(category)}

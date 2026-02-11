@@ -1,34 +1,31 @@
-// Importujemy funkcje do renderowania komponentów i interakcji
 import { render, screen, fireEvent } from '@testing-library/react';
-// Importujemy komponent ProductCard, który będziemy testować
-import { ProductCard } from '@/components/common/ProductCard';
-// Importujemy BrowserRouter, bo ProductCard używa Link (wymaga kontekstu routera)
+import { FavouriteItemCard } from '@/components/common/FavouriteItemCard';
 import { BrowserRouter } from 'react-router-dom';
 
-// Mockujemy react-redux, żeby testy były izolowane
+// W przypadku unit testu z mockowanym useSelector i useDispatch sprawdzasz tylko, czy komponent renderuje się poprawnie i reaguje na interakcje, a nie działanie całego Redux store.
 vi.mock('react-redux', () => ({
-  // Mockujemy useDispatch, aby móc sprawdzać wywołania dispatch w testach
+  // Mockujemy useDispatch, żeby komponenty mogły wywoływać akcje Redux
+  // w testach bez prawdziwego store. Umożliwia sprawdzenie, czy dispatch
+  // został wywołany z odpowiednim payload.
   useDispatch: vi.fn(),
-  // Mockujemy useSelector, zwracając pustą tablicę, bo w tym unit teście
+  // Mockujemy useSelector, żeby komponenty korzystające z Redux (np. FavouriteButton)
+  // działały w testach bez prawdziwego store. Zwracamy pustą tablicę, bo w tym unit teście
   // nie zależy nam na danych z Redux, tylko na samym renderowaniu i interakcjach komponentu.
   useSelector: vi.fn(() => []),
 }));
-
-// Mockujemy komponent FavouriteButton, żeby nie renderować prawdziwego komponentu
+// Nie testujemy komponentu FavouriteButton w tym teście, więc go mockujemy.
+// W mocku dodajemy data-testid, żeby można było sprawdzić, że komponent został wyrenderowany.
 vi.mock('@/components/common/FavouriteButton', () => ({
-  // Zwracamy prosty div z data-testid, który pozwoli nam go znaleźć w testach
   FavouriteButton: () => <div data-testid="fav-btn" />,
 }));
 
-// Importujemy useDispatch, żeby podpiąć naszego mocka
+// Impotyujemy useDispatch, żeby podpiąć naszego mocka
 import { useDispatch } from 'react-redux';
-
 // Importujemy akcję addToCart, której wywołanie chcemy testować
 import { addToCart } from '@/store/cartSlice';
 
 // Tworzymy mock funkcji dispatch, która będzie rejestrować wywołania
 const mockedDispatch = vi.fn();
-
 // Podpinamy naszego mocka pod useDispatch
 // Każdy komponent korzystający z useDispatch użyje naszego mockedDispatch
 useDispatch.mockReturnValue(mockedDispatch);
@@ -39,14 +36,14 @@ useDispatch.mockReturnValue(mockedDispatch);
 // renderWithRouter - funkcja renderująca komponent wewnątrz BrowserRouter, ze wzdlędu na adres URL używany w Linkach
 const renderWithRouter = (ui) => render(<BrowserRouter>{ui}</BrowserRouter>);
 
-describe('ProductCard unit tests', () => {
+describe('FavouriteItemCard unit tests', () => {
   // Definiujemy przykładowy produkt do testów
   const product = {
     id: 1,
-    image: 'test.jpg',
-    title: 'Test Product',
-    description: 'Test description',
-    price: 99.99,
+    image: 'test-image.jpg',
+    title: 'Test Favourite Product',
+    description: 'This is a test favourite product',
+    price: 49.99,
   };
 
   // Czyścimy historię wywołań dispatch przed każdym testem
@@ -54,49 +51,33 @@ describe('ProductCard unit tests', () => {
     mockedDispatch.mockClear();
   });
 
-  it('renders title, price, rating and image', () => {
-    const productWithRating = {
-      ...product,
-      rating: { rate: 4.2, count: 139 },
-    };
+  it('renders title, price and image', () => {
+    // Renderujemy komponent w DOM z naszym helperem
+    renderWithRouter(<FavouriteItemCard {...product} />);
 
-    renderWithRouter(<ProductCard {...productWithRating} />);
-    // // pokaż cały DOM
-    // screen.debug(undefined, 500000); // Wyświetli do 50 000 znaków
-    // console.log('Rendered DOM:', document.body.innerHTML); // Dodatkowe logowanie całego DOM
+    // Sprawdzamy, czy tytuł produktu jest w DOM
+    expect(screen.getByText(product.title)).toBeInTheDocument();
 
-    // Tytuł i cena
-    expect(screen.getByText(productWithRating.title)).toBeInTheDocument();
-    expect(
-      screen.getByText(`$${productWithRating.price.toFixed(2)}`),
-    ).toBeInTheDocument();
-
-    // Sprawdzamy count w <Typography>
-    expect(
-      screen.getByText(`(${productWithRating.rating.count})`),
-    ).toBeInTheDocument();
-
-    // Sprawdzamy rate po aria-label w MUI <Rating>
-    expect(
-      screen.getByLabelText(`${productWithRating.rating.rate} Stars`),
-    ).toBeInTheDocument();
+    // Sprawdzamy czy cena produktu jest w DOM
+    expect(screen.getByText(`$${product.price.toFixed(2)}`)).toBeInTheDocument();
 
     // Sprawdzamy, czy obraz produktu jest w DOM i ma poprawny src
-    const img = screen.getByRole('img', { name: productWithRating.title });
+    const img = screen.getByRole('img', { name: product.title });
     expect(img).toBeInTheDocument();
-    expect(img).toHaveAttribute('src', productWithRating.image);
+    expect(img).toHaveAttribute('src', product.image);
   });
 
   // Test sprawdza, czy kliknięcie przycisku „Add to Cart” wywołuje akcję Redux `addToCart` z odpowiednim produktem i domyślną ilością 1.
   it('dispatches addToCart action on button click', () => {
     // Renderujemy komponent
-    renderWithRouter(<ProductCard {...product} />);
+    renderWithRouter(<FavouriteItemCard {...product} />);
 
-    // Szukamy przycisku po roli "button" i tekście /add to cart/i (ignore case)
-    const button = screen.getByRole('button', { name: /add to cart/i });
-
+    // Znajdujemy przycisk "Add to Cart"
+    const addToCartButton = screen.getByRole('button', {
+      name: /add to cart/i,
+    });
     // Symulujemy kliknięcie przycisku
-    fireEvent.click(button);
+    fireEvent.click(addToCartButton);
 
     // Sprawdzamy, że dispatch został wywołany dokładnie raz
     expect(mockedDispatch).toHaveBeenCalledTimes(1);
@@ -110,19 +91,19 @@ describe('ProductCard unit tests', () => {
     );
   });
 
-  // Srprawdzamy, czy komponent FavouriteButton jest renderowany w ProductCard
+  // Sprawdzamy, czy komponent FavouriteButton jest renderowany w FavouriteItemCard
   it('renders FavouriteButton', () => {
     // Renderujemy komponent
-    renderWithRouter(<ProductCard {...product} />);
+    renderWithRouter(<FavouriteItemCard {...product} />);
 
-    // Sprawdzamy, czy div z mockowanego FavouriteButton jest w DOM
+    // Sprawdzamy, czy komponent FavouriteButton jest w DOM
     expect(screen.getByTestId('fav-btn')).toBeInTheDocument();
   });
 
   // Sprawdzamy, czy link „Show details” prowadzi do poprawnego URL
   it('link "Show details" points to correct URL', () => {
     // Renderujemy komponent
-    renderWithRouter(<ProductCard {...product} />);
+    renderWithRouter(<FavouriteItemCard {...product} />);
 
     // Szukamy linku po roli i tekście
     const link = screen.getByRole('link', { name: /show details/i });
@@ -130,5 +111,4 @@ describe('ProductCard unit tests', () => {
     // Sprawdzamy, czy link ma poprawny atrybut href
     expect(link).toHaveAttribute('href', `/product/${product.id}`);
   });
-
 });

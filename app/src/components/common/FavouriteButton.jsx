@@ -10,7 +10,7 @@ import {
 import { useMemo, memo } from 'react';
 
 const FavoriteIconButton = styled(IconButton, {
-  shouldForwardProp: (prop) => prop !== 'active', //shouldForwardProp filtruje propsy, które są używane tylko do stylowania,
+  shouldForwardProp: (prop) => prop !== 'active', // shouldForwardProp filtruje propsy, które są używane tylko do stylowania,
   // aby nie trafiały do DOM i nie generowały ostrzeżeń Reacta.
 })(({ theme, active }) => ({
   position: 'absolute',
@@ -55,6 +55,7 @@ const FavouriteButtonComponent = ({ product }) => {
       size="medium"
       onClick={toggleFavourite}
       active={isFavourite}
+      data-testid="fav-btn" 
     >
       {isFavourite ? <StarIcon /> : <StarBorderIcon />}
     </FavoriteIconButton>

@@ -7,11 +7,13 @@ import { useProduct } from '@/hooks/useProduct';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '@/store/cartSlice';
 import { FORMAT_COMMAS } from '@/constants';
+import { useHandleApiError } from '@/hooks/useHandleApiError';
+import { useEffect } from 'react';
 
 const Product = () => {
   const { id } = useParams();
   console.log('Product ID from URL:', id, typeof id);
-  const { data: product, isPending, isError } = useProduct(id);
+  const { data: product, isPending, isError, error } = useProduct(id);
 
   console.log('Product ID from URL:', id);
   console.log('useProduct data:', product);
@@ -34,25 +36,18 @@ const Product = () => {
     );
   };
 
-  // Sprawdzenie warunków przed return
-  // Sprawdza, czy dane są w trakcie pobierania.
-  if (isPending) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
-        <Spinner />
-      </Box>
-    );
-  }
+  // Tworzymy handler błędów API z użyciem custom hooka.
+  // Przekazujemy queryKey (['product, id']), który hook wykorzysta tylko w przypadku błędu serwera (status ≥ 500), aby opcjonalnie wywołać refetch danych (queryClient.invalidateQueries) dla tego zapytania.
+  const handleApiError = useHandleApiError(['product', id]); // klucz query zależny od produktu
+
+  useEffect(() => {
+    if (isError) handleApiError(error);
+  }, [isError, error, handleApiError]);
 
   // Sprawdza, czy dane są w trakcie pobierania.
-  if (isError) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
-        <Typography color="error">Error while loading products.</Typography>
-      </Box>
-    );
-  }
+  if (isPending) return <Spinner />;
 
+  // Sprawdza, czy dane pojedynczego produktu zostały pobrane.
   if (!product) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>

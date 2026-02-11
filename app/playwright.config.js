@@ -81,7 +81,7 @@ export default defineConfig({
   //   reuseExistingServer: !process.env.CI,
   // },
 
-  // Uruchamiaj webServer tylko jeśli nie ustawiono PLAYWRIGHT_SKIP_WEBSERVER
+  // Uruchamiaj webServer tylko jeśli nie ustawiono PLAYWRIGHT_SKIP_WEBSERVER w CI/CD
   webServer: process.env.PLAYWRIGHT_SKIP_WEBSERVER
     ? undefined
     : {

@@ -90,6 +90,7 @@ const Cart = () => {
                 <IconButton
                   data-testid={`decrement-button-${p.id}`}
                   size="small"
+                  // Jeśli jest null, undefined albo 0, używa 1 jako domyślnej wartości.
                   onClick={() => handleChangeQty(p.id, (p.quantity || 1) - 1)}
                 >
                   <RemoveIcon />
@@ -98,20 +99,24 @@ const Cart = () => {
                   type="number"
                   variant="outlined"
                   size="small"
-                  data-testid={`quantity-input-${p.id}`} // ← to jest kluczowe
-                  inputProps={{
-                    'aria-label': `quantity-input-${p.id}`,
-                    min: 1,
-                    style: { textAlign: 'center' },
+                  // slotProps.htmlInput = atrybuty przekazywane bezpośrednio do natywnego <input> wewnątrz TextField MUI
+                  slotProps={{
+                    htmlInput: {
+                      'aria-label': `Quantity for product #${p.id}`, // ważne dla testów, pozwala łatwo znaleźć ten input
+                      min: 1,
+                      style: { textAlign: 'center' },
+                    },
                   }}
                   value={p.quantity || 1}
                   onChange={(e) => {
+                    // Zamienia wartość inputa na liczbę całkowitą (ale nie zaokrągla) w systemie dziesiętnym (10 = baza dziesiętna).
+                    // Jeśli użytkownik wpisze coś niepoprawnego (np. pusty string), wynik będzie NaN → dzięki `|| 1` ustawiamy minimalną domyślną wartość 1.
                     const qty = parseInt(e.target.value, 10) || 1;
                     handleChangeQty(p.id, qty);
                   }}
                   sx={{
                     width: 60,
-                    // usuwa strzałki w Chrome/Safari/Edge
+                    // usuwa strzałki góra/dół w oknie inputa w Chrome/Safari/Edge
                     '& input::-webkit-outer-spin-button': {
                       WebkitAppearance: 'none',
                       margin: 0,
@@ -151,17 +156,17 @@ const Cart = () => {
 
               alignItems: 'center',
               p: 2,
-              border: { xs: 'none', md: '1px solid #ccc' }, // desktop pełny border
-              borderTop: { xs: '1px solid #ccc' }, // mobile tylko górny border
+              border: { xs: 'none', md: '1px solid #ccc' },
+              borderTop: { xs: '1px solid #ccc' },
               borderRadius: { md: 2 },
               position: { xs: 'fixed', md: 'sticky' },
-              top: { xs: 'auto', md: '110px' }, // desktop: przyklejony od góry
-              bottom: { xs: 0, md: 'auto' }, // mobile: przyklejony od dołu
-              width: { xs: '100%', md: 'auto' }, // mobile: pełna szerokość, desktop: auto
+              top: { xs: 'auto', md: '110px' },
+              bottom: { xs: 0, md: 'auto' },
+              width: { xs: '100%', md: 'auto' },
               minHeight: { xs: '185px', md: 0 },
-              left: { xs: 0, md: 'auto' }, // na mobile przylega do lewej krawędzi
+              left: { xs: 0, md: 'auto' },
               zIndex: 10,
-              backgroundColor: 'background.default', // żeby nie było przezroczyste
+              backgroundColor: 'background.default', // nieprzezroczyste tło
             }}
           >
             <Box>

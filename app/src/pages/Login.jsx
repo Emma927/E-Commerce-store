@@ -8,19 +8,19 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { Spinner } from '@/components/common/Spinner';
-import { TextFieldComponent } from '../components/common/TextFieldComponent';
+import { TextFieldComponent } from '@/components/common/TextFieldComponent';
 import { useForm, FormProvider, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLogin } from '@/hooks/useLogin';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { login } from '@/store/authSlice';
-import { useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { login, selectToken } from '@/store/authSlice';
 
 const loginSchema = z.object({
   username: z.string().min(1, { message: 'Username does not match' }),
   password: z.string().min(1, { message: 'Password does not match' }),
+  // remember jest booleanem (true / false).
   remember: z.boolean().optional(), // niewymuszone zaznaczenie checkbox
 });
 
@@ -41,23 +41,32 @@ const Login = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const from = location.state?.from?.pathname || '/';
+
+  // 🔹 Pobranie tokena z Redux
+  const token = useSelector(selectToken);
+
   // Wyciągnięcie całego obiektu methods, który zawiera wszyskie metody, zamiast destrukturyzować pojedyncze metody
   const methods = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: defaultLoginValues,
   });
 
-  // Hook useLogin() zwraca obietk mutation, a dzięki destrukturyazji tego obiektu mamy dostęp do tokena
+  // Hook useLogin() zwraca obietk mutation, a dzięki destrukturyzaji tego obiektu mamy dostęp do tokena
   const { mutate, isPending, isError, error } = useLogin(); // Zwraca obiekt z metodami i stanami, a nie z końcowymi danymi z POST. W skrócie: useLogin zwraca obiekt mutation, ale dane z POST nie są “wewnątrz hooka” – są zarządzane przez React Query i udostępniane przez jego stan.
 
-  /*
-Wszystkie etapy przepływu danych i kontroli, od interakcji użytkownika, przez działanie biblioteki, aż po finalne użycie danych w kodzie:
+  /* Wszystkie etapy przepływu danych i kontroli, od interakcji użytkownika, przez działanie biblioteki, aż po finalne użycie danych w kodzie:
 1) Użytkownik uzupełnił dane i kliknął onSubmit.
 2) onSubmit wywołuje mutate.
 3) mutate daje sygnał QueryClient, aby uruchomił mutationFn i zmienił status stanu ładowania.
 4) mutationFn rozpoczyna żądanie POST (sieć).
 5) Po pomyślnym zakończeniu żądania mutationFn zwraca dane (return response.json()). zwrócone przez mutationFn dane trafiają bezpośrednio do QueryClienta, aktualizuje status mutacji na success i przekazuje te dane do callbacka onSuccess w mutate. To mutationFn jest odpowiedzialne za zwrócenie danych, a QueryClient tylko nimi zarządza, a nie sam je pobiera z sieci. Nie ma znaczenia, gdzie trzymane jest onSuccess, czy w mutate w Login.jsx, czy w mutationFn w hooku useLogin — dane zawsze przechodzą przez QueryClient, który zarządza statusem i cache mutacji.
 */
+
+  // 🔹 Jeśli już jesteśmy zalogowani, będziemy przekierowani na stronę główną
+  if (token) {
+    // jeśli jesteś zalogowany, od razu idź na główną
+    return <Navigate to="/" replace />; // replace zastępuje bieżący wpis w historii przeglądarki, zamiast dodawać nowy. Login w ogóle nie istnieje w historii, więc użytkownik nie może wrócić do niego przy pomocy przycisku "wstecz" w przeglądarce.
+  }
 
   const onSubmit = (formData) => {
     // Mutate zawiera gotowe Callbacki jak: onSuccess, onError
@@ -69,21 +78,24 @@ Wszystkie etapy przepływu danych i kontroli, od interakcji użytkownika, przez 
         // Drugi parametr (variables) – zawsze obiekt, który przekazałaś do mutate() ({ username, password }).
         // Status, isPending, isSuccess, isError, error: Mówią nam co się dzieje z mutacją w danej chwili. Te wartości powodują re-render komponentu, gdy się zmieniają.
 
-        // data → wynik mutationFn, czyli odpowiedź z API
+        // data → wynik mutationFn, czyli odpowiedź z API, to co zwraca fetch/Post
         // variables → obiekt przekazany do mutate(), czyli { username, password }
         onSuccess: (data, variables) => {
+          // Wywoływane tylko wtedy, gdy mutacja zakończy się sukcesem (HTTP 2xx, wszystko poszło dobrze)
           const userData = { username: variables.username, token: data.token };
           localStorage.setItem('user', JSON.stringify(userData));
           localStorage.setItem('token', data.token);
           dispatch(login({ username: variables.username, token: data.token })); // Aktualizacja stanu w store, tutaj onSuccess jest lokalny, ale jego efektem jest aktualizacja globalnego stanu RTK.
           methods.reset(defaultLoginValues); // reset jest potrzebny w obu przypadkach RHF i useState, jeśli komponent nie odmontowuje się, bo nie nawigujemy na inną stronę po udanym logowaniu na przykład na stronę główną. Podczas ponownego mountu czyli nawigacji na inną stronę i spowrotem na Login, React Hook Form tworzy nowy formState, który przyjmuje defaultValues.
-          navigate(from, { replace: true }); // ← teraz wraca na stronę, z której przyszedł, czyli na from
+          navigate(from, { replace: true }); // ← teraz wraca na stronę, z której przyszedł, czyli na "from"
         },
         onError: (error) => {
+          // Wywoływane tylko wtedy, gdy mutacja zakończy się błędem (HTTP 4xx, 5xx, fetch wyrzuci błąd).
           console.error('Login failed', error);
         },
         onSettled: () => {
-          () => console.log('Mutatin end');
+          // Wywoływane zawsze, niezależnie od tego, czy mutacja zakończyła się sukcesem czy błędem.
+          console.log('Mutation end');
         },
       },
     );
@@ -144,10 +156,11 @@ Jeśli dodamy onSubmit={(e) => { e.preventDefault(); ... }}, to nic złego się 
                 />
               )}
             />
+            {/* Pole opcjonalne – użytkownik może je zaznaczyć lub nie, brak walidacji. W przypadku zmiany na wymagane, można dodać walidację z Zod, np. .refine(value => value === true, { message: 'Must be accepted' }) */}
             {methods.formState.errors.remember && (
               <p>{methods.formState.errors.remember.message}</p>
             )}
-            {isPending && <Spinner />} {/* <=== SPINNER JEST TU */}
+            {isPending && <Spinner />}
             <Button
               type="submit"
               fullWidth

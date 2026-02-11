@@ -1,6 +1,7 @@
 import { createSlice, createSelector } from '@reduxjs/toolkit';
 
-// Wczytanie koszyka z localStorage przy starcie
+// Wczytanie koszyka z localStorage przy starcie aplikacji
+// Jeśli nic nie ma w localStorage, używamy pustej tablicy
 const savedCart = JSON.parse(localStorage.getItem('cart')) || [];
 
 const initialState = {
@@ -11,33 +12,47 @@ const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
-    // W koszyku możesz mieć wiele sztuk tego samego produktu, np. 3 razy ten sam kubek → wtedy liczy się quantity, a nie blokujesz dodawania.
+    /**
+     * Dodaje produkt do koszyka.
+     * Jeśli produkt już istnieje, zwiększa jego quantity.
+     * Jeśli nie istnieje, dodaje nowy obiekt z quantity domyślnym 1.
+     * Po każdej zmianie zapisuje stan do localStorage.
+     */
     addToCart: (state, action) => {
       const existingProduct = state.cartProducts.find(
         (p) => p.id === action.payload.id,
       );
       // if (existingProduct) – produkt jest już w koszyku → zwiększamy jego quantity o 1.
       if (existingProduct) {
+        // jeśli action.payload.quantity jest falsy (czyli undefined, null, 0, '' itp.), to użyje wartości 1 zamiast tego.
         existingProduct.quantity += action.payload.quantity || 1;
         // else – produkt nie ma w koszyku → tworzymy nowy wpis z quantity = 1 i dodajemy do tablicy.
       } else {
         state.cartProducts.push({
           ...action.payload,
-          quantity: action.payload.quantity || 1,
+          quantity: action.payload.quantity || 1, // Jeśli payload nie zawiera quantity, ustawiamy domyślnie 1.
+          // W przeciwnym razie używamy podanej wartości.
         });
       }
 
       localStorage.setItem('cart', JSON.stringify(state.cartProducts));
     },
+    /**
+     * Usuwa produkt z koszyka po jego ID.
+     * Zapisuje zmieniony koszyk do localStorage.
+     */
     removeFromCart: (state, action) => {
       state.cartProducts = state.cartProducts.filter(
         (p) => p.id !== action.payload,
       );
       localStorage.setItem('cart', JSON.stringify(state.cartProducts));
     },
-    // Szukasz w tablicy cartProducts produktu o tym samym id.0
-    // Zmieniasz jego quantity zamiast dodawać nowy obiekt do tablicy.
-    // localStorage działa tak, że zapisujesz ciąg znaków (string) jako wartość pod kluczem. Nie ma tam możliwości „podmiany jednego pola w obiekcie w tablicy” w pamięci — musisz zserializować cały obiekt lub tablicę, czyli w Twoim przypadku całą tablicę state.cartProducts.
+
+    /**
+     * Aktualizuje quantity produktu w koszyku.
+     * Nie dodaje nowego produktu, tylko zmienia ilość istniejącego.
+     * Po zmianie zapisuje cały koszyk do localStorage.
+     */
     updateQuantity: (state, action) => {
       const { id, quantity } = action.payload; // dostajesz id i nową ilość
       const product = state.cartProducts.find((p) => p.id === id); // znajdujesz produkt
@@ -45,6 +60,10 @@ const cartSlice = createSlice({
       // Do localStorage trafia cała tablica produktów, wraz z wszystkimi ich właściwościami, w tym zaktualizowanym quantity.
       localStorage.setItem('cart', JSON.stringify(state.cartProducts)); // zapisujesz całą tablicę produktów
     },
+    /**
+     * Czyści cały koszyk.
+     * Usuwa też zapis w localStorage.
+     */
     clearCart: (state) => {
       state.cartProducts = [];
       localStorage.removeItem('cart');
@@ -53,7 +72,7 @@ const cartSlice = createSlice({
 });
 
 /**
-Memoizowane selektory — dzięki memoizacji (createSelector) nie będą się przeliczać przy każdym renderowaniu, czy każdej nawigacji, tylko tylko wtedy, gdy cartProducts faktycznie się zmieni.
+Memoizowane selektory — dzięki memoizacji (createSelector) nie będą się przeliczać przy każdym renderowaniu, czy każdej nawigacji, tylko wtedy, gdy cartProducts faktycznie się zmieni.
  */
 /**
 [...state.cart.cartProducts] → tworzy kopię tablicy, żeby nie zmieniać oryginalnego stanu w Reduxie.
