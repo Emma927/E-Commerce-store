@@ -30,14 +30,31 @@ import { CAPITALIZE } from '@/constants';
 import { CAPITALIZE_WORDS } from '@/constants';
 import { usePostOrder } from '@/hooks/usePostOrder';
 
+/**
+ * trim() usuwa spacje na początku i końcu
+ * .split(/\s+/) dzieli tekst na wyrazy, traktując dowolną liczbę spacji lub tabulatorów jako jeden separator.
+ * .length >= 2 wymaga co najmniej dwóch wyrazów
+ * .refine() to metoda, która pozwala dodać dowolną własną walidację, której nie da się łatwo wyrazić w standardowych metodach typu .min(), .max(), .regex() itp.
+ */
 const checkoutSchema = z.object({
-  name: z.string().min(1, { message: 'Name is required' }),
-  address: z.string().min(1, { message: 'Address is required' }),
-  city: z.string().min(1, { message: 'City is required' }),
-  postalCode: z.string().min(1, { message: 'Postal code is required' }),
-  country: z.string().min(1, { message: 'Country is required' }),
-  paymentMethod: z.string().min(1, { message: 'Select a payment method' }),
-  deliveryMethod: z.string().min(1, { message: 'Select a delivery method' }),
+  name: z
+    .string()
+    .min(1, { message: 'Name is required' })
+    .refine((val) => val.trim().split(/\s+/).length >= 2, {
+      message: 'Both first and last name is required',
+    }),
+  address: z.string().min(3, { message: 'Address is required' }),
+  city: z.string().min(3, { message: 'City is required' }),
+  postalCode: z
+    .string()
+    .trim() // usuwa spacje na początku i końcu
+    .regex(/^\d{2,}-\d{2,}$/, {
+      message:
+        'Postal code must have at least 2 digits before and after the hyphen',
+    }),
+  country: z.string().min(3, { message: 'Country is required' }),
+  paymentMethod: z.string().nonempty({ message: 'Select a payment method' }),
+  deliveryMethod: z.string().nonempty({ message: 'Select a delivery method' }),
 });
 
 const defaultCheckoutValues = {
@@ -100,7 +117,7 @@ const Checkout = () => {
 
     // 2) pełne order tylko lokalnie (Redux + Session)
     const fullOrder = {
-      userId: user?.id || 1, // z API albo gość....czyli zawsze 1 ?
+      userId: user?.id || 1, // z API albo gość, czyli u mnie zawsze 1, ponieważ John Doe ma rówznież w API id=1
       products: cartProducts,
       deliveryAddress: data,
       deliveryMethod: data.deliveryMethod,
@@ -231,6 +248,7 @@ const Checkout = () => {
                       {...field}
                       onChange={(e) => {
                         field.onChange(e); // aktualizuje RHF
+                        // Nadpisanie domyślnie wybranej opcji dostawy i ceny dostawy
                         const selected = DELIVERY_OPTIONS.find(
                           (opt) => opt.value === e.target.value,
                         );
@@ -279,6 +297,7 @@ const Checkout = () => {
                 </Box>
                 <Typography key={p.id}>
                   {p.title} x {p.quantity || 1}: $
+                  {/* Jeśli z jakiegoś powodu p.price jest undefined lub null, wtedy p.price || 0 daje 0, żeby uniknąć błędu mnożenia. */}
                   {((p.price || 0) * (p.quantity || 1)).toFixed(2)}
                 </Typography>
               </Box>
@@ -296,7 +315,7 @@ const Checkout = () => {
               color="primary"
               fullWidth
               onClick={methods.handleSubmit(onSubmit)}
-              disabled={!cartProducts.length} // <--- blokada
+              disabled={!cartProducts.length} // blokada, żeby przycisk był nieklikalny, przy pustym koszyku
             >
               Place Order
             </Button>

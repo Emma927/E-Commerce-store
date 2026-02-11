@@ -13,10 +13,10 @@ const CartItemCardComponent = ({ image, title, price }) => {
         src={image}
         alt={title}
         sx={{
-          width: { xs: 60, sm: 80, md: 100 }, // responsywna szerokość
+          width: { xs: 60, sm: 80, md: 100 },
           height: 'auto', // wysokość dopasowuje się proporcjonalnie
           objectFit: 'contain', // zachowanie proporcji
-          flexShrink: 0, // nie kurczy się w flex
+          flexShrink: 0, // zapobiega kurczeniu się obrazka
         }}
       />
       <Box sx={{ flex: 1, minWidth: 0 }}>

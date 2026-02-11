@@ -1,6 +1,13 @@
 import { render, screen } from '@testing-library/react';
 import { CartItemCard } from '@/components/common/CartItemCard';
 
+/**
+ * 1️⃣ Zakres komponentu CartItemCard
+ * CartItemCard jest czysto prezentacyjnym komponentem (stateless, display-only).
+ * Nie wykonuje fetchy, requestów do API ani interakcji z backendem.
+ * Renderuje tylko dane przekazane przez propsy (image, title, price).
+ * ✅ W takich sytuacjach test jednostkowy pokrywający renderowanie wszystkich elementów jest optymalny i kompletny.
+ */
 // Grupa testów dla komponentu CartItemCard
 describe('CartItemCard', () => {
   // Definiujemy przykładowe propsy, które zostaną przekazane do komponentu w testach

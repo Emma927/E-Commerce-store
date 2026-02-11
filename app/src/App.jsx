@@ -27,7 +27,7 @@ const ProtectedRoute = lazy(() => import('@/pages/ProtectedRoute'));
 const App = () => {
   return (
     <Router>
-      {/* Dzięki React.lazy + Suspense, początkowy bundle jest mniejszy → strona startowa ładuje się szybciej. */}
+      {/* Dzięki React.lazy + Suspense komponenty stron są ładowane dopiero wtedy, gdy użytkownik je odwiedzi → początkowy bundle jest mniejszy → strona startowa ładuje się szybciej. */}
       {/* Bez React.lazy wszystkie komponenty stron są importowane statycznie, czyli podczas startu aplikacji cały kod trafia do głównego bundle’a. Niezależnie od tego, czy użytkownik odwiedzi daną stronę, czy nie – kod jest już w przeglądarce. */}
       {/* React.lazy + Suspense rozwiązuje ten problem, bo komponenty są ładowane dynamicznie (tzw. code splitting). Kod strony nie znajduje się w głównym bundle’u, tylko zostaje umieszczony w osobnym, dynamicznie ładowanym pliku JavaScript. Jest pobrany dopiero w momencie, gdy komponent zostanie wyrenderowany (np. użytkownik odwiedzi daną stronę). Kod nie jest w bundle głównym, tylko w osobnym pliku, który pobiera się dopiero „na żądanie”.*/}
       {/* Suspense w React to komponent, który pozwala „zawiesić” renderowanie części drzewa komponentów, dopóki dane lub moduły nie są gotowe. */}

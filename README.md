@@ -97,8 +97,10 @@ Login is handled via the Fake Store API endpoint - POST:
 ```bash
 Authentication - POST `/auth/login`
 Get user ID by username - GET `/users`
-Get user data by ID and token - GET `/users/:id`
+Get user data by ID - GET `/users/:id`
 ```
+
+> The JWT token is used on the frontend only to control whether the fetch request should be executed (enabled: !!token). The Fake API does not verify the token, so in practice only the user id is required to retrieve user data.
 
 Test login credentials:
 
@@ -107,8 +109,8 @@ username: "johnd"
 password: "m38rmF$"
 ```
 
-The API returns a simulated JWT token, which is stored in the browser's local storage.
-The token follows a valid JWT format but has no security validation—it is generated for demonstration purposes only.
+> The API returns a simulated JWT token and stores it in the browser's local storage (localStorage).
+The token has a valid JWT format, but it is neither properly signed nor verified on the backend, so it does not provide real security and is intended for demonstration purposes only.
 
 ### 📦 3. Product Catalog
 

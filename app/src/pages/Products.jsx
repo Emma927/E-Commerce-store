@@ -70,8 +70,11 @@ const Products = () => {
   // Dodanie do synchronizacji URL filtrów ze stanem RTK:
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // const currentPage = useSelector(selectCurrentPage);
-  const queryClient = useQueryClient(); // usunac???
+  // Pobieramy istniejący, globalny QueryClient z kontekstu QueryClientProvider React Query.
+  // useQueryClient() NIE tworzy nowej instancji (to nie jest new QueryClient()),
+  // tylko daje dostęp do tego samego klienta używanego w całej aplikacji,
+  // dzięki czemu możemy ręcznie zarządzać cache (resetQueries / invalidateQueries).
+  const queryClient = useQueryClient();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -79,8 +82,8 @@ const Products = () => {
   useEffect(() => {
     const categoryFromUrl = searchParams.get('category') || 'all';
     const sortFromUrl = searchParams.get('sort') || 'asc';
-    const searchFromUrl = searchParams.get('search') || ''; // dodatkowo url po wpisanym słowie
-    const ratingFromUrl = Number(searchParams.get('rating')) || 0; // default "All" = 0
+    const searchFromUrl = searchParams.get('search') || ''; // dodatkowo w url po wpisanym słowie
+    const ratingFromUrl = Number(searchParams.get('rating')) || 0; // default rating "All" = 0
 
     dispatch(setCategory(categoryFromUrl));
     dispatch(setSortOrder(sortFromUrl));
@@ -96,6 +99,7 @@ const Products = () => {
     if (debouncedSearch) params.search = debouncedSearch; // dodatkowo url po wpisanym słowie
     if (selectedRating) params.rating = selectedRating;
 
+    // Z replace: true zmiana filtra nie zapełnia historii, więc wstecz wraca do poprzedniej strony, a nie do poprzedniego filtra.
     setSearchParams(params, { replace: true }); // bo przy normalnej zmianie filtrów nie chcemy tworzyć historii, historia ma być tylko dla url akcji użytkownika, nie przy każdej aktualizacji redux
   }, [
     selectedCategory,
@@ -124,9 +128,8 @@ Po prawej stronie (argumenty useProductsInfinite({ category: selectedCategory, s
     pageSize: PAGE_SIZE,
   });
 
-  // Tworzymy handler błędów API z użyciem naszego hooka.
-  // Przekazujemy queryKey (['products-infinite']), który hook wykorzysta tylko w przypadku błędu serwera (status ≥ 500),
-  // aby opcjonalnie wywołać refetch danych (queryClient.invalidateQueries) dla tego zapytania.
+  // Tworzymy handler błędów API z użyciem custom hooka.
+  // Przekazujemy queryKey (['products-infinite']), który hook wykorzysta tylko w przypadku błędu serwera (status ≥ 500), aby opcjonalnie wywołać refetch danych (queryClient.invalidateQueries) dla tego zapytania.
   const handleApiError = useHandleApiError(['products-infinite']);
 
   useEffect(() => {
@@ -194,7 +197,7 @@ infinite scroll zaczyna dopiero przy ładowaniu następnych danych
       { replace: true },
     );
     // 3. Reset i refetch React Query
-    queryClient.resetQueries({ queryKey: ['products-infinite'], exact: false }); // Czyści,  po resetQueries kasuje stare strony (stary infinite scroll)
+    queryClient.resetQueries({ queryKey: ['products-infinite'], exact: false }); // Czyści, po resetQueries kasuje stare strony (stary infinite scroll)
     queryClient.invalidateQueries({
       queryKey: ['products-infinite'],
       exact: false,

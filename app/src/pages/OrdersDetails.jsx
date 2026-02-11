@@ -44,7 +44,7 @@ const OrdersDetails = () => {
             src={p.image}
             alt={p.title}
             sx={{
-              width: { xs: 50, sm: 80, md: 110 }, // responsywna szerokość
+              width: { xs: 50, sm: 80, md: 110 },
               height: 'auto', // wysokość dopasowuje się proporcjonalnie
               objectFit: 'contain', // zachowanie proporcji
               flexShrink: 0, // nie kurczy się w flex
