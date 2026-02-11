@@ -1,10 +1,15 @@
 import { http, HttpResponse, delay } from 'msw';
 import { FAKE_API_URL } from '@/constants';
 
+// Sprawdza, czy działamy w środowisku CI (np. GitHub Actions).
+// `process.env.CI` jest stringiem w CI ("true") lub undefined lokalnie.
+// Podwójne `!!` konwertuje wartość na Boolean: true w CI, false lokalnie.
+const isCI = !!process.env.CI;
+
 export const dataHandlers = [
   // 🔹 Login użytkownika
   http.post(`${FAKE_API_URL}/auth/login`, async ({ request }) => {
-    await delay(50);
+    await delay(isCI ? 200 : 50); // 200ms w CI, 50ms lokalnie
 
     // Typ żądania POST, więc dane logowania trafiają w body.
     // Odczytujemy je, aby sprawdzić poprawność loginu i hasła.
