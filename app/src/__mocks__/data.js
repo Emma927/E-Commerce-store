@@ -4,7 +4,7 @@ import { FAKE_API_URL } from '@/constants';
 export const dataHandlers = [
   // 🔹 Login użytkownika
   http.post(`${FAKE_API_URL}/auth/login`, async ({ request }) => {
-    await delay(50);
+    await delay(200);
 
     // Typ żądania POST, więc dane logowania trafiają w body.
     // Odczytujemy je, aby sprawdzić poprawność loginu i hasła.
