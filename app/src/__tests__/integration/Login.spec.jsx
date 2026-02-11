@@ -25,9 +25,9 @@ describe('Login integration via MSW', () => {
     await user.click(button);
 
     // Sprawdź loading
-    expect(
-      await screen.findByTestId('login-button-loading'),
-    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByTestId('login-button-loading')).toBeInTheDocument(),
+    );
 
     // Sprawdź Redux po mutacji
     await waitFor(() =>
