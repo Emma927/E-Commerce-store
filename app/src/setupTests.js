@@ -6,13 +6,14 @@ import { server } from '@/__mocks__/server'; // Podpięcie serwera MSW, aby test
 
 // JS DOM nie implementuje metody scrollTo, która tworzy pustą funkcję zamiast prawdziwego scrollTo,
 // a niektóre komponenty jej używają
-// Mockujemy ją, żeby testy nie wyrzucały błędów, 
+// Mockujemy ją, żeby testy nie wyrzucały błędów,
 // nie wykonuje prawdziwej obserwacji, tylko zapobiega błędom
 window.scrollTo = () => {}; // Bez tego mocka wyrzuca błąd: "Not implemented: Window's scrollTo() method"
 
 // JS DOM nie implementuje IntersectionObserver, a biblioteki np. Mantine używają go do lazy loadingu
 // Tworzymy prosty mock, żeby testy nie wywalały błędów
-global.IntersectionObserver = class { // Bez tego mocka wyrzuca błąd: "ReferenceError: IntersectionObserver is not defined"
+global.IntersectionObserver = class {
+  // Bez tego mocka wyrzuca błąd: "ReferenceError: IntersectionObserver is not defined"
   constructor(callback) {
     this.callback = callback; // callback, który normalnie reaguje na zmiany widoczności elementów
   }

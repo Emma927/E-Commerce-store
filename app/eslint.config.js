@@ -56,7 +56,7 @@ export default defineConfig([
       'no-unused-vars': [
         'warn',
         {
-          // varsIgnorePattern: '^[A-Z]', // ignoruj komponenty JSX (np. Icon w mapowaniu (icon: Icon)) dzięki temu ESLint nie będzie ich oznaczać jako unused vars
+          varsIgnorePattern: '^[A-Z]', // ignoruj komponenty JSX (np. Icon w mapowaniu (icon: Icon)) dzięki temu ESLint nie będzie ich oznaczać jako unused vars
           argsIgnorePattern: '^_', // ignoruj _unused args
         },
       ],

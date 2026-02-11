@@ -130,5 +130,4 @@ describe('ProductCard unit tests', () => {
     // Sprawdzamy, czy link ma poprawny atrybut href
     expect(link).toHaveAttribute('href', `/product/${product.id}`);
   });
-
 });

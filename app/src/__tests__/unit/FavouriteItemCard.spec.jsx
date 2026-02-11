@@ -59,7 +59,9 @@ describe('FavouriteItemCard unit tests', () => {
     expect(screen.getByText(product.title)).toBeInTheDocument();
 
     // Sprawdzamy czy cena produktu jest w DOM
-    expect(screen.getByText(`$${product.price.toFixed(2)}`)).toBeInTheDocument();
+    expect(
+      screen.getByText(`$${product.price.toFixed(2)}`),
+    ).toBeInTheDocument();
 
     // Sprawdzamy, czy obraz produktu jest w DOM i ma poprawny src
     const img = screen.getByRole('img', { name: product.title });

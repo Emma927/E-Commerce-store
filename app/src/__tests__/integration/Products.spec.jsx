@@ -75,7 +75,9 @@ describe('Products integration tests', () => {
     const listbox = await screen.findByRole('listbox');
 
     // 6. Wybieramy opcję
-    const electronicsOption = within(listbox).getByRole('option', { name: /Electronics/i })
+    const electronicsOption = within(listbox).getByRole('option', {
+      name: /Electronics/i,
+    });
     await user.click(electronicsOption);
 
     // Sprawdzamy wyniki

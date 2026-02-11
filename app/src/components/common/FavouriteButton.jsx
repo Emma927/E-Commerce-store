@@ -55,7 +55,7 @@ const FavouriteButtonComponent = ({ product }) => {
       size="medium"
       onClick={toggleFavourite}
       active={isFavourite}
-      data-testid="fav-btn" 
+      data-testid="fav-btn"
     >
       {isFavourite ? <StarIcon /> : <StarBorderIcon />}
     </FavoriteIconButton>

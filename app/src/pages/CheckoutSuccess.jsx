@@ -96,7 +96,11 @@ const CheckoutSuccess = () => {
 
         <List>
           {lastOrder.products.map((item) => (
-            <ListItem key={item.id} disablePadding data-testid={`order-item-${item.id}`}>
+            <ListItem
+              key={item.id}
+              disablePadding
+              data-testid={`order-item-${item.id}`}
+            >
               {item.image && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <Box
@@ -134,11 +138,20 @@ const CheckoutSuccess = () => {
           {CAPITALIZE_WORDS(lastOrder.paymentMethod)}
         </Typography>
         <Typography variant="body2" mt={1}>
-           <strong>Shipping Address:</strong> 
-           <Typography variant="body2">{lastOrder.deliveryAddress.name}</Typography> 
-           <Typography variant="body2">{lastOrder.deliveryAddress.address}</Typography> 
-           <Typography variant="body2">{lastOrder.deliveryAddress.postalCode} {lastOrder.deliveryAddress.city}</Typography> 
-           <Typography variant="body2">{lastOrder.deliveryAddress.country}</Typography>
+          <strong>Shipping Address:</strong>
+          <Typography variant="body2">
+            {lastOrder.deliveryAddress.name}
+          </Typography>
+          <Typography variant="body2">
+            {lastOrder.deliveryAddress.address}
+          </Typography>
+          <Typography variant="body2">
+            {lastOrder.deliveryAddress.postalCode}{' '}
+            {lastOrder.deliveryAddress.city}
+          </Typography>
+          <Typography variant="body2">
+            {lastOrder.deliveryAddress.country}
+          </Typography>
         </Typography>
 
         <Button
