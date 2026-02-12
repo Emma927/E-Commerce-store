@@ -130,28 +130,27 @@ const CheckoutSuccess = () => {
           <strong>Total:</strong> ${lastOrder.total.toFixed(2)}
         </Typography>
         <Typography variant="body2" mt={1}>
-          <strong>Delivery Method:</strong>{' '}
+          <strong>Delivery Method: </strong>
           {CAPITALIZE_WORDS(lastOrder.deliveryMethod)}
         </Typography>
         <Typography variant="body2" mt={1}>
-          <strong>Payment Method:</strong>{' '}
+          <strong>Payment Method: </strong>
           {CAPITALIZE_WORDS(lastOrder.paymentMethod)}
         </Typography>
         <Typography variant="body2" mt={1}>
           <strong>Shipping Address:</strong>
-          <Typography variant="body2">
-            {lastOrder.deliveryAddress.name}
-          </Typography>
-          <Typography variant="body2">
-            {lastOrder.deliveryAddress.address}
-          </Typography>
-          <Typography variant="body2">
-            {lastOrder.deliveryAddress.postalCode}{' '}
-            {lastOrder.deliveryAddress.city}
-          </Typography>
-          <Typography variant="body2">
-            {lastOrder.deliveryAddress.country}
-          </Typography>
+        </Typography>
+        <Typography variant="body2">
+          {lastOrder.deliveryAddress.name}
+        </Typography>
+        <Typography variant="body2">
+          {lastOrder.deliveryAddress.address}
+        </Typography>
+        <Typography variant="body2">
+          {`${lastOrder.deliveryAddress.postalCode} ${lastOrder.deliveryAddress.city}`}
+        </Typography>
+        <Typography variant="body2">
+          {lastOrder.deliveryAddress.country}
         </Typography>
 
         <Button
@@ -160,6 +159,7 @@ const CheckoutSuccess = () => {
           fullWidth
           sx={{ mt: 3 }}
           onClick={() => {
+            // Funkcja strzałkowa jest po to, żeby akcja nie wykonała się natychmiast po renderze, tylko dopiero po kliknięciu.
             sessionStorage.removeItem('lastOrder'); // USUWAMY TUTAJ — dopiero po kliknięciu!
             navigate(user ? '/dashboard/orders' : '/');
           }}

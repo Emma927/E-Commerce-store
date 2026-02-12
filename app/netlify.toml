@@ -1,0 +1,17 @@
+# Reguła dla API (zawsze przed regułą "/*")
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# Reguła dla zasobów statycznych
+[[redirects]]
+  from = "/static/*"
+  to = "/static/:splat"
+  status = 200
+
+# Reguła dla SPA (musi być OSTATNIA)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
