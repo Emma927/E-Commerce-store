@@ -115,11 +115,7 @@ const Home = () => {
             <Grid container spacing={2} marginBottom={3}>
               {topProducts.length ? (
                 topProducts.map((product) => (
-                  <Grid
-                    key={product.id}
-                    size={{ xs: 12, md: 6, lg: 4 }}
-                    data-testid={`product-${product.id}`}
-                  >
+                  <Grid key={product.id} size={{ xs: 12, md: 6, lg: 4 }}>
                     <ProductCard {...product} />
                   </Grid>
                 ))

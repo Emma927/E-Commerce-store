@@ -28,13 +28,13 @@ import { Spinner } from '@/components/common/Spinner';
 
 export const ColorModeProvider = ({ children }) => {
   // Sprawdzenie preferencji systemowej
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)'); // Ta zmienna prefersDarkMode nie ustawia żadnego trybu sama w sobie, tylko sprawdza systemową preferencję użytkownika w momencie renderu
 
   // Stan koloru: uwzględnia localStorage lub system. Tutaj useState przyjmuje funkcję inicjalizującą (lazy initializer).
   const [mode, setMode] = useState(() => {
     // od razu sprawdzamy localStorage
     const stored = getInitialMode();
-    return stored ?? (prefersDarkMode ? DARK_MODE : LIGHT_MODE);
+    return stored ?? (prefersDarkMode ? DARK_MODE : LIGHT_MODE); // Jeśli w localStorage nic nie ma (nie jest null, ani undefined) → użyje systemowego trybu ciemnego/jasnego
   });
 
   // useCallback stabilizuje referencję funkcji toggleColorMode, dzięki czemu
