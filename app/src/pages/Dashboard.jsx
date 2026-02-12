@@ -10,14 +10,17 @@ const Dashboard = () => {
         size={{ xs: 12, md: 4 }}
         sx={{
           p: { xs: 0, md: 2 },
+          // height: fit-content - w MUI Grid kolumny mają domyślnie align-items: stretch
+          // bez fit-content sidebar byłby rozciągnięty na całą wysokość rodzica
+          // sticky nie miałby miejsca do przyklejenia → efekt sticky nie działałby
           position: { xs: 'fixed', md: 'sticky' },
-          top: { xs: 'auto', md: '90px' }, // desktop: przyklejony od góry
-          bottom: { xs: 0, md: 'auto' }, // mobile: przyklejony od dołu
-          left: 0, // na mobile przylega do lewej krawędzi
+          top: { xs: 'auto', md: '90px' },
+          bottom: { xs: 0, md: 'auto' },
+          left: 0,
           zIndex: 10,
-          borderTop: { xs: '1px solid #ccc', md: 'none' }, // mobile tylko górny border
+          borderTop: { xs: '1px solid #ccc', md: 'none' },
           height: { xs: '110px', md: 'fit-content' }, // ważne dla sticky
-          backgroundColor: 'background.default', // żeby nie było przezroczyste,
+          backgroundColor: 'background.default', // zapewnia tło nieprzezroczyste
           display: 'flex',
           flexDirection: 'column', // ułożenie dzieci w kolumnie
           justifyContent: 'center', // pionowe wyśrodkowanie

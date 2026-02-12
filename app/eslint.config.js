@@ -1,87 +1,93 @@
 import js from '@eslint/js';
 import globals from 'globals';
+// Pluginy React / Hooks / Vite HMR
+import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
-import { defineConfig } from 'eslint/config';
-import react from 'eslint-plugin-react';
+// API Flat Config (ESLint 9)
+import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig([
   // 1. IGNOROWANIE PLIKÓW
+  globalIgnores(['dist', 'node_modules', 'test-results', 'playwright-report']),
+  // 2. KONFIGURACJA DLA APLIKACJI (React)
   {
-    ignores: ['dist', 'node_modules', 'test-results', 'playwright-report'],
-  },
-  // 2. BAZOWE REKOMENDACJE (jako osobne elementy tablicy)
-  js.configs.recommended,
-  // 2. GŁÓWNY BLOK KONFIGURACYJNY DLA APLIKACJI - KONFIGURACJA DLA APLIKACJI
-  {
-    files: ['**/*.{js,jsx}'],
-    plugins: {
-      react,
-      'react-hooks': reactHooks,
-      'react-refresh': reactRefresh,
-    },
-    // DODANO USTAWIEŃ WERSJI REACTA:
+    files: ['**/*.{js,jsx}'], // wszystkie pliki JS/JSX
+    // 2a. PRESETY
+    extends: [
+      js.configs.recommended, // podstawowe reguły JS
+      react.configs.flat.recommended, // reguły React
+      reactHooks.configs.flat.recommended, // reguły React Hooks
+      reactRefresh.configs.vite, // integracja z Vite + HMR
+    ],
+    // 2b. USTAWIENIA REACTA
     settings: {
       react: {
-        version: 'detect',
+        version: 'detect', // automatyczne wykrywanie wersji React
       },
     },
-    // 2. REKOMENDOWANA KONFIGURACJA JS I REACT
+    // 2c. OPCJE JĘZYKOWE
     languageOptions: {
-      ecmaVersion: 2020,
+      ecmaVersion: 'latest', // używa najnowszego standardu JS, np. optional chaining, nullish coalescing itd.
+      sourceType: 'module',
+
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+      },
+
       globals: {
         ...globals.browser,
         ...globals.node,
       },
-      parserOptions: {
-        ecmaVersion: 'latest',
-        ecmaFeatures: { jsx: true },
-        sourceType: 'module',
-      },
     },
+
+    // 2d. WŁASNE REGUŁY (NADPISUJĄ PRESETY)
     rules: {
-      // Ładujemy reguły z pluginów ręcznie, bo Flat Config nie używa 'extends' wewnątrz obiektów
-      ...react.configs.recommended.rules,
-      ...reactHooks.configs.recommended.rules,
+      // React 17+ nie wymaga: import React
+      'react/react-in-jsx-scope': 'off',
 
-      // --- WYŁĄCZENIE BŁĘDÓW, KTÓRE CI SIĘ POJAWIŁY ---
-      'react/react-in-jsx-scope': 'off', // Nie wymaga "import React" w każdym pliku
-      'react/prop-types': 'off', // Nie wymaga definiowania propTypes
+      // nie używasz prop-types
+      'react/prop-types': 'off',
 
-      // Zmieniamy na 'warn', aby Husky nie blokował pracy (np. przy mapowaniu ikon)
+      // debugger = błąd (blokuje build/CI)
+      'no-debugger': 'error',
+
+      // Husky/CI nie blokuje commitów przez unused vars
       'no-unused-vars': [
         'warn',
         {
-          varsIgnorePattern: '^[A-Z]', // ignoruj JSX Components
-          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^[A-Z]', // ignoruj komponenty JSX (np. Icon w mapowaniu (icon: Icon)) dzięki temu ESLint nie będzie ich oznaczać jako unused vars
+          argsIgnorePattern: '^_', // ignoruj _unused args
         },
       ],
-      'react/jsx-uses-vars': 'warn', // ignoruje podkreślanie JSX Components
 
-      // Wyciszamy błąd kaskadowych renderów, aby odblokować testy
+      // wyciszenie ostrzeżeń o efektach
       'react-hooks/set-state-in-effect': 'warn',
 
-      // Ostrzeżenie o eksporcie rzeczy innych niż komponenty (np. Context)
+      // ostrzeżenie przy eksporcie rzeczy innych niż komponenty (Vite HMR)
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
       ],
     },
   },
-
-  // 3. KONFIGURACJA DLA TESTÓW I PLIKÓW SETUP
+  // 3. KONFIGURACJA DLA TESTÓW (Vitest/Jest)
   {
     files: [
       '**/*.test.js',
       '**/*.spec.js',
       '**/*.test.jsx',
       '**/*.spec.jsx',
-      'src/setupTests.js', // Dodane, aby przedAll/afterEach były tu legalne
+      '**/setupTests.js', // Tutaj definiowane są globalne funkcje testowe (Jest/Vitest), ESLint przestaje je podkreślać jako nieznane
+      // Bez dodania setupTests.js do listy plików ESLint nadal będzie podkreślać globalne testowe, bo Flat Config działa per files, nie globalnie po całym projekcie.
     ],
+
     languageOptions: {
       globals: {
         // Ręczne zdefiniowanie globali Vitest jako 'readonly'
         ...globals.jest, // Vitest często używa tych samych globali
+
+        // dodatkowe Vitest
         describe: 'readonly',
         it: 'readonly',
         test: 'readonly',
@@ -93,6 +99,7 @@ export default defineConfig([
         vi: 'readonly',
       },
     },
+
     rules: {
       // W testach często mamy nieużywane zmienne, więc tu też dajemy tylko ostrzeżenie
       'no-unused-vars': 'warn',

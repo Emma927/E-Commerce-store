@@ -10,47 +10,21 @@ import {
   ListItem,
   ListItemText,
 } from '@mui/material';
-import { Spinner } from '@/components/common/Spinner';
 import { CAPITALIZE_WORDS } from '@/constants';
 
 const CheckoutSuccess = () => {
   const navigate = useNavigate();
   const { data: user } = useUser();
 
-  // undefined = ładowanie, null = brak orderu, object = OK
-  // const [lastOrder, setLastOrder] = useState(undefined); // undefined → Jeszcze nie sprawdzono /jeszcze nie załadowano danych
-
   /**
-Cecha	sessionStorage	localStorage
-Czas przechowywania	Tylko w trakcie sesji (zamykanie karty = usunięcie)	Trwałe, zostaje nawet po zamknięciu i ponownym otwarciu przeglądarki
-Odświeżenie strony	Dane zostają	Dane zostają
-Nawigacja między stronami	Dane zostają	Dane zostają
-Usuwanie po kluczu (removeItem)	Tak, tylko ten klucz	Tak, tylko ten klucz */
-  //   useEffect(() => {
-  //     const order = JSON.parse(sessionStorage.getItem('lastOrder'));
-  //
-  //     if (order) {
-  //       setLastOrder(order);
-  //     } else {
-  //       setLastOrder(null); // jawny brak
-  //     }
-  //   }, []);
-
-  // const lastOrder = (() => {
-  //   const raw = sessionStorage.getItem('lastOrder');
-  //   return raw ? JSON.parse(raw) : null;
-  // })();
-  // const raw = sessionStorage.getItem('lastOrder');
-  // const lastOrder = raw ? JSON.parse(raw) : null;
+   * Destrukturyzacja pierwszego elementu tablicy zwracanej przez useState.
+   * lastOrder jest tylko do odczytu w tym komponencie, więc setLastOrder nie jest potrzebne.
+   * Dane pobierane są od razu z sessionStorage podczas inicjalizacji, bez użycia useEffect.
+   */
   const [lastOrder] = useState(() => {
     const raw = sessionStorage.getItem('lastOrder');
     return raw ? JSON.parse(raw) : null;
   });
-
-  // ŁADOWANIE → tylko raz, bez migania
-  // if (lastOrder === undefined) {
-  //   return <Spinner />;
-  // }
 
   // BRAK ORDERU - Dane sprawdzone → brak wartości
   if (lastOrder === null) {
@@ -122,7 +96,11 @@ Usuwanie po kluczu (removeItem)	Tak, tylko ten klucz	Tak, tylko ten klucz */
 
         <List>
           {lastOrder.products.map((item) => (
-            <ListItem key={item.id} disablePadding>
+            <ListItem
+              key={item.id}
+              disablePadding
+              data-testid={`order-item-${item.id}`}
+            >
               {item.image && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <Box
@@ -152,17 +130,26 @@ Usuwanie po kluczu (removeItem)	Tak, tylko ten klucz	Tak, tylko ten klucz */
           <strong>Total:</strong> ${lastOrder.total.toFixed(2)}
         </Typography>
         <Typography variant="body2" mt={1}>
-          <strong>Delivery Method:</strong>{' '}
+          <strong>Delivery Method: </strong>
           {CAPITALIZE_WORDS(lastOrder.deliveryMethod)}
         </Typography>
-        <Typography variant="body2">
-          <strong>Payment Method:</strong>{' '}
+        <Typography variant="body2" mt={1}>
+          <strong>Payment Method: </strong>
           {CAPITALIZE_WORDS(lastOrder.paymentMethod)}
         </Typography>
         <Typography variant="body2" mt={1}>
-          <strong>Shipping Address:</strong> {lastOrder.deliveryAddress.address}
-          , {lastOrder.deliveryAddress.city},{' '}
-          {lastOrder.deliveryAddress.postalCode},{' '}
+          <strong>Shipping Address:</strong>
+        </Typography>
+        <Typography variant="body2">
+          {lastOrder.deliveryAddress.name}
+        </Typography>
+        <Typography variant="body2">
+          {lastOrder.deliveryAddress.address}
+        </Typography>
+        <Typography variant="body2">
+          {`${lastOrder.deliveryAddress.postalCode} ${lastOrder.deliveryAddress.city}`}
+        </Typography>
+        <Typography variant="body2">
           {lastOrder.deliveryAddress.country}
         </Typography>
 
@@ -172,6 +159,7 @@ Usuwanie po kluczu (removeItem)	Tak, tylko ten klucz	Tak, tylko ten klucz */
           fullWidth
           sx={{ mt: 3 }}
           onClick={() => {
+            // Funkcja strzałkowa jest po to, żeby akcja nie wykonała się natychmiast po renderze, tylko dopiero po kliknięciu.
             sessionStorage.removeItem('lastOrder'); // USUWAMY TUTAJ — dopiero po kliknięciu!
             navigate(user ? '/dashboard/orders' : '/');
           }}

@@ -7,7 +7,7 @@ import {
   Button,
 } from '@mui/material';
 
-// ConfirmModal – nie warto memoizować, bo rerender jest rzadki i tani.
+// ConfirmModal – nie warto memoizować, bo rerender jest rzadki i koszt niewielki
 export const ConfirmModal = ({
   open,
   title,

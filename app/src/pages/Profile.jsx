@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { selectIsAuthenticated } from '@/store/authSlice';
 import { Box, Typography, Button } from '@mui/material';
@@ -6,6 +6,7 @@ import { Spinner } from '@/components/common/Spinner';
 import { useUser } from '@/hooks/useUser';
 import { CAPITALIZE } from '@/constants';
 import { CAPITALIZE_WORDS } from '@/constants';
+import { useHandleApiError } from '@/hooks/useHandleApiError';
 
 // Fake Store API (https://fakestoreapi.com) NIE ZWRACA użytkownika po tokenie JWT. Nie dostaniemy ID użytkownika, ani jego pełnych danych po samym logowaniu.
 const Profile = () => {
@@ -13,15 +14,25 @@ const Profile = () => {
   // const isReady = useSelector(selectIsReady); // pobierz stan gotowości
 
   // pobiera userId po username (enndpoint auth ma tylko username i password) → potem pobiera usera po userId (endpoint users może już pobierać po id)
-  const { data: user, isPending, isError } = useUser();
+  const { data: user, isPending, isError, error } = useUser();
 
   const [show, setShow] = useState(false);
+
+  // Tworzymy handler błędów API z użyciem custom hooka.
+  // Przekazujemy queryKey (['user']), który hook wykorzysta tylko w przypadku błędu serwera (status ≥ 500), aby opcjonalnie wywołać refetch danych (queryClient.invalidateQueries) dla tego zapytania.
+  const handleApiError = useHandleApiError(['user']);
+
+  useEffect(() => {
+    if (isError) {
+      // Gdy wystąpi błąd, przekazujemy obiekt error do hooka.
+      handleApiError(error);
+    }
+  }, [isError, error, handleApiError]);
 
   // 1. Najpierw sprawdź, czy Redux w ogóle wczytał stan z localStorage -  tutaj nie potrzeba tylo w ProteceedRoute konieczne
   // if (!isReady) return <Spinner />;
   // 2. Potem sprawdź, czy zapytanie do API o dane usera jest w toku
   if (isPending || !user) return <Spinner />;
-  if (isError) return <p>Error loading profile</p>;
 
   /**
    Mignięcie brało się stąd, że React widział isAuthenticated: false przez ułamek sekundy, zanim Redux "zauważył", że w initialState jednak coś jest. Dodając isReady i stawiając isPending na samej górze, tworzysz szczelną zaporę.

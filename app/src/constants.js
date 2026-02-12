@@ -18,7 +18,7 @@ export const CAPITALIZE = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 // CAPITALIZE_WORDS - funkcja, która zamienia pierwszą literę każdego wyrazu na wielką literę.
 export const CAPITALIZE_WORDS = (str) =>
   str
-    // Dzieli string na tablicę słów według spacji
+    // funkcja split dzieli string na tablicę słów według spacji
     // "john doe" -> ["john", "doe"]
     .split(' ')
     // Dla każdego słowa w tablicy:

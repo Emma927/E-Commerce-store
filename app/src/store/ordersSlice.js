@@ -1,10 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-// Bezpośrednia synchronizacja z localStorage wewnątrz reducera ze względu na
-// pragmatyzm i czytelność przy obecnej skali projektu (prosty E-commerce).
-// Jestem świadoma, że w dużych systemach "Side Effects" (efekty uboczne) takie jak
-// localStorage powinny być wyniesione do Middleware (np. RTK Listener Middleware),
-// aby zachować czystość funkcji (Pure Functions) i ułatwić testy jednostkowe.
+/**
+ * Slice do zarządzania zamówieniami użytkownika.
+ *
+ * UWAGA: Bezpośrednia synchronizacja z localStorage jest tutaj użyta ze względów
+ * praktycznych w prostym E-commerce. W dużych aplikacjach side effects-efekty uboczne takie jak localStorage powinny być
+ * obsługiwane w Middleware (np. RTK Listener Middleware), aby zachować czystość funkcji
+ * i łatwość testowania.
+ */
 
 // Inicjalizacja stanu z localStorage.
 // Zastosowanie operatora || [] zapobiega błędom, gdy użytkownik nie ma jeszcze żadnych zamówień.
@@ -19,13 +22,25 @@ const ordersSlice = createSlice({
   initialState,
   reducers: {
     addOrder: (state, action) => {
-      // INŻYNIERIA (Unshift): Dodajemy nowe zamówienie na POCZĄTEK tablicy.
-      // Dzięki temu w historii zamówień najnowsze zakupy są od razu na górze listy.
-      // Nie musimy tracić wydajności na odwracanie tablicy (.reverse()) przy każdym renderowaniu.
+      /**
+       * Dodaje nowe zamówienie na początek listy (najnowsze zamówienia wyświetlane jako pierwsze).
+       *
+       * Immer: Redux Toolkit używa Immer, który tworzy „draft” (Proxy) stanu.
+       * Dzięki temu można pisać kod w stylu mutującym (np. używając unshift),
+       * ale pod spodem Immer tworzy nową, niemutowalną kopię stanu.
+       *
+       * Dzięki temu:
+       * - referencja stanu w store się zmienia,
+       * - React Redux wykrywa zmianę i komponenty rerenderują się poprawnie,
+       * - DevTools i middleware widzą nowy, poprawny stan.
+       *
+       * Mutowany jest draft, czyli specjalna kopia stanu (Proxy od Immer) → Immer tworzy nowy stan → Redux widzi inną referencję → zastępuje stary stan → rerender komponentów.
+       *
+       * 💡 Zasada praktyczna:
+       * Jeśli kolejność w logice aplikacji ma znaczenie → unshift w reducerze.
+       * Jeśli kolejność ma znaczenie tylko dla wyświetlania → reverse() w selektorze.
+       */
 
-      // IMMER: RTK używa pod spodem biblioteki Immer. Pozwala ona na bezpieczne
-      // użycie metody .unshift() (która normalnie mutuje tablicę),
-      // bo Immer automatycznie tworzy nową, niemutowalną kopię stanu za nas.
       state.orders.unshift(action.payload); // W Redux Toolkit (createSlice) nie ma potrzeby tworzenia nowej tablicy w tym przypadku, bo RTK używa Immer, który pozwala na bezpośrednią mutację stanu. Immer tworzy niemutowalną kopię stanu za nas.
 
       // Synchronizacja z bazą danych przeglądarki (localStorage)
@@ -46,8 +61,9 @@ const ordersSlice = createSlice({
   },
 });
 
-// Selektor dostępowy - zwraca surową referencję, co jest najszybszą metodą odczytu.
-export const selectOrders = (state) => state.orders.orders;
+// Zwraca bezpośrednio tablicę zamówień ze store (ta sama referencja, bez kopiowania),
+// dzięki czemu jest to najszybszy możliwy odczyt stanu
+export const selectOrders = (state) => state.orders.orders; // selectOrders służy tylko do odczytu aktualnej listy zamówień z Redux store.
 
 export const { addOrder, deleteOrder, clearOrders } = ordersSlice.actions;
 export default ordersSlice.reducer;

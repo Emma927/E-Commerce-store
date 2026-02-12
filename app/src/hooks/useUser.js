@@ -13,6 +13,7 @@ const fetchUser = async (userId) => {
 
 export const useUser = () => {
   const token = useSelector(selectToken);
+  // Nie da się dostać pełnych danych po samym logowaniu — potrzebny jest dodatkowy request po userId
   const { data: userId } = useUserIdFromUsername();
 
   return useQuery({

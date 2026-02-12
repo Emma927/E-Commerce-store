@@ -13,7 +13,6 @@ import { Link } from 'react-router-dom';
 import { FavouriteButton } from './FavouriteButton';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '@/store/cartSlice'; // zakładam, że masz taką akcję
-import { useTheme } from '@mui/material/styles';
 import { memo } from 'react';
 
 // ❌ Jeśli nie masz memo → React i tak rerenderuje komponenty dzieci, bo rerender rodzica = rerender dzieci (standard React).
@@ -45,7 +44,6 @@ const ProductCardComponent = ({
   rating,
 }) => {
   const dispatch = useDispatch();
-  const theme = useTheme();
 
   const handleAddToCart = () => {
     dispatch(addToCart({ id, image, title, description, price, quantity: 1 }));
@@ -66,7 +64,7 @@ const ProductCardComponent = ({
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'flex-start',
-          maxHeight: { xs: '340px', sm: '380px', md: '470px' },
+          maxHeight: { xs: '390px', md: '500px' },
           '&:hover .card-media-hover': {
             transform: 'scale(1.03)',
           },
@@ -101,11 +99,11 @@ const ProductCardComponent = ({
             gutterBottom
             variant="h5"
             component="div"
-            sx={{
+            sx={(theme) => ({
               fontSize: { xs: '16px', sm: '18px', md: '20px' },
               fontWeight: 'bold',
               color: theme.palette.primary.main,
-            }}
+            })}
           >
             {title}
           </Typography>

@@ -22,11 +22,13 @@ const authSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
+    // Loguje użytkownika: zapisuje username i token, ustawia isAuthenticated
     login: (state, action) => {
       state.username = action.payload.username;
       state.token = action.payload.token;
       state.isAuthenticated = true;
     },
+    // Wylogowuje użytkownika: czyści dane i usuwa token z localStorage
     logout: (state) => {
       state.username = '';
       state.token = null; // Wyczyść token przy wylogowaniu

@@ -11,4 +11,7 @@ docker compose up -d e2e-tests
 # Opcjonalnie: podłącz się do kontenera dev (interaktywnie)
 echo "🚀 Wchodzę do kontenera, mogę przeprowadzać testy e2e..."
 docker compose exec -it e2e-tests bash
-
+# 💡 Klucz:
+# Agent SSH = proces hostowy, niezależny od kontenerów → nie znika po usunięciu kontenera.
+# Socket w kontenerze = tylko sposób, żeby kontener komunikował się z agentem hosta → tworzony przy starcie kontenera i znika po jego usunięciu.
+# Dlatego w starej sesji, tuż po usunięciu kontenera, mount socketu może nie działać, dopóki nie ustawisz poprawnie SSH_AUTH_SOCK w tej sesji.

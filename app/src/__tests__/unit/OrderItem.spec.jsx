@@ -1,78 +1,92 @@
-// Importujemy narzędzia do renderowania komponentów i symulowania akcji
-import { render, screen, fireEvent } from '@testing-library/react';
-import { OrderItem } from '@/components/common/OrderItem';
+// Narzędzia z React Testing Library:
+// render → renderuje komponent do wirtualnego DOM (JSDOM)
+// screen → globalne query do wyszukiwania elementów (zalecane przez RTL)
+import { render, screen } from '@testing-library/react';
 
-// Import BrowserRouter, bo OrderItem używa Linków (wymaga kontekstu routera)
+// userEvent → symuluje prawdziwe interakcje użytkownika (kliknięcia, pisanie, focus)
+import userEvent from '@testing-library/user-event';
+
+// BrowserRouter → potrzebny, bo komponent używa <Link />, który wymaga kontekstu routera
 import { BrowserRouter } from 'react-router-dom';
 
-// Tworzymy przykładowe dane zamówienia do testów
+// Testowany komponent
+import { OrderItem } from '@/components/common/OrderItem';
+
+// Helper: renderuje komponent wewnątrz Routera,
+// żeby <Link /> nie rzucał błędu "useLocation/useNavigate must be used within Router"
+const renderWithRouter = (ui) => render(<BrowserRouter>{ui}</BrowserRouter>);
+
+// Przykładowe dane testowe (fixture)
+// Stałe dane ułatwiają testowanie i powtarzalność
 const order = {
-  id: 1, // ID zamówienia
-  serverDate: new Date().toISOString(), // data zamówienia w formacie ISO
-  total: 150, // całkowita kwota zamówienia
+  id: 1,
+  serverDate: new Date().toISOString(),
+  total: 150,
   products: [
-    // lista produktów w zamówieniu
     { id: 1, title: 'Product 1', price: 50, quantity: 1, image: 'img1.jpg' },
     { id: 2, title: 'Product 2', price: 100, quantity: 1, image: 'img2.jpg' },
   ],
 };
 
-// Funkcja pomocnicza, która renderuje komponent w kontekście routera
-const renderWithRouter = (ui) => render(<BrowserRouter>{ui}</BrowserRouter>);
-
-// Grupa testów dla komponentu OrderItem
+// Grupujemy testy jednego komponentu w describe
 describe('OrderItem', () => {
-  // Testuje poprawne wyświetlanie szczegółów zamówienia
-  it('renders order details correctly', () => {
-    // Renderujemy komponent z przykładowym zamówieniem
-    renderWithRouter(<OrderItem order={order} onDelete={() => {}} />);
+  // Test 1: sprawdzamy czy dane są poprawnie WYŚWIETLANE (render)
+  it('renders order data and product list correctly', () => {
+    // vi.fn() → przekazujemy pusty mock, bo nie testujemy tu onDelete
+    renderWithRouter(<OrderItem order={order} onDelete={vi.fn()} />);
 
-    // Sprawdzamy, czy wyświetlany jest numer zamówienia
+    // Szukamy tekstu z ID zamówienia i sprawdzamy czy jest w DOM
     expect(screen.getByText(`Order ID: ${order.id}`)).toBeInTheDocument();
 
-    // Sprawdzamy, czy wyświetlana jest całkowita kwota zamówienia
+    // Sprawdzamy czy suma została poprawnie sformatowana
     expect(
       screen.getByText(`Total: $${order.total.toFixed(2)}`),
     ).toBeInTheDocument();
 
-    // Sprawdzamy, czy wyświetlane są produkty i ich ilości
+    // ListItemText renderuje: "Product 1 x 1"
+    // używamy regex /.../ żeby test był bardziej elastyczny
     expect(screen.getByText(/Product 1 x 1/)).toBeInTheDocument();
     expect(screen.getByText(/Product 2 x 1/)).toBeInTheDocument();
   });
 
-  // Testuje funkcjonalność przycisku "Delete"
-  it('calls onDelete when delete button is clicked', () => {
-    // Tworzymy mock funkcji onDelete
+  // Test 2: sprawdzamy ZACHOWANIE (kliknięcie)
+  it('calls onDelete when user clicks Delete button', async () => {
+    // userEvent.setup() → tworzy "użytkownika" do symulacji interakcji
+    const user = userEvent.setup();
+
+    // Tworzymy mock funkcji, żeby móc sprawdzić ile razy została wywołana
     const handleDelete = vi.fn();
 
-    // Renderujemy komponent z mockiem onDelete
+    // Renderujemy komponent z naszym mockiem
     renderWithRouter(<OrderItem order={order} onDelete={handleDelete} />);
 
-    // Szukamy przycisku "Delete"
-    const deleteButton = screen.getByText(/delete/i);
+    // Szukamy przycisku po roli (bardziej semantyczne niż getByText)
+    // role=button + name=Delete → dokładnie tak jak widzi to użytkownik/screen reader
+    const deleteButton = screen.getByRole('button', { name: /delete/i });
 
-    // Symulujemy kliknięcie przycisku
-    fireEvent.click(deleteButton);
+    // Symulujemy prawdziwe kliknięcie użytkownika (lepsze niż fireEvent)
+    await user.click(deleteButton);
 
-    // Sprawdzamy, czy funkcja onDelete została wywołana dokładnie raz
+    // Sprawdzamy czy callback wywołał się dokładnie 1 raz
     expect(handleDelete).toHaveBeenCalledTimes(1);
 
-    // Sprawdzamy, czy funkcja onDelete została wywołana z poprawnym ID zamówienia
+    // Sprawdzamy czy dostał poprawny argument (order.id)
     expect(handleDelete).toHaveBeenCalledWith(order.id);
   });
 
-  // Testuje poprawność linku przycisku "Details"
-  it('Details button has correct href', () => {
-    // Renderujemy komponent
-    renderWithRouter(<OrderItem order={order} onDelete={() => {}} />);
+  // Test 3: sprawdzamy poprawność linku (routing)
+  it('renders Details link with correct href', () => {
+    // znów tylko render → mock wystarczy
+    renderWithRouter(<OrderItem order={order} onDelete={vi.fn()} />);
 
-    // Szukamy przycisku "Details" i pobieramy jego najbliższy element <a>
-    const detailsButton = screen.getByText(/details/i).closest('a');
+    // Szukamy linku po roli
+    const detailsLink = screen.getByRole('link', { name: /details/i });
 
-    // Sprawdzamy, czy link prowadzi do poprawnego URL
-    expect(detailsButton).toHaveAttribute(
+    // Link z react-router-dom w DOM staje się <a href="...">
+    // więc możemy normalnie sprawdzić atrybut href
+    expect(detailsLink).toHaveAttribute(
       'href',
       `/dashboard/orders/${order.id}`,
-    ); // "to" staje się atrybutem "href" w DOM
+    );
   });
 });

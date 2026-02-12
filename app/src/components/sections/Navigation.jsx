@@ -135,6 +135,7 @@ const Navigation = () => {
                 color="inherit"
                 component={StyledNavLink}
                 to="/products"
+                aria-label="Products"
                 sx={{ fontSize: { md: '16px' } }}
               >
                 Products
@@ -144,6 +145,7 @@ const Navigation = () => {
                 color="inherit"
                 to="/cart"
                 component={StyledNavLink}
+                aria-label="Cart"
                 sx={{
                   height: '100%', // pełna wysokość rodzica
                   display: 'flex', // żeby wewnątrz ikonki było wyśrodkowane
@@ -160,6 +162,7 @@ const Navigation = () => {
                 color="inherit"
                 component={StyledNavLink}
                 to="/favourites"
+                aria-label="Favourites"
                 sx={{
                   height: '100%', // pełna wysokość Toolbara
                   display: 'flex',
