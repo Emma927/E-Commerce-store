@@ -63,7 +63,6 @@ const Cart = () => {
             mb: {
               xs: '185px',
               md: 0,
-              height: 'fit-content' /* ważne dla sticky*/,
             },
           }}
         >
