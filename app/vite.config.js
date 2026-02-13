@@ -23,7 +23,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8', // v8 to narzędzie do mierzenia coverage
       reporter: ['text', 'json', 'html'],
-      reportsDirectory: './test-results/coverage', // trafia do katalogu z wynikami testów
+      reportsDirectory: './test-results', // trafia do katalogu z wynikami testów
       all: true, // <- obejmuje wszystkie pliki, nie tylko te testowane
       include: ['src/**/*.{js,jsx}'], // <- folder z kodem źródłowym
       exclude: [
