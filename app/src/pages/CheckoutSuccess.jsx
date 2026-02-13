@@ -63,7 +63,6 @@ const CheckoutSuccess = () => {
         justifyContent: 'center',
         alignItems: 'center',
         minHeight: 'calc(100vh - 6.875rem - 8.125rem)',
-        boxSizing: 'border-box',
         p: 3,
       }}
     >
@@ -126,32 +125,34 @@ const CheckoutSuccess = () => {
           ))}
         </List>
 
-        <Typography variant="subtitle1" mt={2}>
-          <strong>Total:</strong> ${lastOrder.total.toFixed(2)}
-        </Typography>
-        <Typography variant="body2" mt={1}>
-          <strong>Delivery Method: </strong>
-          {CAPITALIZE_WORDS(lastOrder.deliveryMethod)}
-        </Typography>
-        <Typography variant="body2" mt={1}>
-          <strong>Payment Method: </strong>
-          {CAPITALIZE_WORDS(lastOrder.paymentMethod)}
-        </Typography>
-        <Typography variant="body2" mt={1}>
-          <strong>Shipping Address:</strong>
-        </Typography>
-        <Typography variant="body2">
-          {lastOrder.deliveryAddress.name}
-        </Typography>
-        <Typography variant="body2">
-          {lastOrder.deliveryAddress.address}
-        </Typography>
-        <Typography variant="body2">
-          {`${lastOrder.deliveryAddress.postalCode} ${lastOrder.deliveryAddress.city}`}
-        </Typography>
-        <Typography variant="body2">
-          {lastOrder.deliveryAddress.country}
-        </Typography>
+        <Box>
+          <Typography variant="subtitle1" mt={1}>
+            <strong>Total:</strong> ${lastOrder.total.toFixed(2)}
+          </Typography>
+          <Typography variant="body2" mt={1}>
+            <strong>Delivery Method: </strong>
+            {CAPITALIZE_WORDS(lastOrder.deliveryMethod)}
+          </Typography>
+          <Typography variant="body2" mt={1}>
+            <strong>Payment Method: </strong>
+            {CAPITALIZE_WORDS(lastOrder.paymentMethod)}
+          </Typography>
+          <Typography variant="body2" mt={1}>
+            <strong>Shipping Address:</strong>
+          </Typography>
+          <Typography variant="body2">
+            {lastOrder.deliveryAddress.name}
+          </Typography>
+          <Typography variant="body2">
+            {lastOrder.deliveryAddress.address}
+          </Typography>
+          <Typography variant="body2">
+            {`${lastOrder.deliveryAddress.postalCode} ${lastOrder.deliveryAddress.city}`}
+          </Typography>
+          <Typography variant="body2">
+            {lastOrder.deliveryAddress.country}
+          </Typography>
+        </Box>
 
         <Button
           variant="contained"
