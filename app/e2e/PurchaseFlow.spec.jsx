@@ -13,6 +13,7 @@ test.describe('Purchase flow (login → cart → checkout → orders)', () => {
     await page.getByRole('link', { name: /products/i }).click();
 
     const addBtns = page.getByRole('button', { name: 'Add to cart' });
+    await expect(addBtns.nth(0)).toBeVisible();
     await addBtns.nth(0).click();
     await addBtns.nth(1).click();
 
