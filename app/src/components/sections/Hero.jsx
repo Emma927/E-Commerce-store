@@ -19,16 +19,16 @@ const Hero = () => {
         <Grid container spacing={2} direction="column">
           <Grid size={12}>
             <HeroImage
-              src="ecommerce1.webp"
+              src="https://res.cloudinary.com/dtoczcwf4/image/upload/v1771017832/ecommerce1_qx6se6.webp"
               alt="E-Commerce Hero 1"
-              loading="lazy"
+              fetchPriority="high"
             />
           </Grid>
           <Grid size={12}>
             <HeroImage
-              src="ecommerce2.webp"
+              src="https://res.cloudinary.com/dtoczcwf4/image/upload/v1771017832/ecommerce2_mxyjuz.webp"
               alt="E-Commerce Hero 2"
-              loading="lazy"
+              fetchPriority="high"
             />
           </Grid>
         </Grid>
@@ -66,14 +66,14 @@ const Hero = () => {
         <Grid container spacing={2} direction="column">
           <Grid size={12}>
             <HeroImage
-              src="ecommerce3.webp"
+              src="https://res.cloudinary.com/dtoczcwf4/image/upload/v1771017832/ecommerce3_dgqlgt.webp"
               alt="E-Commerce Hero 3"
-              loading="lazy"
+              // loading="lazy"
             />
           </Grid>
           <Grid size={12}>
             <HeroImage
-              src="ecommerce4.webp"
+              src="https://res.cloudinary.com/dtoczcwf4/image/upload/v1771017832/ecommerce4_lvxo1j.webp"
               alt="E-Commerce Hero 4"
               loading="lazy"
             />
