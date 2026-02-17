@@ -1,10 +1,17 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+// initialState czyta URL, ponieważ przy starcie aplikacji Redux musi ustawić stan filtrów zgodnie z parametrami w URL, żeby po odświeżeniu lub wejściu z linka zachować te same ustawienia.
+// 1. Pobieramy parametry z URL bezpośrednio przy inicjalizacji pliku
+const params = new URLSearchParams(window.location.search);
+
+// Redux przyjmuje wartości domyślne (all, asc, '', 0).
+// URL pozostaje czysty, bo setSearchParams() nie jest jeszcze wywołane.
 const initialState = {
-  category: 'all', // domyślna kategoria "all"
-  sortOrder: 'asc', // domyślny porządek sortowania rosnący
-  searchQuery: '', // domyślny pusty search
-  ratingQuery: 0, // "All" = 0 w constants
+  category: params.get('category') || 'all', // domyślna kategoria "all"
+  sortOrder: params.get('sort') || 'asc', // domyślny porządek sortowania rosnący
+  searchQuery: params.get('search') || '', // domyślny pusty search
+  // Konwersja na Number, bo URL zawsze zwraca string
+  ratingQuery: Number(params.get('rating')) || 0, // "All" = 0 w constants
 };
 
 const filtersSlice = createSlice({
@@ -28,7 +35,12 @@ const filtersSlice = createSlice({
       state.ratingQuery = action.payload;
     },
     // Przywrócenie wszystkich filtrów do wartości początkowych
-    resetFilters: () => initialState,
+    resetFilters: (state) => {
+      state.category = 'all';
+      state.sortOrder = 'asc';
+      state.searchQuery = '';
+      state.ratingQuery = 0;
+    },
   },
 });
 

@@ -85,6 +85,12 @@ const Checkout = () => {
 
   const total = productsTotal + deliveryPrice;
 
+  /**
+   *useDebounce używa się głównie w wyszukiwarkach lub inputach, gdzie każda zmiana wywołuje kosztowną akcję, np. fetch do API lub filtrowanie dużej listy.
+   * W Twoim checkoutie inputy są zwykłymi formularzami, których wartości trafiają dopiero przy onSubmit.
+   * Nie wysyłasz API przy każdej literze wpisywanej w TextFieldComponent, więc debounce niczego tu nie przyspiesza ani nie optymalizuje.
+   */
+
   // Prefill dla zalogowanego użytkownika - czyli nadpisanie domyślnych wartości danymi z API
   useEffect(() => {
     if (!isPendingUser && user) {

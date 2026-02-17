@@ -4,18 +4,27 @@ import path from 'path';
 
 // https://vite.dev/config/
 export default defineConfig({
+  // clearScreen: false,
+  // logLevel: 'info', // zamiast domyślnego 'warn'
   server: {
     host: true,
     port: 3000, // jeśli nie podano PORT, domyślnie 3000
     open: false,
-    //  watch: {
+    // watch: {
     //   // DLA WSL2 + DOCKER: Wymusza odświeżanie plików (Hot Reload) przez cykliczne sprawdzanie (polling).
     //   // Rozwiązuje to problem, w którym zmiany w kodzie na Windowsie nie są wykrywane przez kontener Linuxowy.
     //   usePolling: true, // u mnie nie potrzeba bo projekt mam na WSL
     //   interval: 100, // czas w ms między sprawdzeniami
     // },
+    // hmr: {
+    //   host: 'localhost', // TO JEST KLUCZ: mówi Vite, żeby wysyłał info o zmianach na localhost
+    //   protocol: 'ws',
+    //   port: 3000,
+    // },
+    //   // Wersja z verbose logami
+    // logLevel: 'info', // 'error' | 'warn' | 'info' | 'silent'
     allowedHosts: [
-      'localhost', // dla lokalnego dev
+      'localhost', // dla lokalnego developmentu
       'e-commerce-store', // dla kontenera e2e-tests w sieci kontenerowej
     ],
   },
@@ -48,7 +57,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve('./src'), // Alias @ w resolve.alias pozwala używać skróconej ścieżki do katalogu src, co upraszcza importy.
+      '@': path.resolve(__dirname, './src'), // Alias @ w resolve.alias pozwala używać skróconej ścieżki do katalogu src, co upraszcza importy.
     },
   },
   optimizeDeps: {

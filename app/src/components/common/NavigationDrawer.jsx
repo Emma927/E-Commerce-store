@@ -79,6 +79,8 @@ export const NavigationDrawer = ({
             active={currentPath === '/favourites'}
             sx={{ color: 'text.primary' }}
           >
+            {/* Jeśli favouritesCount jest liczbą (np. 3), to badge pokaże tę liczbę.
+Jeśli favouritesCount jest null lub undefined, to przypisze undefined, a <Badge> w MUI nie wyświetli się (nie pokaże żadnej liczby). */}
             <Badge badgeContent={favouritesCount ?? undefined} color="primary">
               <StarIcon
                 color={currentPath === '/favourites' ? 'primary' : 'inherit'}
@@ -98,8 +100,8 @@ export const NavigationDrawer = ({
             </DrawerNavButton>
           ) : (
             <DrawerNavButton
-              onClick={() => handleNavigate('/dashboard')}
-              active={currentPath === '/dashboard'}
+              onClick={() => handleNavigate('/user')}
+              active={currentPath === '/user'}
             >
               <ListItemText primary={username} />
             </DrawerNavButton>

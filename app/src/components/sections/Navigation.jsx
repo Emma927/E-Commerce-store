@@ -186,7 +186,7 @@ const Navigation = () => {
                 <Button
                   color="inherit"
                   component={StyledNavLink}
-                  to="/dashboard"
+                  to="/user"
                   sx={{ fontSize: { md: '16px' } }}
                 >
                   {username}

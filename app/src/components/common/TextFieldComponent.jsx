@@ -1,6 +1,7 @@
 import TextField from '@mui/material/TextField';
 import { useFormContext, Controller } from 'react-hook-form';
 
+// "MUI nie obsługuje bezpośredniego przypisania ref z funkcji register, ponieważ TextField to złożona struktura wielu elementów DOM. Aby poprawnie skomunikować React Hook Form z wewnętrznym inputem MUI, używamy Controllera, który realizuje to poprzez komponent kontrolowany (propsy value i onChange), zamiast polegać na surowym dostępie do DOM."
 export const TextFieldComponent = ({
   name,
   label,
