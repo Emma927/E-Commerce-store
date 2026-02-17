@@ -2,6 +2,11 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { FAKE_API_URL } from '@/constants';
 
 /**
+ * „Server-side pagination (z użyciem limit) stosujemy zawsze, gdy backend wspiera filtrowanie i sortowanie, a danych jest dużo (tysiące/miliony). To oszczędza transfer i pamięć urządzenia.
+Client-side pagination (tak jak w moim projekcie) stosujemy, gdy backend jest ograniczony (brak filtrów po cenie/ratingu) lub gdy zbiór danych jest mały (kilkadziesiąt rekordów). Pozwala to na płynną i poprawną filtrację całego zbioru danych w pamięci przeglądarki”.
+ */
+
+/**
  * fetchProductsInfinite - pobiera produkty z FakeStoreAPI
  *
  * - Jeśli podano kategorię, pobiera tylko produkty z tej kategorii.
@@ -26,7 +31,12 @@ export const fetchProductsInfinite = async ({
 
   const data = await response.json();
 
-  // 🔹 Sortujemy już tutaj po stronie „backendu” (API zwraca wszystkie produkty)
+  /**
+   🔹 FakeStore API zwraca produkty posortowane tylko po id (rosnąco lub malejąco w zależności od sort='asc'/'desc')
+   🔹 Dlatego tutaj sortujemy już po stronie front-endu po cenie (a.price/b.price)
+   🔹 Dzięki temu infinite scroll i wyświetlanie produktów w Products zawsze pokazuje właściwą kolejność
+   */
+  // 🔹 Sortujemy już tutaj po stronie „backendu” (API zwraca wszystkie produkty w kolejnosci od 'asc', czyli po rosnącym id produktu rosnąo)
   return data.sort((a, b) =>
     sort === 'asc' ? a.price - b.price : b.price - a.price,
   );
@@ -48,6 +58,13 @@ export const useProductsInfinite = ({
   rating = 0,
 } = {}) =>
   useInfiniteQuery({
+    // 🔹 queryKey używa { category, sort, search, rating }
+    // - category → faktycznie używane w fetchProductsInfinite do wyboru kategorii
+    // - sort → przekazywane do API, ALE FakeStore API nie sortuje po cenie, tylko po id
+    //    • faktyczne sortowanie po cenie odbywa się w fetchProductsInfinite (front-endowo po pobraniu danych)
+    // - search i rating → NIE są obsługiwane przez API, dodane tylko do queryKey
+    //    • React Query wie, kiedy odświeżyć hook i przeliczyć cache
+    //    • lokalna filtracja front-endowa w komponencie Products
     queryKey: ['products-infinite', { category, sort, search, rating }],
     // pageParam = 0 w hooku to startowy indeks w tablicy produktów, od którego zaczyna się wycinek (slice) dla pierwszej „strony” infinite scroll.
     queryFn: async ({ pageParam = 0 }) => {
@@ -55,8 +72,18 @@ export const useProductsInfinite = ({
       // Nie ma kategorii "all". Jeśli w URL wpiszesz /products/category/all, API zwróci 404 albo pustą tablicę. Dlatego w hooku, gdy użytkownik wybiera All, trzeba przekazać pusty string, żeby triggerować GET /products zamiast /products/category/all.
       // '' (pusty string) oznacza fetch wszystkich produktów: /products zamiast /products/category/all.
       const cat = category === 'all' ? '' : category; // W skrócie: "all" w UI to → '' w kodzie, czyli → /products w API bez kategorii
+      // KROK 1: Pobranie i posortowanie wszystkich produktów po kategorri, po cenie już jest w fetchProductsInfinite
       let data = await fetchProductsInfinite({ category: cat, sort });
 
+      // KROK 2: Filtrowanie po search i rating już w hooku
+      if (search)
+        data = data.filter((p) =>
+          p.title.toLowerCase().includes(search.toLowerCase()),
+        );
+      if (rating > 0)
+        data = data.filter((p) => Math.round(p.rating?.rate) === rating);
+
+      // KROK 3: Paginacja po przefiltrowanym i posortowanym zbiorze
       // Paginacja po stronie klienta
       return data.slice(pageParam, pageParam + pageSize);
     },

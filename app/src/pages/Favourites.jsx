@@ -11,10 +11,10 @@ const Favourites = () => {
   const navigate = useNavigate();
   const [showScrollTop, setShowScrollTop] = useState(false);
 
-  // Przekierowanie zalogowanego użytkownika do dashboard/user-favourites
+  // Przekierowanie zalogowanego użytkownika do user/my-favourites
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard/user-favourites');
+      navigate('/user/my-favourites');
     }
   }, [isAuthenticated, navigate]);
 

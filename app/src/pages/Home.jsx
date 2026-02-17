@@ -21,7 +21,7 @@ const Home = () => {
     // queries nie jest tablicą sama w sobie, tylko kluczem w obiekcie przekazywanym do useQueries, który musi zawierać tablicę obiektów query.
     queries: categories.map((category) => ({
       queryKey: ['products', category],
-      queryFn: () => fetchProducts({ category, limit: 20 }),
+      queryFn: () => fetchProducts({ category }),
       staleTime: 1000 * 60 * 5, // 5 minut – dane są uważane za „świeże”, dopóki nie minie ten czas, brak refetch przy mountowaniu
       cacheTime: 1000 * 60 * 10, // 10 minut – dane pozostają w pamięci po odmontowaniu komponentu, potem zostaną usunięte
       retry: 1, // maksymalnie 1 ponowna próba fetch w przypadku błędu (łącznie 2 próby)
@@ -48,6 +48,7 @@ const Home = () => {
     );
   }
 
+  // Jeśli nie ma kategorii (pusta tablica), pokazujemy komunikat. Nie ma sensu renderować reszty strony bez kategorii, bo nie będzie co wyświetlać.
   if (!categories.length) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
@@ -58,8 +59,7 @@ const Home = () => {
 
   const marquee = keyframes`
   0% { transform: translateX(0%); }
-  100% { transform: translateX(-100%); }
-`;
+  100% { transform: translateX(-100%); }`;
 
   return (
     <Box>
@@ -91,8 +91,14 @@ const Home = () => {
           Our top picks for You!
         </Box>
       </Box>
+      {/*
+       * productsQueries → tablica wyników hooków, gdzie każdy element odpowiada jednej kategorii
+       * productsQueries[index] → obiekt wynikowy dla jednej kategorii
+       * productsQueries[index].data → faktyczne produkty
+       * || [] → zapewnia tablicę, nawet jeśli data jest undefined
+       */}
       {categories.map((category, index) => {
-        const products = productsQueries[index].data || []; // productsQueries[index] – wybieramy wynik dla konkretnej kategorii (indeks z categories.map).
+        const products = productsQueries[index].data || []; // Bezpiecznie uzyskujemy produkty dla danej kategorii, zapewniając pustą tablicę, jeśli data jest undefined
 
         // --- Top 3 po ratingu ---
         const topProducts = products

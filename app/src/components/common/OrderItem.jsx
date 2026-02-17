@@ -47,7 +47,7 @@ export const OrderItemComponent = ({ order, onDelete }) => {
             variant="outlined"
             component={Link}
             key={order.id}
-            to={`/dashboard/orders/${order.id}`}
+            to={`/user/orders/${order.id}`}
             sx={{
               textDecoration: 'none',
               color: 'primary.main',

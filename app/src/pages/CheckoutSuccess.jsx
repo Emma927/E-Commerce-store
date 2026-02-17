@@ -46,7 +46,7 @@ const CheckoutSuccess = () => {
         <Button
           variant="contained"
           color="primary"
-          onClick={() => navigate(user ? '/dashboard/orders' : '/')}
+          onClick={() => navigate(user ? '/user/orders' : '/')}
         >
           {user ? 'Go to Orders' : 'Back to Home'}
         </Button>
@@ -162,7 +162,7 @@ const CheckoutSuccess = () => {
           onClick={() => {
             // Funkcja strzałkowa jest po to, żeby akcja nie wykonała się natychmiast po renderze, tylko dopiero po kliknięciu.
             sessionStorage.removeItem('lastOrder'); // USUWAMY TUTAJ — dopiero po kliknięciu!
-            navigate(user ? '/dashboard/orders' : '/');
+            navigate(user ? '/user/orders' : '/');
           }}
         >
           {user ? 'Go to Orders' : 'Back to Home'}

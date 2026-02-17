@@ -84,9 +84,6 @@ describe('OrderItem', () => {
 
     // Link z react-router-dom w DOM staje się <a href="...">
     // więc możemy normalnie sprawdzić atrybut href
-    expect(detailsLink).toHaveAttribute(
-      'href',
-      `/dashboard/orders/${order.id}`,
-    );
+    expect(detailsLink).toHaveAttribute('href', `/user/orders/${order.id}`);
   });
 });
