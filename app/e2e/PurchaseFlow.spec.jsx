@@ -4,6 +4,11 @@ import { login } from './helpers/login';
 test.describe('Purchase flow (login → cart → checkout → orders)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
+    const scripts = await page.$$eval('script', (els) => els.map((e) => e.src));
+    console.log('Scripts loaded:', scripts);
+
+    // Dodatkowo pokaż URL strony
+    console.log('Page URL:', page.url());
   });
 
   test('logged user purchase', async ({ page }) => {

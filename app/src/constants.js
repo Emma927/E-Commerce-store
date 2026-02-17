@@ -85,9 +85,9 @@ export const FEATURES = [
 
 export const LINKS = [
   { to: '/', label: 'Home', icon: HomeIcon },
-  { to: '/dashboard/profile', label: 'Profile', icon: AccountCircleIcon },
-  { to: '/dashboard/orders', label: 'Orders', icon: HistoryIcon },
-  { to: '/dashboard/user-favourites', label: 'Favourites', icon: StarIcon },
+  { to: '/user', label: 'Profile', icon: AccountCircleIcon },
+  { to: '/user/orders', label: 'Orders', icon: HistoryIcon },
+  { to: '/user/my-favourites', label: 'Favourites', icon: StarIcon },
   {
     action: 'logout',
     label: 'Logout',

@@ -58,23 +58,17 @@ services:
     # ale te nie są mapowane na hosta, więc w przeglądarce widzisz tylko localhost:3000.
     env_file:
       - .env
-      # Dla lokalnego developmenty wystarczy zakomentować poniższy command (command: ["npm", "run", "dev"]), jeśli Docker będzie używany tylko na końcu, ponieważ podczas lokalnego developmentu na hoście, nie potrzebuje się, żeby kontener automatycznie uruchamiał dev server.
-    command: ["npm", "run", "dev"] # Dev server startuje automatycznie, ale w kontenerze Vite będzie próbować kolejnego wolnego portu, dlatego że 3000 jest zajęty. W związku z tym nie możesz ręcznie uruchomić npm run dev w tym samym kontenerze, bo proces dev servera już działa i blokuje terminal. Możesz otworzyć przeglądarkę na hoście: http://localhost:3000
-    # 1️⃣ Bez command: ["npm", "run", "dev"] w docker-compose
-    # Kontener e-commerce-store nie uruchamia dev servera automatycznie.
-    # Port 3000 w kontenerze jest wolny, bo nic tam nie nasłuchuje.
-    # Jeśli wejdziesz do kontenera i zrobisz ręcznie:
-    # npm run dev
-    # Next.js lub Vite widzi, że port 3000 jest dostępny → startuje na nim.
-    # W konsoli widzisz http://localhost:3000.
-  # 2️⃣ Gdy odkomentujesz command: ["npm", "run", "dev"]
-  # Kontener startuje automatycznie dev server na tym samym porcie 3000.
-  # Port 3000 wewnątrz kontenera jest już zajęty → ręczne uruchomienie npm run dev w tym samym kontenerze wykryje konflikt:
-  # Vite → spróbuje kolejnego wolnego portu (3001, 3002…)
-  # Next.js → może wywalić błąd EADDRINUSE albo spróbuje dalej 3000 → konflikt
+    # command: ["npm", "run", "dev"]
+  # LOGIKA PORTÓW (Docker Proxy):
+  # ----------------------------
+  # 1. Gdy kontener jest 'Up', proces 'docker-proxy' REZERWUJE port 3000 na Twoim hoście (WSL).
+  # 2. Nawet jeśli powyższy 'command' jest zakomentowany (dev server w kontenerze nie działa), port na hoście jest ZAJĘTY.
+  # 3. Skutek: Lokalne 'npm run dev' w WSL wykrywa zajęty port i przeskakuje na 3001 (konflikt z Dockerem).
+  # 4. Wewnątrz kontenera port 3000 pozostaje WOLNY, dopóki nie uruchomisz tam ręcznie 'npm run dev'.
+  # ROZWIĄZANIE: Aby używać portu 3000 lokalnie w WSL, najpierw zatrzymaj kontener: 'docker compose stop e-commerce-store'.
 
   e2e-tests:
-    image: mcr.microsoft.com/playwright:v1.57.0-noble
+    image: mcr.microsoft.com/playwright:v1.58.2-noble
     container_name: e2e-tests
     volumes:
       - .:/workspace # bind mount – cały katalog hosta jest współdzielony z kontenerem (w tym node_modules)
@@ -91,6 +85,11 @@ services:
     # command: ["sh", "-c", "npx wait-on $PLAYWRIGHT_BASE_URL && npx playwright test ./e2e; tail -f /dev/null"]
     # TRYB RĘCZNY: kontener czeka, testy uruchamiasz ręcznie
     # command: ["tail", "-f", "/dev/null"]
-    command: ["sh", "-c", "npx wait-on http://e-commerce-store:3000 && tail -f /dev/null"]
+    command:
+      [
+        "sh",
+        "-c",
+        "npx wait-on http://e-commerce-store:3000 && tail -f /dev/null",
+      ]
 
     # Testy E2E (Playwright) zostały usunięte z Dockerfile – słusznie, bo E2E najlepiej uruchamiać po uruchomieniu kontenera frontendowego, np. w docker-compose jako osobny serwis. Dzięki temu nie blokują builda i nie wymagają uruchamiania frontendu w tle w czasie builda.

@@ -51,21 +51,14 @@ const App = () => {
             <Route path="login" element={<Login />} />
             {/* Chronione routy */}
             <Route element={<ProtectedRoute />}>
-              <Route path="dashboard" element={<Dashboard />}>
-                {/* Atrybut replace używa się tylko przy przekierowaniach (Navigate), gdy chcemy uniknąć tworzenia nowego wpisu w historii.*/}
-                {/* Aby URL był dokładnie /dashboard/profile, a nie /dashboard potrzebuja Navigate z replace. */}
-                {/* Podsumowanie działania w historii przeglądarki
-Użytkownik wpisuje /dashboard → od razu jest przekierowany do /dashboard/profile.
-W historii przeglądarki nie pojawia się wpis /dashboard, tylko bezpośrednio /dashboard/profile.
-Jeśli kliknie „wstecz” w przeglądarce, nie wróci do /dashboard, tylko do poprzedniej strony sprzed /dashboard. */}
-                <Route index element={<Navigate to="profile" replace />} />
-                <Route path="profile" element={<Profile />} />
+              <Route path="user" element={<Dashboard />}>
+                <Route index element={<Profile />} />
                 {/* Historia zamówień */}
                 <Route path="orders" element={<Orders />} />
                 {/* Detal zamówienia */}
                 <Route path="orders/:id" element={<OrdersDetails />} />
                 {/* Ulubione oferty użytokownika zalogowanego dostępne w pulpicie użytkownka */}
-                <Route path="user-favourites" element={<UserFavourites />} />
+                <Route path="my-favourites" element={<UserFavourites />} />
               </Route>
             </Route>
             {/* Strona nieodnaleziona 404 */}

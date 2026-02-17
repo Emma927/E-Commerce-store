@@ -31,8 +31,10 @@ const Sidebar = () => {
             <ListItemButton
               component={NavLink}
               to={to}
-              end={to === '/' || to === '/dashboard'} // Home i Profile mają end
-              // Dla NavLink, jeśli "end" jest ustawione, link będzie aktywny tylko wtedy, gdy aktualna ścieżka dokładnie pasuje do atrybutu "to".
+              end={to === '/' || to === '/user'}
+              // Home i Profile mają `end`, aby NavLink był aktywny tylko przy dokładnym dopasowaniu.
+              // Bez `end`, np. dla '/user', NavLink byłby aktywny również przy '/user/orders' i '/user/favourites',
+              // co byłoby mylące dla użytkownika.
               sx={{
                 gap: 1,
                 justifyContent: { xs: 'center' },
